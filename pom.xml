@@ -2,10 +2,10 @@
 	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.syndeticlogic</groupId>
-  <artifactId>syndeticlogic-linearis</artifactId>
+  <artifactId>syndeticlogic-catena</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>syndeticlogic-linearis</name>
+  <name>syndeticlogic-catena</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -18,18 +18,6 @@
       <version>2.1</version>
     </dependency>
 
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4.1</version>
-    </dependency>
-
-    <dependency>
-      <groupId>opensymphony</groupId>
-      <artifactId>quartz</artifactId>
-      <version>1.6.0</version>
-      <scope>compile</scope>
-    </dependency>
     <!-- Quartz 1.6.0 depends on commons collections -->
     <dependency>
       <groupId>commons-collections</groupId>
@@ -53,24 +41,14 @@
       <version>1.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.syndeticlogic</groupId>
-      <artifactId>syndeticlogic-thirdparty</artifactId>
-      <version>1.0-SNAPSHOT-a</version>
-    </dependency>
+<dependency>
+  <groupId>org.xerial.snappy</groupId>
+  <artifactId>snappy-java</artifactId>
+  <version>1.0.4.1</version>
+  <type>jar</type>
+  <scope>compile</scope>
+</dependency>
 
-    <!-- dependency> <groupId>org.xerial.snappy</groupId> <artifactId>snappy-java</artifactId> 
-	 <version>1.0.3.1</version> <type>jar</type> <scope>compile</scope> </dependency -->
-
-    <!--dependency> <groupId>com.sleepycat</groupId> <artifactId>je</artifactId> 
-	<version>3.3.75</version> </dependency -->
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>3.0.0.RELEASE</version>
-      <scope>runtime</scope>
-    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -83,11 +61,11 @@
       <version>1.1.1</version>
     </dependency>
 
-    <dependency>
+    <!--   dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
       <version>10.8.1.2</version>
-    </dependency>
+    </dependency -->
 
     <dependency>
       <groupId>javax.persistence</groupId>
@@ -103,33 +81,16 @@
     </dependency>
 
 
-    <dependency>
+    <!--   dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derbyclient</artifactId>
       <version>10.8.1.2</version>
-    </dependency>
+    </dependency-->
 
 
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-	<directory>src/main/java</directory>
-	<includes>
-	  <include>org/xerial/snappy/VERSION</include>
-	</includes>
-      </resource>
-      <resource>
-	<directory>src/main/resources</directory>
-	<includes>
-	  <include>org/xerial/snappy/*.bytecode</include>
-	  <include>org/xerial/snappy/native/**</include>
-	</includes>
-      </resource>
-    </resources>
-
-
     <plugins>
       <plugin>
 	<groupId>org.apache.maven.plugins</groupId>

@@ -1,0 +1,4 @@
+To run the javaagent:<agentjarfile> parameter must be passed to the JVM.  For example:
+-javaagent:/Users/percent/.m2/repository/org/syndeticlogic/sizeof/1.0-SNAPSHOT/sizeof-1.0-SNAPSHOT.jar
+
+Note that the full path is required

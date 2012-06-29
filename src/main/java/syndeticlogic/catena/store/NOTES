@@ -1,0 +1,199 @@
+
+Notes:
+
+03/18/2011
+
+Mark 9th Mensiversary - wah00!  Next steps with store package are to fix the PersistentIOHandler - 
+it is broken.  It needs be able to load and unload pages ondemand.  The pageManager currently keeps
+all the pages of a all sequences loaded in memory.  As pages are evicted from the cache (and 
+supsequenctly deleted by the pageManager, then they need to be faulted back into memory).
+
+Not sure how to do this right now.  Seems like the page manager could use a pagetable.  pagetable 
+keeps track of page assignments and they state.  perhaps just search through the pagesequence list
+for null entries and load them as needed.  Simply and effective.
+
+
+12/15/2011
+
+PageIOHandler rewrite notes.  The PageIOHandler is used by the Segment
+object to scan, update and append binary data to pages.
+
+Scan.  The scan operation takes a buffer, an offset within the buffer,
+a length and a segment offset, where the object to be scanned starts.
+
+Scan seeks to page that the object starts on.  It scans the
+remainder of the first page into the buffer and moves to the next
+page.  And continues scanning the pages until the length that was
+passed in has been scanned.
+
+Append.  The append operation takes a buffer holding the data, the
+offset within the buffer that the data starts on, and the size of the
+object to be appended.
+
+Append finds the last page and determines where the last object ends.
+It the starts writing the new object, creating pages as needed.
+
+Update.  The update operation takes the same parameters as teh other,
+except that it gets the new object's size as well as the old.
+
+Update seeks to the page and offset within the page that the object
+starts on.  It then proceeds to overwrite the existing object until
+all the new data has been written or the new object ends.  If they end
+at the same logical offset, then we are done.  
+
+If the new object ends before the old object, then there are a couple
+cases to consider.
+
+If objects end on the same page at different page offsets, then
+there is either good data at the end of the page or no data past the
+old object, on the current page.  If there is good data, we copy it up
+to the old offset and truncate the page.  If there is not, then we are
+done.
+
+Otherwise the objects do not end on the same page.  We remove all the
+between the page that the old object ends on and the page that the new
+object ends on.  If the old object does not end at the end of the
+page, then there is good data after the old object.  We copy that data
+to the end of the page where the new object ends.  Any additional data
+is copied to the beginning of the page that the old object ended on.
+
+If the old object is completely overwritten and the new object is not
+completely written, then there are a few cases to consider.  Any data
+at the end of the page where the last object ends is good data from
+the next object, so we copy it off and subsequently start writing that
+page with the rest of th new object.  We add as many pages as are
+necessary.  When the new object has been completely written, any data
+from the next object that we copied off, gets written to the end of
+the page.  After that page is full, if there is still data from the
+next object we create a fragmented page.
+
+Note that over time pages can become fragmented, such that the size of
+the object does not neccearliy determine which 1 of the above
+scenarios will be encountered.  A large object may take up less pages
+because writing defragments the pages.
+
+9/22/2011
+
+Created 2 versions of PageDescriptor - Synchronized and Unsafe.  Currently I'm not going to create
+any tests for the new verision because it's really just the same code without the locks.  After
+I have an end-to-end system working I will start to invest in hardening the under layers.
+
+- add tests
+
+9/12/2011
+
+- Decided to just hack the compression to work and move forward.  I'm focusing on getting an 
+end-to-end thing working.  After I have the basic storage engine functionality in place and can 
+start to do meaningul performance analysis, I will use the performance analysis to drive the 
+tradeoffs below.  One issue with this approach is that the performance metrics being used to drive
+design decisions need to adequitely reflect the use-cases they are intended to solve.
+
+- PersistentIOHanlder has a bug.  Parallel ByteBufferCompressor calls deadlock the system.  I suspect
+this is because multiple ByteBufferCompressors share pages.
+
+9/11/2011
+
+Okay some notes on compression because the snappy compressor does not work the way I need it to, but
+it is very fast so I think I would rather adapt my use case then adapt the compression strategy.  
+
+I was hoping I could give it a source (uncompressed) page and a target page and rely
+on it to throw an exception if the compression resulted in a file size increase.  However, the 
+Snappy C++ code does not support this and weird segfaults and invalid memory accesses happen at the
+Native code level when the target is not larger than the source (specifically the target needs to
+be equal to Snappy.maxCompressionSize(pageSize).  
+
+I intended to use fixed size pages from the page pool for compression/decompression buffers.  This 
+would simplify memory management and admissions control.
+
+There are 3 options I consider viable: 
+   1) create big pages for compression/decompression;
+   2) use the stream interface;
+   3) use temporary buffers that are not tracked by the buffer pool.
+
+Adding larger pages to the buffer pool (essentially having 2 buffer buckets) creates the problem of
+managing how much to allocate to each bucket.  Are the bucket sizes stack or dynamic?  Seems like it
+would have to be dynamic.  Managing the memory pool like this could get complicated, and frankly, 
+I'm not sure how I would do it.  I would have to research a bit.  This might be the best options,
+but I'm going put it on hold for now.
+
+Using the stream option would be interesting, but then I would have to rewrite the entire file for
+any update.  This could be prohibitive.  Especially because I'm interested in MVCC and rewriting only
+delta's.  Before I commit to doing this I need to have enough of the system in place that I can 
+measure it for various workloads.
+
+The final option is just to use a temporary buffers for compression/decompression.  This complicates
+the admission control problem, and affects performance negative (buffers have to be allocated).  
+Allocating large amounts of memory on-the-fly to satisfy a request
+means the requests could cause the system to choke on out of memory exceptions.  So an admission
+control agent has to live in the uppper layers.  Probably not a bad idea anyway.  This creates 1 other
+issue, probably no direct buffer support will be viable.  Allocating direct buffers is expensive, and
+since I'm not caching them I'd have to allocate them on-the-fly.
+
+9/7/2011
+
+ - Fix the the paging system so that it caches pages
+
+9/3/2011 
+
+PageManager pageSequence notes.  On initial FileManager creation, the first page is created empty
+and is not marked dirty.  As writes occur the page gets marked dirty.  At some point the file will
+be flushed and perhaps the fileManager will be deleted.  At this time, the pageManager will still
+have the pageSequence in memory.  This sequence shall contain no dirty pages and all pages will be
+unpinned.  and the sequence itself will be unpinned.   If all the pages in the pageSequence are moved from
+the cache, then the pageSequence will be deleted all together.  
+
+If the pageManager is created again at some point in the future, it will reload the pages that are
+unattached in the pageSequence.  Or if the pageSequence.size() = -1 it will reload all the pages.
+
+Notes on append.
+
+Notes on update.
+
+Notes on scan.
+
+Notes on flush.
+
+Story for 7/28/2011
+
+After some reflection, I decided I need to connect the whole system up and create some system tests.  
+The reasoning is that I can already see some aspects of the current page system that may not work 
+well when the whole system is together.  I want to avoid over designing a component that I'm not 
+exactly sure the use-case of.
+
+Todo priority high:
+
+- Create the chunk abstraction and perhaps the notion of files on a chunk basis.  the idea is that
+  i want updates of variable length fields to be able to happen in-place so i'll chunk the files
+  into segments that can be rewritten entirely
+ 
+
+After the last iteration, I ripped the pages package apart and the caching aspect has been broken,
+so I need to integrate page caching in with how the files package uses pages.  
+
+I'd like to have it so that the files package loads pinned pages.  After the operation involving the
+files package has completed it unpins the pages and then they can be release from the cache.  As 
+new request comes in, the pages package tries to load the data pages from the cache.  Pages that are
+not in the cache are loaded from the file.
+
+
+Todo:
+
+- Create some synchronization tests
+- Create a performance testing framework that is completely automated.  Records resource utilization
+  CPU/IO usage as well as well as latency throughput and jitter info  
+- Write paging system documentation
+- Look into caching page descriptors
+
+Completed:
+
+
+- Build the array abstraction on top of the page descriptors and get the original array tests working
+- Create abstract base class or encapsulate common PageDescriptor processing
+- Make page descriptor dependency injected (file channel, etc)
+- Rewrite array code based on paging system
+
+
+Old update overflow pages
+
+
+

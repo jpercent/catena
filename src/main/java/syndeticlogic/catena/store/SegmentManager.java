@@ -1,0 +1,124 @@
+package syndeticlogic.catena.store;
+
+import syndeticlogic.catena.type.Type;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.HashMap;
+
+public class SegmentManager {
+    public enum CompressionType { Snappy, Null };
+    
+    public static synchronized void configureSegmentManager(
+            CompressionType cType, PageManager pm) 
+    {
+        segmentManager = new SegmentManager(cType, pm);
+    }
+
+    public static synchronized SegmentManager get() {
+        if (segmentManager == null) {
+            throw new RuntimeException("SegmentManager has not been injected");
+        }
+        return segmentManager;
+    }
+
+    private static SegmentManager segmentManager;
+    private CompressionType compressionType;
+    private HashMap<String, Segment> files;
+    private PageManager pageManager;
+    private ExecutorService pool;
+    private int cores;
+
+    private SegmentManager(CompressionType compressionType,
+            PageManager pageManager) {
+        this.compressionType = compressionType;
+        this.pageManager = pageManager;
+        this.files = new HashMap<String, Segment>();
+        cores = Runtime.getRuntime().availableProcessors();
+        pool = Executors.newFixedThreadPool(this.cores);
+    }
+
+    public synchronized Segment create(String filename, Type type)
+            throws Exception {
+        assert filename != null;
+        File f = new File(filename);
+        if (f.exists()) {
+            throw new RuntimeException("file exists");
+        }
+        RandomAccessFile file = new RandomAccessFile(filename, "rw");
+        Segment fm = new Segment(type, file.getChannel(),
+                new ReentrantReadWriteLock(), pageManager, pool, filename);
+        files.put(filename, fm);
+        fm.pin();
+        return fm;
+    }
+
+    public synchronized Segment lookup(String filename) {
+        assert filename != null;
+        Segment fm = null;
+
+        fm = files.get(filename);
+
+        if (fm == null) {
+            File f = new File(filename);
+            if (!f.exists()) {
+                throw new RuntimeException("file does not exist");
+            }
+
+            pageManager.createPageSequence(filename);
+            RandomAccessFile file;
+            try {
+                file = new RandomAccessFile(filename, "rw");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+            fm = new Segment(new ReentrantReadWriteLock(),
+                    file.getChannel(), pageManager, pool, filename);
+            files.put(filename, fm);
+        } else {
+            assert filename.equals(fm.getQualifiedFileName());
+        }
+        fm.pin();
+        return fm;
+    }
+
+    public synchronized void release(Segment segment) {
+        assert files.containsKey(segment.getQualifiedFileName());
+        segment.unpin();
+    }
+    
+    public Compressor createCompressor(PageManager pageManager,
+            int compressionSize) {
+        Compressor c = null;
+        switch (compressionType) {
+        case Snappy:
+            c = new SnappyCompressor(pageManager, compressionSize);
+            break;
+        case Null:
+            c = new NullCompressor(pageManager, compressionSize);
+            break;
+        }
+        return c;
+    }
+
+    public Decompressor createDecompressor(PageDescriptor source,
+            ByteBuffer target) {
+        Decompressor d = null;
+        switch (compressionType) {
+        case Snappy:
+            d = new SnappyDecompressor(source, target, pageManager.pageSize());
+            break;
+        case Null:
+            d = new NullDecompressor(source, target);
+            break;
+        }
+        return d;
+    }
+}

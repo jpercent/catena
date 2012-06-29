@@ -1,0 +1,169 @@
+11/09/2011
+
+Some notes on the current design.
+
+Linearis is a column-oriented storage system.  It is composed of a
+hierarchy of storage abstractions.  At the Highest level of abstraction
+are the arrays.  Arrays are comprised of 1 or more segments.
+
+Segments are in turn comprised of pages, the lowest level abstraction.
+Pages contain binary data that is read and written to and from
+segments by arrays. 
+
+Pages are completely transient structures that are encapsulated by
+segments.  Each segment corresponds to an on-disk file.  The on-disk
+meta data for a segment consists of the segment's type, page count and
+size.
+
+Segments are designed to be loaded into memory as a unit.  We call
+this process pinning a segment.  A segment is pinned by pinning each
+of its pages, and a segment is unpinned by unpinning each of its pages.
+
+To pin a segment we query the cache for its pages.  A page query 
+always returns a pinned page.  A cache-miss causes the page to be
+loaded into memory.  Both cache-misses and cache-hits increment the
+pin count and update the statistics.
+
+Each array resides in its own directory on the local filesystem.
+Each array directory consists of an array descriptor and 0 or
+more segments files.  
+
+The array descriptor file represents the ondisk meta data for the
+array.  It consists of the array type, length and unique identifier.
+When an array is created a descriptor is also created.  The descriptor
+is passed the master key.  The master key is a CompositeKey whose
+first component is the base directory and the array name concatenated
+together.  
+
+The first segment of an array is associated with a CompositeKey whose
+first component is the master key and whose second component is 0.
+As elements are added to the end of the array at some point the array
+append split boundary is crossed a new segment will be created.
+
+Segments are always created on an even object boundary - an
+element of an array never spans more than 1 segment.  The new segment
+will have a CompositeKey that consists of the master key as the first
+component and 2 as the second component.  
+
+ArrayDescriptors also maintain an update split boundary such that such
+updates to variable length types keep an array to a manageable size.
+When the update split threshold is crossed the array is split up and
+new keys are created.  
+
+CompositeKeys are hierarchically collated.  An update split creates
+a new segment between the other segments.  To keep track of this a 3rd
+component is added to the key.  This component follows the same
+natural ordering as the second component.  Consider the following keys:
+
+MasterKey component0:basdir+name
+Segment0Key component0:MasterKey component1:0
+Segement1Key component0:MasterKey component1:0 component:0
+Segement2Key component0:MasterKey component1:0 component:1
+Segement3Key component0:MasterKey component1:1
+
+The collation defined by the CompositeKey enforces the correct
+ordering in searches.
+
+A registry manages the meta data of arrays.  At startup time, the
+registry is passed the base directory of the array system, and the
+registry walks the directory loading the array descriptors and
+locating their segments.
+
+Deltas are defined as inserts, updates and deletes.  Depending on the
+consistency level, deltas are either automatically committed or are
+manually committed.  When an array is committed all of its deltas and
+the meta data associated with those are flushed to disk (in the future
+configuration settings will determine whether commits are flushed to
+disk or replicated to other nodes in the cluster).
+
+10/23/2011
+
+Notes on locking DataSegments.  The Array structures is like an
+iterator over the data segments.  A common operation on an array
+would be to set the position of an element, and then subsequently read
+the element and perhaps write it afterward.  There could also be a
+delete of that element pending at the same time.  This entry is about
+how to solve that particular problem.
+
+In an MVCC approach there would be no locks on the data because it can
+never change.  It implies a fairly complex system of carry deltas and
+merging them.  And thinking about it actually gives me a head ache,
+which is generally a pretty good sign that it is too over complicated.
+
+So then, how can this be as efficient as possible without sacrificing
+simplicity.  I think the first implementation will take a stab at
+doing with this with a reader/writer locking strategy.
+Readers/Writers set their position which acquires a lock on the
+segment in question.  When a locking operation completes they will
+release the lock.  To implement this correctly, a lock across arrays
+that share segments must be created and acquiring/releasing locks on
+segments is synchronized through the shared lock.
+
+Since there can be many array instances for a given physical array
+(set of data segments), the shared lock will be stored in the array
+descriptor, which is shared across array instances.  The
+ArrayDescriptor lock will synchronize access to the data segment list
+between the time that a cursor is locked.
+
+9/18/2011
+
+The main function of the array package is to provide an abstraction
+over the store package.  Each array consists of multiple segments.
+The segments include a largest and smallest setting for rough indexing
+purposes.  Each file will be of a limited size - performance analysis
+will ultimately drive the size decision, but it will be configurable.
+We want the size to be large enough that it benefits from sequential
+scan properties, but small enough that updates are not prohibitively
+expensive.
+
+Berkeley integration
+--------------------------
+
+The array system is not intended to perform well for writes.  The idea
+is to be very fast at scanning projections.  The array system can be
+thought of as the analysis store.  We intend to use BerkeleyDB as the
+transaction storage.  The array store will likely be eventually
+consistent against the transaction store.
+
+Therefore we plan to integrate processing with the BerkeleyDB.  We
+will use the BDB as a key-value store with each key representing a
+row.  As rows are committed they will be sent over to the array store.
+
+Handling Writes
+--------------------------
+
+The array store needs to handle writes efficiently, but cannot
+compromise reads in doing so.  To accomplish this it should use MVCC -
+no locks.  Each new write will create a new Array.  Technically this
+will not be the case, each new write will create a new delta.  Delta's
+will be keep in memory until some threshold is reached and the new
+version will be flushed from memory onto disk.  Since the transaction
+store is completely consistent we don't have to worry about losing
+data.  In the event of a crash we will restore from the transaction
+store.
+
+Buffer replacement notes
+--------------------------
+
+Currently the DataSegmentManager supports interface methods pin/unpin.
+These methods will be used to cache and/or prefetch data segments.
+This functionality is not currently implemented in the
+DataSegmentManager.  As the array package starts to use this
+functionality it will need to be developed.
+
+The current idea is that when a DataSegmentManager has been unpinned,
+it will release all of its pages back to the pageManager.  The
+pageManager will then add them to the cache and let the cache
+determine when they are replaced.  If the file is pinned again, it
+will ask the page manager for pages and reload evicted pages from
+disk.
+
+Concurrency
+--------------------------
+
+At this stage the concurrency has not been defined.  There are some
+reader writer locks in the DataSegmentManager, but teh locking is
+carefully propogated throughout the system.  I feel like I want to get
+a better idea for the general structure - perhaps the locks go at the
+array level.  Also, I want to be able to add different strategies and
+evaluate their performance before closing on a decision.

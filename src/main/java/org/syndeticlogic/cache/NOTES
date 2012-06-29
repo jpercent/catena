@@ -1,0 +1,21 @@
+9/28/2011
+
+This package was originally derived from Jeff Drost's Shiftone Cache 2.0b.  It has undergone 
+significant change and beyond the interface, most of the code is original (it has a nice simple
+interface, which is why I chose it over other open-source Java caches).
+
+Currently it is not integrated with the system.  I originally had the idea that the pages would 
+handle writing themselves to disk, but this led to partial pages and fragmentation when integrated 
+with compression, so I decided to have the files package do scatter gather compression and 
+defragment pages during the writing process.
+
+Integration will be at the pages package level.  The question is should it be a general cache or
+a page-only cache.  The tradeoff being if there are optimizations that can be leveraged because it
+is only buffers/pages.  My current thinking is that it would not be advantageous to make the caching
+optimized for Page objects.
+
+Other things that need to be done are related to the replacement policy.   Currently PinnableLru is
+the 1 that is usable by Linearis.  I'd like to implement LRU-k, and perhaps another before performance
+analysis.  As a stretch goal it would be interesting to take a look at teh papers coming out of 
+Madden's research group.  As with all elements of this system, I would like the performance analysis
+to drive the decisions related to which structures are used.
