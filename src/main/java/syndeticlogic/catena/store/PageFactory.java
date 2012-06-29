@@ -9,11 +9,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
-import org.syndeticlogic.cache.Cache;
-import org.syndeticlogic.cache.PinnableListener;
-import org.syndeticlogic.cache.PinnableLruStrategy;
-import org.syndeticlogic.cache.PolicyCache;
-import org.syndeticlogic.cache.PolicyStrategy;
+import syndeticlogic.memento.Cache;
+import syndeticlogic.memento.PinnableListener;
+import syndeticlogic.memento.PinnableLruStrategy;
+import syndeticlogic.memento.PolicyCache;
+import syndeticlogic.memento.PolicyStrategy;
 import syndeticlogic.catena.utility.ObservationManager;
 
 import syndeticlogic.catena.store.PageManager;

@@ -3,7 +3,7 @@ package syndeticlogic.catena.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.syndeticlogic.cache.Pinnable;
+import syndeticlogic.memento.Pinnable;
 import syndeticlogic.catena.type.CodeHelper;
 import syndeticlogic.catena.type.Codec;
 import syndeticlogic.catena.type.Operand;

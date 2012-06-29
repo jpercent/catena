@@ -1,8 +1,8 @@
 package syndeticlogic.catena.store;
 
-import org.syndeticlogic.cache.Cache;
-import org.syndeticlogic.cache.EvictionListener;
-import org.syndeticlogic.cache.PinnableListener;
+import syndeticlogic.memento.Cache;
+import syndeticlogic.memento.EvictionListener;
+import syndeticlogic.memento.PinnableListener;
 import syndeticlogic.catena.utility.Observeable;
 import syndeticlogic.catena.utility.Observer;
 import syndeticlogic.catena.utility.ThreadSafe;
