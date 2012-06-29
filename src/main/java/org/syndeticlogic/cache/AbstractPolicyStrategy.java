@@ -20,8 +20,6 @@ package org.syndeticlogic.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.utility.LinkedList;
-import syndeticlogic.catena.utility.LinkedListNode;
 import syndeticlogic.catena.utility.Util;
 
 import java.util.Map;

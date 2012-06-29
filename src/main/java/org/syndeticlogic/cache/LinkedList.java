@@ -1,4 +1,4 @@
-package syndeticlogic.catena.utility;
+package org.syndeticlogic.cache;
 
 /*
  * Author == James Percent (james@empty-set.net) 

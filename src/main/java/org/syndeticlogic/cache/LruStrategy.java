@@ -18,8 +18,6 @@ package org.syndeticlogic.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.utility.LinkedList;
-import syndeticlogic.catena.utility.LinkedListNode;
 
 /**
  * Class LruStrategy
