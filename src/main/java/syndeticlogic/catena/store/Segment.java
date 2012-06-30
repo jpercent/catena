@@ -4,8 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.memento.Pinnable;
-import syndeticlogic.catena.type.CodeHelper;
-import syndeticlogic.catena.type.Codec;
+import syndeticlogic.catena.codec.CodeHelper;
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Operand;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.ThreadSafe;

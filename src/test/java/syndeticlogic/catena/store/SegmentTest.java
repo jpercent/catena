@@ -5,9 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.store.SegmentManager;
-import syndeticlogic.catena.type.Codec;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.ArrayGenerator;

@@ -1,5 +1,7 @@
 package syndeticlogic.catena.type;
 
+import syndeticlogic.catena.codec.Codec;
+
 
 public class ShortOperand extends Operand {
 	private short decoded;

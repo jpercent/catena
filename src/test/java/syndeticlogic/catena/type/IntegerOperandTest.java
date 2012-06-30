@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.type.Codec;
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.IntegerOperand;
 import syndeticlogic.catena.type.TypeFactory;
 

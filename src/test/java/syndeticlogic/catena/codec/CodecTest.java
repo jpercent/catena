@@ -1,4 +1,4 @@
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.codec;
 
 import static org.junit.Assert.*;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.type.Codec;
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
 
 public class CodecTest {

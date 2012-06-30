@@ -1,5 +1,6 @@
 package syndeticlogic.catena.type;
 
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
 
 public class IntegerOperand extends Operand {

@@ -1,7 +1,7 @@
 package syndeticlogic.catena.store;
 
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Codeable;
-import syndeticlogic.catena.type.Codec;
 import syndeticlogic.catena.type.Type;
 
 public class RangeChecker {

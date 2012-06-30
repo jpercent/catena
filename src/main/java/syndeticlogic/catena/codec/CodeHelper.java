@@ -1,4 +1,4 @@
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.codec;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import syndeticlogic.catena.type.Codeable;
+import syndeticlogic.catena.type.Type;
 
 public class CodeHelper {
 	private static final Log log = LogFactory.getLog(CodeHelper.class);

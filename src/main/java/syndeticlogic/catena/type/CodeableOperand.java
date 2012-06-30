@@ -1,5 +1,7 @@
 package syndeticlogic.catena.type;
 
+import syndeticlogic.catena.codec.Codec;
+
 
 public class CodeableOperand extends Operand {
 	private boolean data;

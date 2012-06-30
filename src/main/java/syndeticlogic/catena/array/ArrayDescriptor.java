@@ -16,12 +16,12 @@ import java.util.zip.CRC32;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import syndeticlogic.catena.type.CodeHelper;
-import syndeticlogic.catena.type.Codec;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.CompositeKey;
 import syndeticlogic.catena.utility.ThreadSafe;
 
+import syndeticlogic.catena.codec.CodeHelper;
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.store.SegmentManager;
 

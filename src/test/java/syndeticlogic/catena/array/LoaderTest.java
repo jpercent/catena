@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import syndeticlogic.catena.array.ArrayDescriptor;
 import syndeticlogic.catena.array.Loader;
+import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.stubs.SegmentStub;
-import syndeticlogic.catena.type.Codec;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.CompositeKey;

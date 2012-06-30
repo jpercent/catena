@@ -18,7 +18,7 @@
 /**
  * 
  */
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.codec;
 
 import static org.junit.Assert.*;
 

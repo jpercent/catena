@@ -15,12 +15,16 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.codec;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import syndeticlogic.catena.type.Codeable;
+import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.type.TypeFactory;
 
 
 public class Codec {
@@ -55,7 +59,7 @@ public class Codec {
         return singleton;
     }
 
-    protected Codec(TypeFactory factory) {
+    public Codec(TypeFactory factory) {
         this.factory = factory;
     }
 
