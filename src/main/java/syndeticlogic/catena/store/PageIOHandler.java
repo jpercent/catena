@@ -157,6 +157,19 @@ public class PageIOHandler {
         }
     }
 
+    private void prepare(byte[] buffer, int bufferOffset, int length,
+            long loffset) {
+        this.page = null;
+        this.pageOffset = -1;
+        this.buffer = buffer;
+        this.bufferOffset = bufferOffset;
+        this.logicalOffset = loffset;
+        this.length = length;
+        this.remaining = length;
+        this.total = 0;
+        this.index = 0;
+    }
+    
     private void complete() {
         this.page = null;
         this.endPage = null;
@@ -171,19 +184,6 @@ public class PageIOHandler {
         this.remaining = -1;
         this.index = -1;
         this.endIndex = -1;
-    }
-
-    private void prepare(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        this.page = null;
-        this.pageOffset = -1;
-        this.buffer = buffer;
-        this.bufferOffset = bufferOffset;
-        this.logicalOffset = loffset;
-        this.length = length;
-        this.remaining = length;
-        this.total = 0;
-        this.index = 0;
     }
 
     private long setIndexAndPageOffset() {
