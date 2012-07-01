@@ -26,7 +26,8 @@ public class NullCompressor implements Compressor {
         if (log.isTraceEnabled())
             log.trace(" compressionSize = " + compressionSize);
     }
-
+    
+    @Override
     public synchronized void add(int offset, PageDescriptor page) {
         pages.add(page);
         if (isDirect) {
@@ -35,7 +36,50 @@ public class NullCompressor implements Compressor {
         offsets.add(offset);
     }
 
-    public ByteBuffer coalese() {
+    @Override
+    public synchronized void run() {
+        assert pages.size() == offsets.size();
+        target = pageManager.byteBuffer();
+        target.limit(compressionSize);
+
+        if (pages.size() > 1)
+            coalese();
+        else
+            pages.get(0).read(target, 0);
+
+        target.rewind();
+        assert target.limit() - target.position() == compressionSize;
+    }
+
+    @Override
+    public synchronized void releaseTarget() {
+        pageManager.releaseByteBuffer(target);
+        target = null;
+    }
+
+    @Override
+    protected synchronized void finalize() throws Throwable {
+        try {
+            if (target != null)
+                pageManager.releaseByteBuffer(target);
+
+        } finally {
+            super.finalize();
+        }
+    }
+    
+    @Override
+    public synchronized ByteBuffer getTarget() {
+        return target;
+    }
+
+    @Override
+    public Object call() throws Exception {
+        run();
+        return null;
+    }
+    
+    private ByteBuffer coalese() {
         int total = 0;
         int offset = 0;
         int i = 0;
@@ -56,42 +100,4 @@ public class NullCompressor implements Compressor {
         return target;
     }
 
-    public synchronized void run() {
-        assert pages.size() == offsets.size();
-        target = pageManager.byteBuffer();
-        target.limit(compressionSize);
-
-        if (pages.size() > 1)
-            coalese();
-        else
-            pages.get(0).read(target, 0);
-
-        target.rewind();
-        assert target.limit() - target.position() == compressionSize;
-    }
-
-    public synchronized void releaseTarget() {
-        pageManager.releaseByteBuffer(target);
-        target = null;
-    }
-
-    protected synchronized void finalize() throws Throwable {
-        try {
-            if (target != null)
-                pageManager.releaseByteBuffer(target);
-
-        } finally {
-            super.finalize();
-        }
-    }
-
-    public synchronized ByteBuffer getTarget() {
-        return target;
-    }
-
-    @Override
-    public Object call() throws Exception {
-        run();
-        return null;
-    }
 }

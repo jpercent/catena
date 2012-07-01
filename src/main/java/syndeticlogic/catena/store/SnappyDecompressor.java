@@ -16,6 +16,7 @@ public class SnappyDecompressor implements Decompressor {
         this.pageSize = pageSize;
     }
 
+    @Override
     public void run() {
         try {
             assert source != null;
@@ -44,7 +45,8 @@ public class SnappyDecompressor implements Decompressor {
         } finally {
         }
     }
-
+    
+    @Override
     public ByteBuffer source() {
         return source;
     }

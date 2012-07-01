@@ -27,7 +27,8 @@ public class SnappyCompressor implements Compressor {
         this.compressionSize = compressionSize;
         this.pageManager = pageManager;
     }
-
+    
+    @Override
     public synchronized void add(int offset, PageDescriptor page) {
         pages.add(page);
         if (isDirect) {
@@ -35,34 +36,8 @@ public class SnappyCompressor implements Compressor {
         }
         offsets.add(offset);
     }
-
-    public ByteBuffer coalese() {
-        // XXX - need to figure out how to manage these
-        ByteBuffer source = ByteBuffer.allocateDirect(pageManager.pageSize());
-        source.limit(compressionSize);
-        int total = 0;
-        int offset = 0;
-        int pageIndex = 0;
-
-        while (total <= compressionSize) {
-
-            PageDescriptor page = pages.get(pageIndex);
-            offset = offsets.get(pageIndex);
-            int size = page.limit() - offset;
-
-            source.limit(source.position() + size);
-            int bytesRead = page.read(source, offset);
-            total += bytesRead;
-            source.limit(compressionSize);
-            pageIndex++;
-
-            if (pageIndex == pages.size())
-                break;
-        }
-        assert total <= compressionSize;
-        return source;
-    }
-
+    
+    @Override
     public synchronized void run() {
         assert pages.size() == offsets.size();
         ByteBuffer source = null;
@@ -105,20 +80,12 @@ public class SnappyCompressor implements Compressor {
         }
     }
 
+    @Override
     public synchronized void releaseTarget() {
         target = null;
     }
 
-    protected synchronized void finalize() throws Throwable {
-        try {
-            // if(target != null)
-            // pageManager.releaseByteBuffer(target);
-
-        } finally {
-            super.finalize();
-        }
-    }
-
+    @Override
     public synchronized ByteBuffer getTarget() {
         return target;
     }
@@ -127,5 +94,32 @@ public class SnappyCompressor implements Compressor {
     public Object call() throws Exception {
         run();
         return null;
+    }
+    
+    private ByteBuffer coalese() {
+        // XXX - need to figure out how to manage these
+        ByteBuffer source = ByteBuffer.allocateDirect(pageManager.pageSize());
+        source.limit(compressionSize);
+        int total = 0;
+        int offset = 0;
+        int pageIndex = 0;
+
+        while (total <= compressionSize) {
+
+            PageDescriptor page = pages.get(pageIndex);
+            offset = offsets.get(pageIndex);
+            int size = page.limit() - offset;
+
+            source.limit(source.position() + size);
+            int bytesRead = page.read(source, offset);
+            total += bytesRead;
+            source.limit(compressionSize);
+            pageIndex++;
+
+            if (pageIndex == pages.size())
+                break;
+        }
+        assert total <= compressionSize;
+        return source;
     }
 }

@@ -10,12 +10,14 @@ public class NullDecompressor implements Decompressor {
         this.target = target;
         this.source = source;
     }
-
+    
+    @Override
     public void run() {
         int iobytes = target.write(source, 0);
         target.setLimit(iobytes);
     }
-
+    
+    @Override
     public ByteBuffer source() {
         return source;
     }
