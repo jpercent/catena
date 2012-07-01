@@ -196,7 +196,7 @@ public class PersistentIOHandler {
         if(log.isTraceEnabled()) log.trace("pages.size() " + pages.size());
     }
 
-    public void commit(int dataSize) throws IOException, InterruptedException,
+    public synchronized void commit(int dataSize) throws IOException, InterruptedException,
             ExecutionException 
     {
         long fileoffset = 0;

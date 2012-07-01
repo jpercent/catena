@@ -31,7 +31,6 @@ public class Segment implements Pinnable {
     private Operand smallest;
     private PageManager pageManager;
     private PersistentIOHandler ioHandler;
-    private PageIOHandler pageIOHandler;
     private ReadWriteLock rwlock;
     private List<PageDescriptor> pageVector;
     private int pinCount;
@@ -55,7 +54,6 @@ public class Segment implements Pinnable {
                     pageVector, pool, fileName);
             ioHandler.writeHeader(size);
             ioHandler.load();
-            pageIOHandler = new PageIOHandler(pageManager, fileName);
             pinCount = 0;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -94,7 +92,6 @@ public class Segment implements Pinnable {
             pinCount = 0;
             ioHandler.load();
             pageManager.releaseByteBuffer(buff);
-            pageIOHandler = new PageIOHandler(pageManager, fileName);
 
         } catch (FileNotFoundException e) {
             log.error("file "+filename+" not found exception ", e); 
@@ -207,8 +204,8 @@ public class Segment implements Pinnable {
         int total = 0;
         rwlock.readLock().lock();
         try {
-            total = pageIOHandler
-                    .scan(buffer, bufferOffset, length, fileOffset);
+            PageIOHandler pageIOHandler = new PageIOHandler(pageManager, fileName);
+            total = pageIOHandler.scan(buffer, bufferOffset, length, fileOffset);
         } finally {
             rwlock.readLock().unlock();
         }
@@ -220,6 +217,7 @@ public class Segment implements Pinnable {
             int oldLen, int newLen) {
         rwlock.writeLock().lock();
         try {
+            PageIOHandler pageIOHandler = new PageIOHandler(pageManager, fileName);
             pageIOHandler.update(buffer, bufferOffset, oldLen, newLen,
                     fileOffset);
             size -= oldLen;
@@ -233,6 +231,7 @@ public class Segment implements Pinnable {
     public void append(byte[] buffer, int bufferOffset, int size) {
         rwlock.writeLock().lock();
         try {
+            PageIOHandler pageIOHandler = new PageIOHandler(pageManager, fileName);
             pageIOHandler.append(buffer, bufferOffset, size);
             this.size += size;
         } finally {
