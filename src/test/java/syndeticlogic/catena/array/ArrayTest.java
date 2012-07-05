@@ -55,7 +55,7 @@ public class ArrayTest {
     String sep = System.getProperty("file.separator");
     String prefix = "target" + sep + "arrayTest" + sep;
     CompositeKey key; 
-    PageFactory pa;
+    PageFactory pf;
     PageManager pm;
     ArrayRegistry arrayRegistry;
     Array array;
@@ -77,11 +77,11 @@ public class ArrayTest {
         key = new CompositeKey();
         key.append(prefix);
 
-        pa = new PageFactory(PageFactory.BufferPoolMemoryType.Java, 
+        pf = new PageFactory(PageFactory.BufferPoolMemoryType.Java, 
                 PageFactory.CachingPolicy.PinnableLru, PageFactory.PageDescriptorType.Unsynchronized, 
                 retryLimit);
 
-        pm = pa.createPageManager(null, 4096, 4096);
+        pm = pf.createPageManager(null, 4096, 4096);
         SegmentManager.configureSegmentManager(CompressionType.Null, pm);
         arrayRegistry = new ArrayRegistry(p);
         arrayRegistry.createArray(key, Type.INTEGER);
@@ -92,11 +92,11 @@ public class ArrayTest {
         key = new CompositeKey();
         key.append(prefix);
 
-        pa = new PageFactory(PageFactory.BufferPoolMemoryType.Java, 
+        pf = new PageFactory(PageFactory.BufferPoolMemoryType.Java, 
                 PageFactory.CachingPolicy.PinnableLru, PageFactory.PageDescriptorType.Unsynchronized, 
                 retryLimit);
 
-        pm = pa.createPageManager(null, 4096, 4096);
+        pm = pf.createPageManager(null, 4096, 4096);
         SegmentManager.configureSegmentManager(CompressionType.Null, pm);
         arrayRegistry = new ArrayRegistry(p);
         array = arrayRegistry.createArrayInstance(key);

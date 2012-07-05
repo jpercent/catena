@@ -105,7 +105,7 @@ public class ArrayDescriptor {
 	private Segment lastSegment;
 	
 	private final FileChannel commitChannel;
-	private final ElementTable elementTable;
+	private final ValueIndex valueIndex;
 	private final int splitThreshold;
 	private final Type type;
     private final int typeSize;
@@ -153,20 +153,20 @@ public class ArrayDescriptor {
         
         if(isFixedLength) {
             typeSize = type.length();
-            elementTable = new FixedLengthElementTable(segments, lock, typeSize);
+            valueIndex = new FixedLengthValueIndex(segments, lock, typeSize);
         } else {
             typeSize = -1;
-            elementTable = new VariableLengthElementTable(master);
+            valueIndex = new VariableLengthValueIndex(master);
         }
 	}
 	
 	public synchronized boolean checkIntegrity() {
         boolean ret = true;
         long size = 0;
-        ElementDescriptor eDesc = null;
+        ValueDescriptor eDesc = null;
 
         for(long index=0; index < length; index++) {
-	        eDesc = elementTable.find(index);
+	        eDesc = valueIndex.find(index);
 	        if(eDesc == null) {
 	            log.error("checkIntegrity failed - less elements than expected");
 	            ret = false;
@@ -175,11 +175,10 @@ public class ArrayDescriptor {
 	        
 	        size += eDesc.size;
 	        if(index+1 == length) {
-	            eDesc = elementTable.find(index+1);
+	            eDesc = valueIndex.find(index+1);
 	            if(eDesc != null) {
 	                log.error("checkIntegrity failed - more elements than expected");
 	                ret = false;
-	                // last element so there's no need to break
 	            }
 	        }
 	    }
@@ -236,20 +235,20 @@ public class ArrayDescriptor {
 	}
 
 	public synchronized int update(long index, int newSize) {
-	    return elementTable.update(index, newSize);
+	    return valueIndex.update(index, newSize);
 	}
 	
 	public synchronized void append(int elementSize) {
 	    if(lastSegment.size() + elementSize > splitThreshold) {
 	        ArrayDescriptor.createSegment(this);
 	    }
-	    elementTable.append(elementSize);
+	    valueIndex.append(elementSize);
 		length++;
 	}
 	
 	public synchronized int delete(long index) {
 	    length --;
-	    int size = elementTable.delete(index);
+	    int size = valueIndex.delete(index);
 	    return size;
 	}
 	
@@ -272,7 +271,7 @@ public class ArrayDescriptor {
             commitChannel.truncate(serialized.length);
             commitChannel.write(ByteBuffer.wrap(serialized));
             commitChannel.force(false);
-            elementTable.persist();
+            //valueIndex.persist();
         } catch (IOException e) {
             String msg = " could not sync array identified by "+master.toString();
             log.error(msg, e);

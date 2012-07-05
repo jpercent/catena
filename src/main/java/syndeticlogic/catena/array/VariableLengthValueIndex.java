@@ -10,12 +10,12 @@ import java.util.Map.Entry;
 //import org.apache.commons.logging.LogFactory;
 import syndeticlogic.catena.utility.CompositeKey;
 
-public class VariableLengthElementTable implements ElementTable {
-    //private static final Log log = LogFactory.getLog(VariableLengthElementTable.class);
+public class VariableLengthValueIndex implements ValueIndex {
+    //private static final Log log = LogFactory.getLog(VariableLengthValueIndex.class);
     private HashMap<CompositeKey, List<Integer>> meta;
     //private File elementFile;
 
-    public VariableLengthElementTable(CompositeKey key) {
+    public VariableLengthValueIndex(CompositeKey key) {
         meta = new HashMap<CompositeKey, List<Integer>>();
         /*String metaFileName = key.toString()+System.getProperty("file.separator")+".varmeta";
         
@@ -34,8 +34,8 @@ public class VariableLengthElementTable implements ElementTable {
     }
 
     @Override
-    public ElementDescriptor find(long index) {
-        ElementDescriptor eDesc=null;
+    public ValueDescriptor find(long index) {
+        ValueDescriptor eDesc=null;
         long elements = 0;
 
         for(Entry<CompositeKey, List<Integer>>  segmentMeta : meta.entrySet()) {
@@ -71,17 +71,17 @@ public class VariableLengthElementTable implements ElementTable {
     public void persist() {
     }
     
-    private ElementDescriptor locateElement(List<Integer> offsets, CompositeKey id,
+    private ValueDescriptor locateElement(List<Integer> offsets, CompositeKey id,
                                             long elements, long index) {
         int segmentOffset = 0;
         int size = 0;
-        ElementDescriptor eDesc=null;
+        ValueDescriptor eDesc=null;
         
         for(Integer i : offsets) {
             elements++;
             size = i.intValue();
             if(elements == index) {
-                eDesc = new ElementDescriptor(id, segmentOffset, size, index);
+                eDesc = new ValueDescriptor(id, segmentOffset, size, index);
                 break;
             }
             segmentOffset += size;

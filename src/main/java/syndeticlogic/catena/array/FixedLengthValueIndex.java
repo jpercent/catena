@@ -8,24 +8,24 @@ import syndeticlogic.catena.utility.CompositeKey;
 
 import syndeticlogic.catena.store.Segment;
 
-public class FixedLengthElementTable implements ElementTable {
+public class FixedLengthValueIndex implements ValueIndex {
 
     private TreeMap<CompositeKey, Segment> segments;
     private ReentrantLock arrayDescriptorLock;
     private int size;
 
-    FixedLengthElementTable(TreeMap<CompositeKey, Segment> segment, ReentrantLock lock, int size) {
+    FixedLengthValueIndex(TreeMap<CompositeKey, Segment> segment, ReentrantLock lock, int size) {
         this.segments = segment;
         this.arrayDescriptorLock = lock;
         this.size = size;
     }
 
     @Override
-    public ElementDescriptor find(long index) {
+    public ValueDescriptor find(long index) {
         long bytePosition = index * size;
         long current = 0;
         long previousEnd = 0;
-        ElementDescriptor element = null;
+        ValueDescriptor element = null;
         arrayDescriptorLock.lock();
         try {
             for (Entry<CompositeKey, Segment> iter : segments.entrySet()) {
@@ -34,7 +34,7 @@ public class FixedLengthElementTable implements ElementTable {
                 current += segment.size();
                 if (current > bytePosition) {
                     int offset = (int) (bytePosition - previousEnd);
-                    element = new ElementDescriptor(iter.getKey(), offset, size, index);
+                    element = new ValueDescriptor(iter.getKey(), offset, size, index);
                 }
             }
         } finally {

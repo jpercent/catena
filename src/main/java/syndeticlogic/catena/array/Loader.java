@@ -46,7 +46,8 @@ public class Loader extends DirectoryWalker {
             if(!arrayDescFile.exists()) {
                 current.push(null);
                 if(log.isTraceEnabled()) { 
-                    log.trace("Loader.hahdleDirectoryStart: baseDir = "+baseDir + ","+ ArrayDescriptor.ARRAY_DESC_FILE_NAME);
+                    log.trace("Loader.hahdleDirectoryStart: baseDir = "+baseDir + ","+ 
+                            ArrayDescriptor.ARRAY_DESC_FILE_NAME);
                 }
                 return;
             }
