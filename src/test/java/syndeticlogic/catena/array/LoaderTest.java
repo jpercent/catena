@@ -39,12 +39,12 @@ public class LoaderTest {
         CompositeKey key = new CompositeKey();
         key.append(prefix);
 
-        ArrayDescriptor adesc = new ArrayDescriptor(key, Type.BINARY, 1048576);
+        ArrayDescriptor adesc = new ArrayDescriptor(key, Type.INTEGER, 1048576);
         SegmentStub stub = new SegmentStub();
         stub.size = 32;
         stub.name = "arrayDescTest";
         adesc.addSegment(adesc.nextId(), stub);
-        adesc.append(2);
+        adesc.append(4);
         return adesc;
         
     }
