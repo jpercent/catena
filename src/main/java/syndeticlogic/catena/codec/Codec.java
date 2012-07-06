@@ -527,39 +527,6 @@ public class Codec {
         // return Type.BYTE.length()+size;
     }
 
-    /*
-     * public int getCodeSize(Type t) { int ret = 0; switch(t) { case TYPE: ret
-     * = Type.BYTE.length(); break; case BOOLEAN: ret = Type.BOOLEAN.length(); break; case BYTE:
-     * ret = Type.BYTE.length(); break; case CHAR: ret = Type.CHAR.length(); break; case SHORT:
-     * ret = Type.SHORT.length(); break; case INTEGER: ret = Type.INTEGER.length(); break; case
-     * LONG: ret = Type.LONG.length(); break; case FLOAT: ret = Type.FLOAT.length(); break; case
-     * DOUBLE: ret = Type.DOUBLE.length(); break; case STRING: ret = Type.SHORT.length(); break;
-     * case BINARY: ret = Type.INTEGER.length(); break; case CODEABLE: ret = Type.BYTE.length();
-     * break; default: throw new RuntimeException("Undefined type"); } return
-     * ret; }
-     */
-
-    /*
-     * public boolean isTypeFixedLength(Type t) { switch(t) { case TYPE: case
-     * BOOLEAN: case BYTE: case CHAR: case SHORT: case INTEGER: case LONG: case
-     * FLOAT: case DOUBLE: return true; case STRING: case BINARY: case CODEABLE:
-     * return false; default: throw new RuntimeException("Undefined type"); } }
-     */
-    // XXX - perhaps this should be deprecated - isTypeFixedLength can be used
-    // in place
-    /*
-     * public int getTypeSize(Type t) {
-     * 
-     * int ret = 0; switch(t) { case TYPE: ret = Type.BYTE.length(); break; case BOOLEAN:
-     * ret = Type.BOOLEAN.length(); break; case BYTE: ret = Type.BYTE.length(); break; case CHAR:
-     * ret = Type.CHAR.length(); break; case SHORT: ret = Type.SHORT.length(); break; case
-     * INTEGER: ret = Type.INTEGER.length(); break; case LONG: ret = Type.LONG.length(); break;
-     * case FLOAT: ret = Type.FLOAT.length(); break; case DOUBLE: ret = Type.DOUBLE.length();
-     * break; case STRING: ret = -1; break; case BINARY: ret = -1; break; case
-     * CODEABLE: ret = -1; break; default: throw new
-     * RuntimeException("Undefined type"); } return ret; }
-     */
-
     public Type decodeCodecType(byte[] source, int offset) {
         assert source.length - offset >= 1;
         return decodeType(source[offset]);
