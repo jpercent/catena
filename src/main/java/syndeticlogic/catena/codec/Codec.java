@@ -1,5 +1,4 @@
 /*
- *   Author == James Percent (james@empty-set.net)
  *   Copyright 2010, 2011 James Percent
  *
  *   This program is free software: you can redistribute it and/or modify

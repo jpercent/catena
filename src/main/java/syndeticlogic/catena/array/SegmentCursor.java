@@ -50,7 +50,14 @@ public class SegmentCursor {
             return (offset == segment.size() ? true : false);
         }
     }
-
+    
+    public int remaining() {
+        if(offset == -1 || segment == null) {
+            return -1;
+        }
+        return segment.size() - offset;
+    }
+    
     public Segment segment() {
         return segment;
     }
@@ -61,12 +68,5 @@ public class SegmentCursor {
     
     public LockType lockType() {
         return lockType;
-    }
-    
-    public int remaining() {
-        if(offset == -1 || segment == null) {
-            return -1;
-        }
-        return segment.size() - offset;
     }
 }
