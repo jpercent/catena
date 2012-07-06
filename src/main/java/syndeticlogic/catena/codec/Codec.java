@@ -77,9 +77,8 @@ public class Codec {
         int size = (types.size() % TYPES_PER_BYTE == 0 ? types.size()
                 / TYPES_PER_BYTE : types.size() / TYPES_PER_BYTE + 1);
 
-        for (int i = offset; i < size; i++) {
+        for (int i = offset; i < size; i++)
             dest[i] = 0;
-        }
 
         boolean set = false;
         byte current = dest[offset];
@@ -90,7 +89,6 @@ public class Codec {
             shift += 4;
             if (shift == 8) {
                 shift = 0;
-                // offset ++;
                 bytes++;
                 set = true;
                 dest[offset++] = current;
