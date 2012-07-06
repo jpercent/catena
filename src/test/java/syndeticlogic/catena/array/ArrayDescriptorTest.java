@@ -16,7 +16,19 @@ import syndeticlogic.catena.array.ArrayDescriptor;
 import syndeticlogic.catena.codec.Codec;
 
 public class ArrayDescriptorTest {
-
+    
+    @Test
+    public void valueTest() throws Exception {
+        CompositeKey c = new CompositeKey();
+        c.append("Bo don't know Jack");
+        ArrayDescriptor.Value vd = new ArrayDescriptor.Value(c, 11, 22222, 22, 33);
+        assertEquals(c, vd.segmentId);
+        assertEquals(11, vd.segmentOffset);
+        assertEquals(22222, vd.byteOffset);
+        assertEquals(22, vd.index);
+        assertEquals(33, vd.valueSize);
+    }
+    
     @Test
     public void testFixedLength() throws Exception {
         String sep = System.getProperty("file.separator");
