@@ -171,16 +171,19 @@ public class CodeHelper {
 		return buffer;
 	}
 	
+	public int metaSize(int elements) {
+        int typescodesize = coder.getBitsPerType()*elements;
+        
+        if(typescodesize % 8 == 0)
+            typescodesize /= 8;
+        else 
+            typescodesize = typescodesize/8+1;
+        return typescodesize;
+	}
+	
 	public List<Object> decode(byte[] rawData, int offset, int elements) {
 		types = coder.decodeTypes(rawData, offset, elements);
-		int typescodesize = coder.getBitsPerType()*elements;
-		
-		if(typescodesize % 8 == 0)
-			typescodesize /= 8;
-		else 
-			typescodesize = typescodesize/8+1;
-		
-		offset += typescodesize;
+		offset += metaSize(elements);
 		if(log.isTraceEnabled()) log.trace(" offset "+ offset);
 
 		for(Type t : types) {
@@ -294,7 +297,7 @@ public class CodeHelper {
 		return components;
 	}
 	
-	private int computeSize() {
+	public int computeSize() {
 		int size = coder.getBitsPerType()*types.size();
 		if(size % 8 == 0) 
 			size = size/8;
