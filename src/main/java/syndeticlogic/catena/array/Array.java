@@ -36,7 +36,7 @@ public class Array {
     private ArrayDescriptor arrayDesc;
     private SegmentController sctrl;
     private SegmentCursor cursor;
-    private long index;
+    private int index;
     private boolean configured;
 
     Array(ArrayDescriptor desc, SegmentController sctrl) {
@@ -58,7 +58,7 @@ public class Array {
         return index;
     }
 
-    public void position(long position, LockType lt) {
+    public void position(int position, LockType lt) {
         long offset = convertIndexToOffset(position);
         sctrl.findAndLockSegment(cursor, lt, offset);
         index = position;
@@ -153,6 +153,7 @@ public class Array {
     }
 
     public void deleteScan() {
+        
         int size = arrayDesc.delete(index);
         cursor.delete(size);
         throw new RuntimeException("Not supported");

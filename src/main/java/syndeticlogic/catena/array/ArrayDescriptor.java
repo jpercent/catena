@@ -7,9 +7,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.TreeMap;
 
+import java.util.Map.Entry;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.CRC32;
 
@@ -29,44 +33,118 @@ import syndeticlogic.catena.store.SegmentManager;
 public class ArrayDescriptor {
     public static final String ARRAY_DESC_FILE_NAME = ".arrayDesc";
     private static final Log log = LogFactory.getLog(ArrayDescriptor.class);
-    private static final int elements=6;
+    private CompositeKey master;
+    private int length;
+    private long nextKey;
+    private LinkedList<Integer> sizes;
+    private long arraySize; 
+    private TreeMap<CompositeKey, Segment> segments;
+    private CompositeKey lastKey;
+    private Segment lastSegment;
+    private final FileChannel commitChannel;
+    private final int splitThreshold;
+    private final Type type;
+    private final int typeSize;
+    private final ReentrantLock lock;
+    
+    public static class Value {
+        public CompositeKey segmentId;
+        public int segmentOffset;
+        public long byteOffset;
+        public int index;
+        public int valueSize;
+
+        public Value() {
+        }
+
+        public Value(CompositeKey segmentId, int segmentOffset, 
+                long byteOffset, int index, int size) {
+            this.segmentId = segmentId;
+            this.segmentOffset = segmentOffset;
+            this.byteOffset = byteOffset;
+            this.index = index;
+            this.valueSize = size;
+        }
+    }
     
     public static byte[] encode(ArrayDescriptor arrayDesc) {
         CodeHelper coder = Codec.getCodec().coder();
-
-        String stringKey = new String(CompositeKey.encode(arrayDesc.master));
-        coder.append(stringKey);
-        coder.append(arrayDesc.type);
-        coder.append(arrayDesc.length);
-        coder.append(arrayDesc.nextKey);
-        coder.append(arrayDesc.splitThreshold);
+        byte[] header = null;
+        arrayDesc.acquire();
+        try {
+            int elements = 7;
+            if(!arrayDesc.type.isFixedLength()) {
+                elements += arrayDesc.length;
+            }
+            coder.append(elements);
+            header = coder.encodeByteArray();
+            coder.reset();
+            
+            String stringKey = new String(CompositeKey.encode(arrayDesc.master));
+            coder.append(stringKey);
+            coder.append(arrayDesc.type);
+            coder.append(arrayDesc.length);
+            coder.append(arrayDesc.nextKey);
+            coder.append(arrayDesc.splitThreshold);
+            coder.append(arrayDesc.arraySize);
+            if(!arrayDesc.type.isFixedLength()) {
+                for(Integer i : arrayDesc.sizes) {
+                    coder.append(i);
+                }
+            }
+        } finally {
+            arrayDesc.release();
+        }
         byte[] buffer = coder.encodeByteArray();
 
         CRC32 crc = new CRC32();
         crc.update(buffer, 0, buffer.length);
         long crc32 = crc.getValue();
         coder.append(crc32);
-        buffer = coder.encodeByteArray();
+        int size = coder.computeSize();
+        buffer = new byte[size+header.length];
+        System.arraycopy(header, 0, buffer, 0, header.length);
+        coder.encode(buffer, header.length);
         return buffer;
     }
     
     public static ArrayDescriptor decode(byte[] buffer, int offset) {
         CodeHelper coder = Codec.getCodec().coder();
-        List<Object> members = coder.decode(buffer, offset, elements);
-        
+        List<Object> members = coder.decode(buffer, offset, 1);
+        int elements = ((Integer)members.get(0)).intValue();
+        offset += Type.INTEGER.length() + coder.metaSize(1);
+        coder.reset();
+
+        members = coder.decode(buffer, offset, elements);
         String stringKey = (String) members.get(0);
         Type type = (Type)members.get(1);
-        long length = ((Long)members.get(2)).longValue();
+        int length = ((Integer)members.get(2)).intValue();
         long nextKey = ((Long)members.get(3)).longValue();
         int splitThreshold = ((Integer)members.get(4)).intValue();
-        long crc32 = ((Long)members.get(5)).longValue();
-        coder.reset();
+        long arraySize = ((Long)members.get(5)).longValue();
         
+        LinkedList<Integer> sizes = null;
+        if(!type.isFixedLength()) {
+            sizes = new LinkedList<Integer>();
+            for(int i=6; i < length+6; i++) {
+                sizes.add(((Integer)members.get((int)i)));
+            }
+        }
+        long crc32 = ((Long)members.get(6)).longValue();
+        
+        coder.reset();
         coder.append(stringKey);
         coder.append(type);
         coder.append(length);
         coder.append(nextKey);
         coder.append(splitThreshold);
+        coder.append(arraySize);
+        if(!type.isFixedLength()) {
+            for(Integer i : sizes) {
+                coder.append(i);
+            }
+        }
+        
         byte[] test = coder.encodeByteArray();
         CRC32 crc = new CRC32();
         crc.update(test, 0, test.length);
@@ -76,6 +154,8 @@ public class ArrayDescriptor {
         CompositeKey master = CompositeKey.decode(stringKey.getBytes());
         ArrayDescriptor ret = new ArrayDescriptor(master, type, splitThreshold);
         ret.length = length;
+        ret.arraySize = arraySize;
+        ret.sizes = sizes;
         ret.nextKey = nextKey;
         return ret;
     }
@@ -96,22 +176,6 @@ public class ArrayDescriptor {
         log.debug("first segment of array "+arrayDesc.id().toString()+" created "); 
     }      
    
-	private CompositeKey master;
-    private long length;
-    private long nextKey;
-
-	private TreeMap<CompositeKey, Segment> segments;
-	private CompositeKey lastKey;
-	private Segment lastSegment;
-	
-	private final FileChannel commitChannel;
-	private final ValueIndex valueIndex;
-	private final int splitThreshold;
-	private final Type type;
-    private final int typeSize;
-    private final boolean isFixedLength;
-	private final ReentrantLock lock;
-
 	public ArrayDescriptor(CompositeKey key, Type type, int splitThreshold) {
 		assert key != null && key.toString() != null;
 		this.master = key;
@@ -120,11 +184,9 @@ public class ArrayDescriptor {
 		this.splitThreshold = splitThreshold;
 		this.segments = new TreeMap<CompositeKey, Segment>();
 		this.lastKey = null;
-		this.lastSegment = null;
-		
+		this.lastSegment = null;		
         this.type = type;
-		isFixedLength = type.isFixedLength();
-        lock = new ReentrantLock();
+        this.lock = new ReentrantLock();
 
         try {
             String sep = System.getProperty("file.separator");
@@ -151,33 +213,35 @@ public class ArrayDescriptor {
             throw new RuntimeException(e);
         }
         
-        if(isFixedLength) {
+        arraySize = 0;
+        if(type.isFixedLength()) {
             typeSize = type.length();
-            valueIndex = new FixedLengthValueIndex(segments, lock, typeSize);
         } else {
             typeSize = -1;
-            valueIndex = new VariableLengthValueIndex(master);
+            sizes = new LinkedList<Integer>();
         }
 	}
 	
 	public synchronized boolean checkIntegrity() {
+	    // not sure this function makes any sense any more
         boolean ret = true;
         long size = 0;
-        ValueDescriptor eDesc = null;
+        Value value = null;
 
-        for(long index=0; index < length; index++) {
-	        eDesc = valueIndex.find(index);
-	        if(eDesc == null) {
+        for(int index=0; index < length; index++) {
+	        //eDesc = valueIndex.find(index);
+            value = find(index);
+	        if(value == null) {
 	            log.error("checkIntegrity failed - less elements than expected");
 	            ret = false;
 	            break;
 	        }
 	        
-	        size += eDesc.size;
+	        size += value.valueSize;
 	        if(index+1 == length) {
-	            eDesc = valueIndex.find(index+1);
-	            if(eDesc != null) {
-	                log.error("checkIntegrity failed - more elements than expected");
+	            value = find(index+1);
+	            if(value != null) {
+	                log.error("checkIntegrity failed - more elements than expected ");//index ="+index+" length = "+length);
 	                ret = false;
 	            }
 	        }
@@ -197,72 +261,94 @@ public class ArrayDescriptor {
             lastKey = key;
         }
     }
-    
-	public synchronized CompositeKey id() {
-		return master;
-	}
 
-	public synchronized CompositeKey nextId() {
-	    CompositeKey key = new CompositeKey();
-        key.append(master);
-        key.append(nextKey);
-	    nextKey++;
-	    return key;
-	}
-	
-	public synchronized boolean isFixedLength() {
-	    return isFixedLength;
-	}
-	
-	public synchronized int typeSize() {
-	    return typeSize;
-	}
-	
-	public synchronized Type type() {
-		return type;
-	}
-	
-	public synchronized long length() {
-		return length;
-	}
-	
-	public synchronized long size() {
-	    long size = 0;
-        for(Segment segment : segments.values()) {
-            size += segment.size();
+    public synchronized Value find(int index) {
+        if(index >= length) {
+            return null;
         }
-        return size;
-	}
+        
+        Value value = configureValue(index);
+        long current = 0;
+        long previousEnd = 0;
+        // XXX segment lock here?
+        acquire();
+        try {
+            for (Entry<CompositeKey, Segment> iter : segments.entrySet()) {
+                Segment segment = iter.getValue();
+                previousEnd = current;
+                current += segment.size();
+                if (current > value.byteOffset) {
+                    int offset = (int) (value.byteOffset - previousEnd);
+                    value.segmentId = iter.getKey();
+                    value.segmentOffset = offset;
+                }
+            }
+        } finally {
+            release();
+        }
+        return value;
+    }
+    
+    public synchronized int update(int index, int size) {
+        int ret = typeSize;
+        if(typeSize == -1) {
+            ret = sizes.set(index, new Integer(size)).intValue();            
+        }
+        return ret;
 
-	public synchronized int update(long index, int newSize) {
-	    return valueIndex.update(index, newSize);
-	}
-	
-	public synchronized void append(int elementSize) {
-	    if(lastSegment.size() + elementSize > splitThreshold) {
-	        ArrayDescriptor.createSegment(this);
-	    }
-	    valueIndex.append(elementSize);
-		length++;
-	}
-	
-	public synchronized int delete(long index) {
-	    length --;
-	    int size = valueIndex.delete(index);
-	    return size;
-	}
-	
-    public Collection<Segment> segments() {
-        return segments.values();
+    }
+
+    public synchronized void append(int size) {
+        if(lastSegment.size() + size > splitThreshold) {
+            ArrayDescriptor.createSegment(this);
+        }
+                
+        if(typeSize == -1) {
+            sizes.add(new Integer(size));
+        } else {
+            assert size == typeSize;
+        }
+        arraySize += size;
+        length++;
+    }
+
+    public synchronized int delete(int index) {
+        length--;
+        int ret = typeSize;
+        if(typeSize == -1) {
+            ret = sizes.remove(index).intValue();
+        }
+        arraySize -= ret;
+        return ret;
+    }
+
+    private Value configureValue(int index) {
+        if(typeSize != -1) {
+            System.out.println("typesize = "+typeSize+" index "+index);
+            return  new Value(null, -1, index * typeSize, index, typeSize);
+        }
+        
+        Value v = new Value();
+        v.index = index;
+
+        long pos = 0;
+        Iterator<Integer> i = sizes.iterator();
+        Integer value = null;
+
+        do {
+            assert i.hasNext();
+            // throw new
+            // RuntimeException("Index given is out of range of what is actually stored; index = "+index+" pos = "+pos);
+            value = i.next();
+            v.byteOffset += value.intValue();
+            pos++;
+        } while (pos < index);
+        assert value != null;
+
+        v.valueSize = value.intValue();
+        return v;
     }
     
-    public void acquire() {
-        lock.lock();
-    }
-    
-    public void release() {
-        lock.unlock();
-    }
     
     public synchronized void persist() {
         byte[] serialized = ArrayDescriptor.encode(this);
@@ -277,5 +363,49 @@ public class ArrayDescriptor {
             log.error(msg, e);
             throw new RuntimeException(msg);
         }
+    }
+
+    public void acquire() {
+        lock.lock();
+    }
+    
+    public void release() {
+        lock.unlock();
+    }
+    
+	public synchronized CompositeKey id() {
+		return master;
+	}
+
+	public synchronized CompositeKey nextId() {
+	    CompositeKey key = new CompositeKey();
+        key.append(master);
+        key.append(nextKey);
+	    nextKey++;
+	    return key;
+	}
+	
+	public synchronized boolean isFixedLength() {
+	    return type.isFixedLength();
+	}
+	
+	public synchronized int typeSize() {
+	    return typeSize;
+	}
+	
+	public synchronized Type type() {
+		return type;
+	}
+	
+	public synchronized int length() {
+		return length;
+	}
+	
+	public synchronized long size() {
+	    return arraySize;
+	}
+	
+    public synchronized Collection<Segment> segments() {
+        return segments.values();
     }
 }
