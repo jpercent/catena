@@ -1,4 +1,4 @@
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.predicate;
 
 public enum BinaryConnector {
     Conjunction {

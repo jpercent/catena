@@ -1,4 +1,6 @@
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.predicate;
+
+import syndeticlogic.catena.type.Value;
 
 
 public enum Operator {
