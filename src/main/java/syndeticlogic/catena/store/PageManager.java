@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import syndeticlogic.catena.utility.Observer;
 import syndeticlogic.catena.utility.ThreadSafe;
 
-import syndeticlogic.catena.store.PageDescriptor.PageState;
+import syndeticlogic.catena.store.Page.PageState;
 
 import java.nio.ByteBuffer;
 
@@ -23,7 +23,7 @@ public class PageManager {
     private static final Log log = LogFactory.getLog(PageManager.class);
     private final PageFactory factory;
     private final Observer observer;
-    private final HashMap<String, List<PageDescriptor>> pageSequences;
+    private final HashMap<String, List<Page>> pageSequences;
     private final ConcurrentLinkedQueue<ByteBuffer> freelist;
     private final ReentrantLock lock;
     private final Condition condition;
@@ -42,7 +42,7 @@ public class PageManager {
     }
 
     public PageManager(PageFactory factory, Observer observer, HashMap<String, 
-            List<PageDescriptor>> pageSequences, ConcurrentLinkedQueue<ByteBuffer> freelist, 
+            List<Page>> pageSequences, ConcurrentLinkedQueue<ByteBuffer> freelist, 
             int pageSize, int retryLimit) {
         this.factory = factory;
         this.observer = observer;
@@ -61,40 +61,40 @@ public class PageManager {
                 log.error("throw runtime exception because key already exits");
                 throw new RuntimeException("key already exists");
             }
-            pageSequences.put(key, new LinkedList<PageDescriptor>());
+            pageSequences.put(key, new LinkedList<Page>());
         } finally {
             lock.unlock();
         }
     }
 
-    public List<PageDescriptor> getPageSequence(String key) {
-        List<PageDescriptor> pageVector = null;
+    public List<Page> getPageSequence(String key) {
+        List<Page> pageVector = null;
         try {
             lock.lock();
             assert pageSequences != null;
             pageVector = pageSequences.get(key);
-            for(PageDescriptor page : pageVector) {
+            for(Page page : pageVector) {
                 page.pin();
                 observer.notify(page);
             }
         } finally {
             lock.unlock();
         }
-        return (List<PageDescriptor>) pageVector;
+        return (List<Page>) pageVector;
     }
 
-    public void releasePageSequence(List<PageDescriptor> pageVector) {
+    public void releasePageSequence(List<Page> pageVector) {
         try {
             lock.lock();
-            for (PageDescriptor page : pageVector)
+            for (Page page : pageVector)
                 releasePage(page);
         } finally {
             lock.unlock();
         }
     }
 
-    public PageDescriptor pageDescriptor(String identifier) {
-        PageDescriptor page = factory.createPageDescriptor();
+    public Page page(String identifier) {
+        Page page = factory.createPageDescriptor();
         ByteBuffer buffer = byteBuffer();
         page.attachBuffer(buffer);
         page.pin();
@@ -105,7 +105,7 @@ public class PageManager {
         return page;
     }
 
-    public void releasePageDescriptor(PageDescriptor pagedes) {
+    public void releasePageDescriptor(Page pagedes) {
         try {
             lock.lock();
             releasePage(pagedes);
@@ -134,7 +134,7 @@ public class PageManager {
         }
     }
 
-    public void free(PageDescriptor page) {
+    public void free(Page page) {
         try {
             lock.lock();
             ByteBuffer buffer = page.detachBuffer();
@@ -189,7 +189,7 @@ public class PageManager {
     // could be called by releasePageSequence and such factor down the overhead of calling 
     // releasePage, but to do so would result in retaking the reentrant lock, which we think is more
     // expensive than a method call. 
-    private void releasePage(PageDescriptor page) {
+    private void releasePage(Page page) {
         assert page != null;
         page.unpin();
         observer.notify(page);

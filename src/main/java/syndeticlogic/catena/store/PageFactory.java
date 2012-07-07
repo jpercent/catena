@@ -61,11 +61,11 @@ public class PageFactory {
                 && pageDescType != null && retryLimit > 0;
     }
 
-    public PageDescriptor createPageDescriptor() {
-        PageDescriptor pagedes = null;
+    public Page createPageDescriptor() {
+        Page pagedes = null;
         switch (pageDescType) {
         case Unsynchronized:
-            pagedes = new PageDescriptor();
+            pagedes = new Page();
             break;
         case Synchronized:
             assert false;
@@ -80,7 +80,7 @@ public class PageFactory {
             int numPages) {
 
         ConcurrentLinkedQueue<ByteBuffer> freelist = new ConcurrentLinkedQueue<ByteBuffer>();
-        HashMap<String, List<PageDescriptor>> pageSequences = new HashMap<String, List<PageDescriptor>>();
+        HashMap<String, List<Page>> pageSequences = new HashMap<String, List<Page>>();
 
         for (int i = 0; i < numPages; i++) {
             switch (memoryType) {
@@ -106,7 +106,7 @@ public class PageFactory {
                             && (size / pageSize + 1) < Integer.MAX_VALUE;
 
                     int pages = (int) (size / pageSize + 1);
-                    List<PageDescriptor> pageSequence = new ArrayList<PageDescriptor>(
+                    List<Page> pageSequence = new ArrayList<Page>(
                             pages);
                     long offset = 0;
 

@@ -7,7 +7,7 @@ import syndeticlogic.catena.utility.Observeable;
 import syndeticlogic.catena.utility.Observer;
 import syndeticlogic.catena.utility.ThreadSafe;
 
-import syndeticlogic.catena.store.PageDescriptor.PageState;
+import syndeticlogic.catena.store.Page.PageState;
 
 @ThreadSafe
 public class PageCache implements Observer, EvictionListener {
@@ -27,7 +27,7 @@ public class PageCache implements Observer, EvictionListener {
             // XXX - this is a hack; find a better way
             cache.removeLeastValuableNode();
         } else {
-            PageDescriptor page = (PageDescriptor)observeable;
+            Page page = (Page)observeable;
             PageState pstate = (PageState)page.state();
             if(pstate == PageState.FREE) {
                 cache.addUncachedObject(page, page);
@@ -51,8 +51,8 @@ public class PageCache implements Observer, EvictionListener {
 
      @Override
     public void evicted(Object userKey, Object cacheObject) {
-        assert cacheObject instanceof PageDescriptor;
-        pageManager.free((PageDescriptor)cacheObject);
+        assert cacheObject instanceof Page;
+        pageManager.free((Page)cacheObject);
         userKey = null;
         cacheObject = null;
     }

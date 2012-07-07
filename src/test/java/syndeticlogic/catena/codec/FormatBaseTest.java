@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
-import syndeticlogic.catena.type.Format;
+import syndeticlogic.catena.utility.Format;
 
 public class FormatBaseTest {
 	private static final Log log = LogFactory.getLog(FormatBaseTest.class);

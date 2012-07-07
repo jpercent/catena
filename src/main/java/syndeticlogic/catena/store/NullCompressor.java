@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 public class NullCompressor implements Compressor {
 
     private Log log = LogFactory.getLog(NullCompressor.class);
-    private List<PageDescriptor> pages;
+    private List<Page> pages;
     private PageManager pageManager;
     private List<Integer> offsets;
     private ByteBuffer target;
@@ -18,7 +18,7 @@ public class NullCompressor implements Compressor {
     private boolean isDirect;
 
     public NullCompressor(PageManager pageManager, int compressionSize) {
-        pages = new LinkedList<PageDescriptor>();
+        pages = new LinkedList<Page>();
         offsets = new LinkedList<Integer>();
         isDirect = true;
         this.compressionSize = compressionSize;
@@ -28,7 +28,7 @@ public class NullCompressor implements Compressor {
     }
     
     @Override
-    public synchronized void add(int offset, PageDescriptor page) {
+    public synchronized void add(int offset, Page page) {
         pages.add(page);
         if (isDirect) {
             isDirect = page.isDirect();
@@ -84,7 +84,7 @@ public class NullCompressor implements Compressor {
         int offset = 0;
         int i = 0;
         while (total <= compressionSize) {
-            PageDescriptor page = pages.get(i);
+            Page page = pages.get(i);
             offset = offsets.get(i);
             int size = page.limit() - offset;
             target.limit(target.position() + size);

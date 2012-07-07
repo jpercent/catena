@@ -7,10 +7,10 @@ import org.xerial.snappy.Snappy;
 
 public class SnappyDecompressor implements Decompressor {
     private ByteBuffer source;
-    private PageDescriptor target;
+    private Page target;
     private int pageSize;
 
-    public SnappyDecompressor(PageDescriptor target, ByteBuffer source, int pageSize) {
+    public SnappyDecompressor(Page target, ByteBuffer source, int pageSize) {
         this.target = target;
         this.source = source;
         this.pageSize = pageSize;

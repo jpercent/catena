@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import syndeticlogic.catena.codec.Codec;
-import syndeticlogic.catena.type.IntegerOperand;
+import syndeticlogic.catena.type.IntegerValue;
 import syndeticlogic.catena.type.TypeFactory;
 
 public class IntegerOperandTest {
@@ -18,7 +18,7 @@ public class IntegerOperandTest {
         Codec.getCodec().encode(31, test, 17);
         Codec.getCodec().encode(31, test1, 12);    
       
-        IntegerOperand inte = new IntegerOperand(test, 17);
+        IntegerValue inte = new IntegerValue(test, 17);
         int ret = inte.compareTo(test1, 12, 4);
         assertEquals(0, ret);
         

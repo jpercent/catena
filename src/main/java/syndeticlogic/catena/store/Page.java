@@ -6,10 +6,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import syndeticlogic.catena.utility.Observeable;
 
-public class PageDescriptor implements Observeable {
+public class Page implements Observeable {
     public enum PageState implements State { FREE, PINNED, UNPINNED }
 
-    private static final Log log = LogFactory.getLog(PageDescriptor.class);
+    private static final Log log = LogFactory.getLog(Page.class);
     private ByteBuffer buffer;
     private String segmentId;
     private int effectiveSize;
@@ -18,7 +18,7 @@ public class PageDescriptor implements Observeable {
     private int pinCount;
     private PageState state;
     
-    public PageDescriptor() {
+    public Page() {
         this.segmentId = "";
         this.buffer = null;
         this.dirty = false;

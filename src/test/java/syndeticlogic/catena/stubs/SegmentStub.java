@@ -2,7 +2,7 @@ package syndeticlogic.catena.stubs;
 
 
 import syndeticlogic.catena.store.Segment;
-import syndeticlogic.catena.type.Operand;
+import syndeticlogic.catena.type.Value;
 import syndeticlogic.catena.type.Type;
 
 public class SegmentStub extends Segment {
@@ -73,21 +73,21 @@ public class SegmentStub extends Segment {
     }
 
     @Override
-    public Operand getSmallest() {
+    public Value getSmallest() {
         return null;
     }
 
     @Override
-    public void setSmallest(Operand smallest) {
+    public void setSmallest(Value smallest) {
     }
 
     @Override
-    public Operand getLargest() {
+    public Value getLargest() {
         return null;
     }
 
     @Override
-    public void setLargest(Operand largest) {
+    public void setLargest(Value largest) {
     }
 
     @Override

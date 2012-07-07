@@ -32,7 +32,7 @@ public class Segment implements Pinnable {
     private PageManager pageManager;
     private PersistentIOHandler ioHandler;
     private ReadWriteLock rwlock;
-    private List<PageDescriptor> pageVector;
+    private List<Page> pageVector;
     private int pinCount;
     private int size;
 

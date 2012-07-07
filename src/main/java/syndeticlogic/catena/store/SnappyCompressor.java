@@ -13,7 +13,7 @@ import org.xerial.snappy.Snappy;
 public class SnappyCompressor implements Compressor {
 
     private Log log = LogFactory.getLog(SnappyCompressor.class);
-    private List<PageDescriptor> pages;
+    private List<Page> pages;
     private PageManager pageManager;
     private List<Integer> offsets;
     private ByteBuffer target;
@@ -21,7 +21,7 @@ public class SnappyCompressor implements Compressor {
     private boolean isDirect;
 
     public SnappyCompressor(PageManager pageManager, int compressionSize) {
-        pages = new LinkedList<PageDescriptor>();
+        pages = new LinkedList<Page>();
         offsets = new LinkedList<Integer>();
         isDirect = true;
         this.compressionSize = compressionSize;
@@ -29,7 +29,7 @@ public class SnappyCompressor implements Compressor {
     }
     
     @Override
-    public synchronized void add(int offset, PageDescriptor page) {
+    public synchronized void add(int offset, Page page) {
         pages.add(page);
         if (isDirect) {
             isDirect = page.isDirect();
@@ -106,7 +106,7 @@ public class SnappyCompressor implements Compressor {
 
         while (total <= compressionSize) {
 
-            PageDescriptor page = pages.get(pageIndex);
+            Page page = pages.get(pageIndex);
             offset = offsets.get(pageIndex);
             int size = page.limit() - offset;
 

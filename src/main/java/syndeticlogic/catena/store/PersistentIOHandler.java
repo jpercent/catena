@@ -41,14 +41,14 @@ public class PersistentIOHandler {
     private Type type;
     private FileChannel channel;
     private PageManager pageManager;
-    private List<PageDescriptor> pages;
+    private List<Page> pages;
     private HashMap<Integer, Long> pageOffsets;
     private ExecutorService pool;
     private String segmentId;
     private int numPages;
 
     public PersistentIOHandler(Type type, FileChannel channel,
-            PageManager pageManager, List<PageDescriptor> pageVector,
+            PageManager pageManager, List<Page> pageVector,
             ExecutorService pool, String segmentId) 
     {
         this.type = type;
@@ -131,7 +131,7 @@ public class PersistentIOHandler {
 
         if (numPages == 0) {
             assert pages.size() == 0;
-            PageDescriptor page = pageManager.pageDescriptor(segmentId);
+            Page page = pageManager.page(segmentId);
             pages.add(page);
             pageOffsets.put(0, (long) HEADER_SIZE);
             return;
@@ -141,7 +141,7 @@ public class PersistentIOHandler {
         boolean emptyVector = (pages.size() == 0 ? true : false);
         Codec coder = Codec.getCodec();
         ByteBuffer size = ByteBuffer.allocate(Type.INTEGER.length());
-        PageDescriptor page = null;
+        Page page = null;
         boolean loadPage = false;
 
         if(log.isTraceEnabled()) log.trace(numPages+"empty vector "+emptyVector);
@@ -156,7 +156,7 @@ public class PersistentIOHandler {
             int compressedPageSize = coder.decodeInteger(size);
             if (emptyVector) {
                 // no numPages are cached. load every single 1 of them
-                page = pageManager.pageDescriptor(segmentId);
+                page = pageManager.page(segmentId);
                 pages.add(page);
                 loadPage = true;
             } else {
@@ -219,7 +219,7 @@ public class PersistentIOHandler {
         int offset = 0;
         int pageSize = pageManager.pageSize();
         Compressor compressor = SegmentManager.get().createCompressor(pageManager, pageSize);
-        PageDescriptor page = null;
+        Page page = null;
         for (int i = dirtyIndex; i < pages.size(); i++) {
             page = pages.get(i);
             compressor.add(offset, page);

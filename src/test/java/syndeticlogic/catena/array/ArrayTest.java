@@ -45,7 +45,7 @@ import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.ArrayGenerator;
 import syndeticlogic.catena.utility.CompositeKey;
 import syndeticlogic.catena.utility.FixedLengthArrayGenerator;
-import syndeticlogic.catena.utility.PropUtility;
+import syndeticlogic.catena.utility.PropertiesUtility;
 import syndeticlogic.catena.utility.Util;
 import syndeticlogic.catena.utility.VariableLengthArrayGenerator;
 
@@ -63,8 +63,8 @@ public class ArrayTest {
 
     @Before
     public void setup() throws Exception {
-        p.setProperty(PropUtility.CONFIG_BASE_DIRECTORY, prefix);
-        p.setProperty(PropUtility.SPLIT_THRESHOLD, "1048676");
+        p.setProperty(PropertiesUtility.CONFIG_BASE_DIRECTORY, prefix);
+        p.setProperty(PropertiesUtility.SPLIT_THRESHOLD, "1048676");
 
         try {
             FileUtils.forceDelete(new File(prefix));

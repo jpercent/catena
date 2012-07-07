@@ -9,11 +9,11 @@ import org.apache.commons.logging.LogFactory;
 public class PageIOHandler {
     protected static final Log log = LogFactory.getLog(PageIOHandler.class);
     private final PageManager pageManager;
-    private final List<PageDescriptor> pages;
+    private final List<Page> pages;
     private final String id;
 
-    private PageDescriptor page;
-    private PageDescriptor endPage;
+    private Page page;
+    private Page endPage;
     private int pageOffset;
     private int endPageOffset;
 
@@ -84,7 +84,7 @@ public class PageIOHandler {
         prepareAppend(buf, bufOffset, size);
 
         if (page.size() == page.limit()) {
-            PageDescriptor newPage = pageManager.pageDescriptor(id);
+            Page newPage = pageManager.page(id);
             pages.add(newPage);
             page = newPage;
             pageOffset = 0;
@@ -99,7 +99,7 @@ public class PageIOHandler {
             if (total < length) {
                 index++;
                 pageOffset = 0;
-                page = pageManager.pageDescriptor(id);
+                page = pageManager.page(id);
                 pages.add(page);
             }
         }
@@ -128,7 +128,7 @@ public class PageIOHandler {
         this.endIndex = -1;
         this.endOffset = loffset + (long) oldlen;
         endIndex = index;
-        PageDescriptor pageIter = page;
+        Page pageIter = page;
         while (endIndex < pages.size()) {
             if (cursor + pageIter.limit() < endOffset) {
                 cursor += pageIter.limit();
@@ -189,7 +189,7 @@ public class PageIOHandler {
     private long setIndexAndPageOffset() {
         long cursor = 0;
 
-        for (PageDescriptor pageIter : pages) {
+        for (Page pageIter : pages) {
             if (cursor + pageIter.limit() < logicalOffset) {
                 cursor += pageIter.limit();
                 index++;
@@ -298,11 +298,11 @@ public class PageIOHandler {
         index++;
         int deadindex = index;
         boolean done = false;
-        List<PageDescriptor> deadpages = new LinkedList<PageDescriptor>();
+        List<Page> deadpages = new LinkedList<Page>();
         
         while (!done) {
             assert deadindex < pages.size();
-            PageDescriptor deadpage = pages.get(deadindex);
+            Page deadpage = pages.get(deadindex);
 
             if ((endPage == deadpage && tail == 0)) {
                 deadpages.add(endPage);
@@ -339,7 +339,7 @@ public class PageIOHandler {
         }
 
         pages.removeAll(deadpages);
-        for (PageDescriptor deadpage : deadpages) {
+        for (Page deadpage : deadpages) {
             pageManager.releasePageDescriptor(deadpage);
         }
     }
@@ -357,7 +357,7 @@ public class PageIOHandler {
             endPage.setLimit(endPageOffset);
         }
         index++;
-        List<PageDescriptor> newPages = new LinkedList<PageDescriptor>();
+        List<Page> newPages = new LinkedList<Page>();
         int iobytes = 0;
         // write the rest of the new object onto new pages
         while (total < length) {
@@ -377,7 +377,7 @@ public class PageIOHandler {
             
             if (total < length) {
                 pageOffset = 0;
-                page = pageManager.pageDescriptor(id);
+                page = pageManager.page(id);
                 newPages.add(page);
             }
         }
@@ -391,7 +391,7 @@ public class PageIOHandler {
         }
 
         if (leftover != null && iobytes < leftover.length) {
-            page = pageManager.pageDescriptor(id);
+            page = pageManager.page(id);
             newPages.add(page);
             iobytes = page.write(leftover, iobytes, 0, leftover.length
                     - iobytes);

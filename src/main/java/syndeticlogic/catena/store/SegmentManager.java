@@ -108,7 +108,7 @@ public class SegmentManager {
         return c;
     }
 
-    public Decompressor createDecompressor(PageDescriptor source,
+    public Decompressor createDecompressor(Page source,
             ByteBuffer target) {
         Decompressor d = null;
         switch (compressionType) {

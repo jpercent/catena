@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Test;
 
 
-import syndeticlogic.catena.store.PageDescriptor;
+import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.utility.FixedLengthArrayGenerator;
 import syndeticlogic.catena.utility.Util;
@@ -28,9 +28,9 @@ public class PageDescriptorTest {
 		gen.generateFileArray();
 		
 		ByteBuffer buf1 = ByteBuffer.allocateDirect(1024);
-		PageDescriptor pdes2 = new PageDescriptor();
-		PageDescriptor pdes1 = new PageDescriptor();
-		PageDescriptor pdes = new PageDescriptor();
+		Page pdes2 = new Page();
+		Page pdes1 = new Page();
+		Page pdes = new Page();
 		
 		pdes2.setDataSegmentId("0");
         pdes1.setDataSegmentId("0");
@@ -50,7 +50,7 @@ public class PageDescriptorTest {
 		assertEquals(1, pdes1.compareTo(pdes));
 		assertEquals(1, pdes2.compareTo(pdes));
 	
-		PriorityQueue<PageDescriptor> p = new PriorityQueue<PageDescriptor>();
+		PriorityQueue<Page> p = new PriorityQueue<Page>();
 		p.add(pdes2);
 		p.add(pdes1);
 		p.add(pdes);
@@ -82,7 +82,7 @@ public class PageDescriptorTest {
 		
 		//PageFactory pageSystemAssembler = new PageFactory(PageFactory.BufferPoolMemoryType.Native, PageFactory.CachingPolicy.PinnableLru);
 		
-		PageDescriptor pdes = new PageDescriptor();
+		Page pdes = new Page();
 		ByteBuffer buf = ByteBuffer.allocateDirect(pageSize);
 		pdes.attachBuffer(buf);
 		FileChannel chan = new RandomAccessFile(filename, "r").getChannel();
@@ -115,7 +115,7 @@ public class PageDescriptorTest {
 		
 		pdes.detachBuffer();
 		
-		PageDescriptor pdes1 = new PageDescriptor();
+		Page pdes1 = new Page();
 		pdes1.attachBuffer(buf);
 		assertEquals(pageSize,buf.capacity());
 		assertEquals(0, buf.position());
@@ -149,7 +149,7 @@ public class PageDescriptorTest {
 		}
 		pdes = null;
 		
-		PageDescriptor pdes2 = new PageDescriptor();
+		Page pdes2 = new Page();
 		pdes2.attachBuffer(buf);
 		
 		assertEquals(pageSize,buf.capacity());
@@ -191,7 +191,7 @@ public class PageDescriptorTest {
 		PageFactory pageFactory = new PageFactory(PageFactory.BufferPoolMemoryType.Native, 
 		        PageFactory.CachingPolicy.PinnableLru, PageFactory.PageDescriptorType.Unsynchronized, 
 		        retryLimit);
-		PageDescriptor pdes = pageFactory.createPageDescriptor();
+		Page pdes = pageFactory.createPageDescriptor();
 		ByteBuffer buf = ByteBuffer.allocateDirect(pageSize);		
 		pdes.attachBuffer(buf);
 		

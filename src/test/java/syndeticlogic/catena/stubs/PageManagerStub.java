@@ -3,13 +3,13 @@ package syndeticlogic.catena.stubs;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import syndeticlogic.catena.store.PageDescriptor;
+import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageManager;
 
 public class PageManagerStub extends PageManager {
 	public int pageSize;
 	public int unreleasedBuffers = 0;
-	public List<PageDescriptor> pages=null;
+	public List<Page> pages=null;
 	public int pageDesc = 0;
 
 	@Override
@@ -17,16 +17,16 @@ public class PageManagerStub extends PageManager {
 	}
 
 	@Override
-	public List<PageDescriptor> getPageSequence(String fileName) {
+	public List<Page> getPageSequence(String fileName) {
 		return pages;
 	}
 
 	@Override
-	public void releasePageSequence(List<PageDescriptor> pageVector) {
+	public void releasePageSequence(List<Page> pageVector) {
 	}
 
 	@Override
-	public PageDescriptor pageDescriptor(String pd) {
+	public Page page(String pd) {
 		pageDesc++;
 		PageDescriptorStub page =  new PageDescriptorStub();
 		page.createdByManager = true;
@@ -34,7 +34,7 @@ public class PageManagerStub extends PageManager {
 	}
 
 	@Override
-	public void releasePageDescriptor(PageDescriptor pagedes) {
+	public void releasePageDescriptor(Page pagedes) {
 	}
 
 	@Override

@@ -1,8 +1,8 @@
 package syndeticlogic.catena.stubs;
 
-import syndeticlogic.catena.store.PageDescriptor;
+import syndeticlogic.catena.store.Page;
 
-public class PageDescriptorStub extends PageDescriptor {
+public class PageDescriptorStub extends Page {
 	
 	public int limit;
 	public byte[] buffer;

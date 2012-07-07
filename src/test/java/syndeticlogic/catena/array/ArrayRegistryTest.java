@@ -18,7 +18,7 @@ import syndeticlogic.catena.store.SegmentManager.CompressionType;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.CompositeKey;
-import syndeticlogic.catena.utility.PropUtility;
+import syndeticlogic.catena.utility.PropertiesUtility;
 
 public class ArrayRegistryTest {
 
@@ -26,8 +26,8 @@ public class ArrayRegistryTest {
 	public void test() throws Exception {
 	    String prefix = null;
 	  try {  
-	      Properties p = PropUtility.load(PropUtility.CONFIG_PROPERTIES);
-	      prefix = p.getProperty(PropUtility.CONFIG_BASE_DIRECTORY);
+	      Properties p = PropertiesUtility.load(PropertiesUtility.CONFIG_PROPERTIES);
+	      prefix = p.getProperty(PropertiesUtility.CONFIG_BASE_DIRECTORY);
 	        
 	      Codec.configureCodec(new TypeFactory());
 		

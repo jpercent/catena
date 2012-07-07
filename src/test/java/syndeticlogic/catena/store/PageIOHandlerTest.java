@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.store.PageDescriptor;
+import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.store.PageIOHandler;
 import syndeticlogic.catena.store.PageManager;
@@ -63,8 +63,8 @@ public class PageIOHandlerTest {
     }
 
     void loadData() {
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         rand.setSeed(42);
         byte[] data = new byte[pageSize];
 
@@ -73,7 +73,7 @@ public class PageIOHandlerTest {
             page.write(data, 0, 0, data.length);
             page.setLimit(data.length);
             ps.add(page);
-            page = pm.pageDescriptor(name);
+            page = pm.page(name);
         }
     }
 
@@ -96,8 +96,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -148,8 +148,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -202,8 +202,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -252,8 +252,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -302,8 +302,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -358,8 +358,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -414,8 +414,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -471,8 +471,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -525,8 +525,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -579,8 +579,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 4;
@@ -633,8 +633,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 3;
@@ -687,8 +687,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 3;
@@ -741,8 +741,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(42);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
 
         int size = page.size() / 3;
@@ -791,8 +791,8 @@ public class PageIOHandlerTest {
     public void testAppend() {
         byte[] data = new byte[pageSize];
         rand.setSeed(42);
-        List<PageDescriptor> pageList = pm.getPageSequence(name);
-        PageDescriptor firstpage = pm.pageDescriptor(name);
+        List<Page> pageList = pm.getPageSequence(name);
+        Page firstpage = pm.page(name);
         pageList.add(firstpage);
         pio = new PageIOHandler(pm, name);
         for (int i = 0; i < pages; i++) {
@@ -881,8 +881,8 @@ public class PageIOHandlerTest {
         pio = new PageIOHandler(pm, name);
         rand.setSeed(seed);
 
-        PageDescriptor page = pm.pageDescriptor(name);
-        List<PageDescriptor> ps = pm.getPageSequence(name);
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
         System.out.println("max" + max);
         for (int i = 0; i < iterations; i++) {

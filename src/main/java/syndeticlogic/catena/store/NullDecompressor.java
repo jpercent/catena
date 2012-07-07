@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 public class NullDecompressor implements Decompressor {
     private ByteBuffer source;
-    private PageDescriptor target;
+    private Page target;
 
-    public NullDecompressor(PageDescriptor target, ByteBuffer source) {
+    public NullDecompressor(Page target, ByteBuffer source) {
         this.target = target;
         this.source = source;
     }

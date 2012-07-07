@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.type.BinaryOperand;
+import syndeticlogic.catena.type.BinaryValue;
 import syndeticlogic.catena.type.Type;
 
 public class OperandTest {
@@ -15,7 +15,7 @@ public class OperandTest {
         byte[] test1 = new byte[2];
         
         test[0] = 0x0;
-        BinaryOperand bin = new BinaryOperand(test, 0, 1);
+        BinaryValue bin = new BinaryValue(test, 0, 1);
         assertEquals(test, bin.data());
         assertEquals(0, bin.offset());
         assertEquals(1, bin.length());

@@ -16,7 +16,7 @@ import syndeticlogic.catena.store.Compressor;
 import syndeticlogic.catena.store.Decompressor;
 import syndeticlogic.catena.store.NullCompressor;
 import syndeticlogic.catena.store.NullDecompressor;
-import syndeticlogic.catena.store.PageDescriptor;
+import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.SnappyCompressor;
 import syndeticlogic.catena.store.SnappyDecompressor;
 import syndeticlogic.catena.utility.ArrayGenerator;
@@ -49,7 +49,7 @@ public class CompressorDecompressorTest {
         else
             bcompressor = new NullCompressor(pageManager, pageSize);
 
-        PageDescriptor page = new PageDescriptor();
+        Page page = new Page();
         page.attachBuffer(ByteBuffer.allocateDirect(pageSize));
         page.write(array.get(0), 0, 0, pageSize);
         bcompressor.add(0, page);
@@ -109,8 +109,8 @@ public class CompressorDecompressorTest {
         else
             bcompressor = new NullCompressor(pageManager, pageSize);
 
-        PageDescriptor page = new PageDescriptor();
-        PageDescriptor page1 = new PageDescriptor();
+        Page page = new Page();
+        Page page1 = new Page();
 
         page.attachBuffer(ByteBuffer.allocateDirect(pageSize));
         page1.attachBuffer(ByteBuffer.allocateDirect(pageSize));
@@ -163,8 +163,8 @@ public class CompressorDecompressorTest {
         else
             bcompressor = new NullCompressor(pageManager, pageSize);
 
-        PageDescriptor page = new PageDescriptor();
-        PageDescriptor page1 = new PageDescriptor();
+        Page page = new Page();
+        Page page1 = new Page();
 
         page.attachBuffer(ByteBuffer.allocateDirect(pageSize));
         page1.attachBuffer(ByteBuffer.allocateDirect(pageSize));
@@ -206,8 +206,8 @@ public class CompressorDecompressorTest {
         SnappyCompressor bcompressor = new SnappyCompressor(pageManager,
                 pageSize);
 
-        PageDescriptor page = new PageDescriptor();
-        PageDescriptor page1 = new PageDescriptor();
+        Page page = new Page();
+        Page page1 = new Page();
 
         page.attachBuffer(ByteBuffer.allocateDirect(pageSize));
         page1.attachBuffer(ByteBuffer.allocateDirect(pageSize));

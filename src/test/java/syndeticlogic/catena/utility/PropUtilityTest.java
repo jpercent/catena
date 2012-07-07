@@ -7,14 +7,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.utility.PropUtility;
+import syndeticlogic.catena.utility.PropertiesUtility;
 
 public class PropUtilityTest {
 
     @Test
     public void setUp() throws Exception {
-        Properties p = PropUtility.load(PropUtility.CONFIG_PROPERTIES);
-        String prefix = p.getProperty(PropUtility.CONFIG_BASE_DIRECTORY);
+        Properties p = PropertiesUtility.load(PropertiesUtility.CONFIG_PROPERTIES);
+        String prefix = p.getProperty(PropertiesUtility.CONFIG_BASE_DIRECTORY);
         assertEquals("target/arrays/", prefix);
     }
 
