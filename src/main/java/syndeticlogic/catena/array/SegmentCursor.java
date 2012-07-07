@@ -9,10 +9,10 @@ public class SegmentCursor {
     private int offset;
     private LockType lockType;
 
-    public void configure(Segment segment, int offset, LockType lt) {
+    public void configure(Segment segment, int offset, LockType lockType) {
         this.segment = segment;
         this.offset = offset;
-        this.lockType = lt;
+        this.lockType = lockType;
     }
     
     public void reconfigure(Segment segment, int offset) {

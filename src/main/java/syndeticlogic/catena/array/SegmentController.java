@@ -18,8 +18,8 @@ public class SegmentController {
         this.arrayDesc = arrayDesc;
     }
 
-    public void findAndLockSegment(SegmentCursor sc, LockType lt, long offset) {
-        assert sc != null && lt != null && offset >= 0;
+    public void findAndLockSegment(SegmentCursor segmentCursor, LockType lockType, long offset) {
+        assert segmentCursor != null && lockType != null && offset >= 0;
         arrayDesc.acquire();
         try {
             
@@ -27,47 +27,47 @@ public class SegmentController {
             assert segments != null;
             Iterator<Segment> iterator = segments.iterator();
 
-            Segment s = null;
+            Segment segment = null;
             long current = 0;
             while (iterator.hasNext()) {
-                s = iterator.next();
-                assert s != null;
-                if (current + s.size() > offset)
+                segment = iterator.next();
+                assert segment != null;
+                if (current + segment.size() > offset)
                     break;
-                current += s.size();
+                current += segment.size();
             }
-            assert s != null;
-            if (current + s.size() < offset) {
+            assert segment != null;
+            if (current + segment.size() < offset) {
                 return;
             }
 
             assert offset - current < Integer.MAX_VALUE;
             int localOffset = (int) (offset - current);
-            lockSegment(s, lt);
-            sc.configure(s, localOffset, lt);
+            lockSegment(segment, lockType);
+            segmentCursor.configure(segment, localOffset, lockType);
 
         } finally {
             arrayDesc.release();
         }
     }
 
-    public boolean unlockAndLockNextSegment(SegmentCursor sc) {
+    public boolean unlockAndLockNextSegment(SegmentCursor segmentCursor) {
         boolean found = false;
         arrayDesc.acquire();
         try {
             Collection<Segment> segments = arrayDesc.segments();
             boolean next = false;
 
-            for (Segment seg : segments) {
+            for (Segment segment : segments) {
                 if (next) {
-                    lockSegment(seg, sc.lockType());
-                    unlockSegment(sc.segment(), sc.lockType());
-                    sc.reconfigure(seg, 0);
+                    lockSegment(segment, segmentCursor.lockType());
+                    unlockSegment(segmentCursor.segment(), segmentCursor.lockType());
+                    segmentCursor.reconfigure(segment, 0);
                     found = true;
                     break;
                 }
 
-                if (seg == sc.segment()) {
+                if (segment == segmentCursor.segment()) {
                     next = true;
                 }
             }
@@ -76,44 +76,44 @@ public class SegmentController {
         }
         
         if(!found) {
-            unlockSegment(sc.segment(), sc.lockType());
-            sc.configure(null, -1, null);
+            unlockSegment(segmentCursor.segment(), segmentCursor.lockType());
+            segmentCursor.configure(null, -1, null);
         }
         
         return found;
     }
 
-    public void unlockSegment(SegmentCursor sc, LockType lt) {
-        unlockSegment(sc.segment(), lt);
-        sc.configure(null, 0, null);
+    public void unlockSegment(SegmentCursor segmentCursor, LockType lockType) {
+        unlockSegment(segmentCursor.segment(), lockType);
+        segmentCursor.configure(null, 0, null);
     }
 
-    private void lockSegment(Segment s, LockType lt) {
-        switch (lt) {
+    private void lockSegment(Segment segment, LockType lockType) {
+        switch (lockType) {
         case ReadLock:
             if(log.isTraceEnabled()) 
                 log.trace(arrayDesc.id() + "blocking on write-lock for segment ");
-            s.acquireReadLock();
+            segment.acquireReadLock();
             break;
         case WriteLock:
             if(log.isTraceEnabled()) 
                 log.trace(arrayDesc.id() + "blocking on write-lock for segment ");
-            s.acquireWriteLock();
+            segment.acquireWriteLock();
             break;
         }
     }
 
-    private void unlockSegment(Segment s, LockType lt) {
-        switch (lt) {
+    private void unlockSegment(Segment segment, LockType lockType) {
+        switch (lockType) {
         case ReadLock:
             if(log.isTraceEnabled()) 
                 log.trace(arrayDesc.id() + "releasing read-lock on segment ");
-            s.releaseReadLock();
+            segment.releaseReadLock();
             break;
         case WriteLock:
             if(log.isTraceEnabled()) 
                 log.trace(arrayDesc.id() + "releaseing write-lock on segment ");
-            s.releaseWriteLock();
+            segment.releaseWriteLock();
             break;
         }
     }
