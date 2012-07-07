@@ -3,10 +3,10 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class StringOperand extends Operand {
+public class StringValue extends Value {
 	private String data;
     
-    public StringOperand(byte[] data, int offset, int length) {
+    public StringValue(byte[] data, int offset, int length) {
         super(data, offset, length);
         this.data = new String(data, offset, length);
     }

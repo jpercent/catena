@@ -3,15 +3,15 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class FloatOperand extends Operand {
+public class FloatValue extends Value {
 	private float decoded;
 	
-    public FloatOperand(int data) {
+    public FloatValue(int data) {
         super(null,0,0);
         this.decoded = data;
     }
 	
-    public FloatOperand(byte[] data, int offset) {
+    public FloatValue(byte[] data, int offset) {
         super(data, offset, Type.FLOAT.length());
         assert data.length - offset >= Type.FLOAT.length();
         this.decoded = Codec.getCodec().decodeFloat(data, offset);

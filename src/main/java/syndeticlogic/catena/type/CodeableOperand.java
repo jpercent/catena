@@ -3,7 +3,7 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class CodeableOperand extends Operand {
+public class CodeableOperand extends Value {
 	private boolean data;
 	
     CodeableOperand(byte[] data, int offset, int length) {

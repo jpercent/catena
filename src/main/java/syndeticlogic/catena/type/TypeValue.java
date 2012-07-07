@@ -3,11 +3,11 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class TypeOperand extends Operand {
+public class TypeValue extends Value {
 	private Type data;
 	
     
-    public TypeOperand(byte[] data, int offset) {
+    public TypeValue(byte[] data, int offset) {
         super(data, offset, Type.TYPE.length());
         this.data = Codec.getCodec().decodeCodecType(data, offset);
     }

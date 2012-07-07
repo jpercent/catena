@@ -3,15 +3,15 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class BooleanOperand extends Operand {
+public class BooleanValue extends Value {
 	private boolean decoded;
 	
-    public BooleanOperand(boolean data) {
+    public BooleanValue(boolean data) {
         super(null, 0, 0);
         decoded = data;
     }
 	
-    public BooleanOperand(byte[] data, int offset) {
+    public BooleanValue(byte[] data, int offset) {
         super(data, offset, Type.BOOLEAN.length());
         assert data.length - offset >= Type.BOOLEAN.length();
         this.decoded = Codec.getCodec().decodeBoolean(data, offset);

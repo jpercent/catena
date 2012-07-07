@@ -3,15 +3,15 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class ShortOperand extends Operand {
+public class ShortValue extends Value {
 	private short decoded;
 	
-	public ShortOperand(short data) {
+	public ShortValue(short data) {
 	    super(null,0,0);
 	    decoded = data;
 	}
 	
-    public ShortOperand(byte[] data, int offset) {
+    public ShortValue(byte[] data, int offset) {
         super(data, offset, Type.SHORT.length());
         assert data.length - offset >= length();
         this.decoded = Codec.getCodec().decodeShort(data, offset);

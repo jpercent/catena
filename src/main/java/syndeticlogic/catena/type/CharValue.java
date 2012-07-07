@@ -3,15 +3,15 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class CharOperand extends Operand {
+public class CharValue extends Value {
 	private char decoded;
 	
-	public CharOperand(char data) {
+	public CharValue(char data) {
 	    super(null, 0, 0);
 	    decoded = data;
 	}
 	
-    public CharOperand(byte[] data, int offset) {
+    public CharValue(byte[] data, int offset) {
         super(data, offset, Type.CHAR.length());
         assert data.length - offset >= Type.CHAR.length();
         this.decoded = Codec.getCodec().decodeChar(data, offset);

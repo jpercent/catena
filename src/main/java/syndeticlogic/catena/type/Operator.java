@@ -4,7 +4,7 @@ package syndeticlogic.catena.type;
 public enum Operator {
     LESS_THAN {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) == -1) {
                 ret = true;
@@ -15,7 +15,7 @@ public enum Operator {
     
     LESS_THAN_EQUAL {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) == 0) {
                 ret = true;
@@ -28,7 +28,7 @@ public enum Operator {
     
     EQUALS {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) == 0) {
                 ret = true;
@@ -39,7 +39,7 @@ public enum Operator {
     
     NOT_EQUALS {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) != 0) {
                 ret = true;
@@ -50,7 +50,7 @@ public enum Operator {
     
     GREATER_THAN_EQUAL {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) == 0) {
                 ret = true;
@@ -63,7 +63,7 @@ public enum Operator {
     
     GREATER_THAN {
         @Override
-        public boolean satisfies(Operand op, byte[] rawdata, int offset, int length) {
+        public boolean satisfies(Value op, byte[] rawdata, int offset, int length) {
             boolean ret = false;
             if (op.compareTo(rawdata, offset, length) == 1) {
                 ret = true;
@@ -72,5 +72,5 @@ public enum Operator {
         }
     };
 
-    abstract boolean satisfies(Operand op, byte[] rawData, int offset, int length);
+    abstract boolean satisfies(Value op, byte[] rawData, int offset, int length);
 }

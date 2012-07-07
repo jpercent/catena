@@ -6,7 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import syndeticlogic.memento.Pinnable;
 import syndeticlogic.catena.codec.CodeHelper;
 import syndeticlogic.catena.codec.Codec;
-import syndeticlogic.catena.type.Operand;
+import syndeticlogic.catena.type.Value;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.ThreadSafe;
 
@@ -27,8 +27,8 @@ public class Segment implements Pinnable {
     private static final Log log = LogFactory.getLog(Segment.class);
 
     private String fileName;
-    private Operand largest;
-    private Operand smallest;
+    private Value largest;
+    private Value smallest;
     private PageManager pageManager;
     private PersistentIOHandler ioHandler;
     private ReadWriteLock rwlock;
@@ -173,22 +173,22 @@ public class Segment implements Pinnable {
     }
 
     
-    public synchronized Operand getSmallest() {
+    public synchronized Value getSmallest() {
         return smallest;
     }
 
     
-    public synchronized void setSmallest(Operand smallest) {
+    public synchronized void setSmallest(Value smallest) {
         this.smallest = smallest;
     }
 
     
-    public synchronized Operand getLargest() {
+    public synchronized Value getLargest() {
         return largest;
     }
 
     
-    public synchronized void setLargest(Operand largest) {
+    public synchronized void setLargest(Value largest) {
         this.largest = largest;
     }
     

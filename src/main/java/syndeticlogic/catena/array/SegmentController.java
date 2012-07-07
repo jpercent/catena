@@ -12,18 +12,18 @@ import syndeticlogic.catena.array.Array.LockType;
 public class SegmentController {
 
     private static final Log log = LogFactory.getLog(SegmentController.class);
-    private ArrayDescriptor arrayDesc;
+    private ArrayDescriptor arrayDescriptor;
 
     public SegmentController(ArrayDescriptor arrayDesc) {
-        this.arrayDesc = arrayDesc;
+        this.arrayDescriptor = arrayDesc;
     }
 
     public void findAndLockSegment(SegmentCursor segmentCursor, LockType lockType, long offset) {
         assert segmentCursor != null && lockType != null && offset >= 0;
-        arrayDesc.acquire();
+        arrayDescriptor.acquire();
         try {
             
-            Collection<Segment> segments = arrayDesc.segments();
+            Collection<Segment> segments = arrayDescriptor.segments();
             assert segments != null;
             Iterator<Segment> iterator = segments.iterator();
 
@@ -47,15 +47,15 @@ public class SegmentController {
             segmentCursor.configure(segment, localOffset, lockType);
 
         } finally {
-            arrayDesc.release();
+            arrayDescriptor.release();
         }
     }
 
     public boolean unlockAndLockNextSegment(SegmentCursor segmentCursor) {
         boolean found = false;
-        arrayDesc.acquire();
+        arrayDescriptor.acquire();
         try {
-            Collection<Segment> segments = arrayDesc.segments();
+            Collection<Segment> segments = arrayDescriptor.segments();
             boolean next = false;
 
             for (Segment segment : segments) {
@@ -72,7 +72,7 @@ public class SegmentController {
                 }
             }
         } finally {
-            arrayDesc.release();
+            arrayDescriptor.release();
         }
         
         if(!found) {
@@ -92,12 +92,12 @@ public class SegmentController {
         switch (lockType) {
         case ReadLock:
             if(log.isTraceEnabled()) 
-                log.trace(arrayDesc.id() + "blocking on write-lock for segment ");
+                log.trace(arrayDescriptor.id() + "blocking on write-lock for segment ");
             segment.acquireReadLock();
             break;
         case WriteLock:
             if(log.isTraceEnabled()) 
-                log.trace(arrayDesc.id() + "blocking on write-lock for segment ");
+                log.trace(arrayDescriptor.id() + "blocking on write-lock for segment ");
             segment.acquireWriteLock();
             break;
         }
@@ -107,12 +107,12 @@ public class SegmentController {
         switch (lockType) {
         case ReadLock:
             if(log.isTraceEnabled()) 
-                log.trace(arrayDesc.id() + "releasing read-lock on segment ");
+                log.trace(arrayDescriptor.id() + "releasing read-lock on segment ");
             segment.releaseReadLock();
             break;
         case WriteLock:
             if(log.isTraceEnabled()) 
-                log.trace(arrayDesc.id() + "releaseing write-lock on segment ");
+                log.trace(arrayDescriptor.id() + "releaseing write-lock on segment ");
             segment.releaseWriteLock();
             break;
         }

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import syndeticlogic.catena.type.Format;
 
 import static syndeticlogic.catena.utility.KeyElement.BYTE_TYPE;
 import static syndeticlogic.catena.utility.KeyElement.INT_TYPE;

@@ -1,9 +1,8 @@
 package syndeticlogic.catena.type;
 
+public class BinaryValue extends Value {
 
-public class BinaryOperand extends Operand {
-
-	public BinaryOperand(byte[] data, int offset, int length) {
+	public BinaryValue(byte[] data, int offset, int length) {
 	    super(data, offset, length);
 	}
 	

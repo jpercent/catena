@@ -2,13 +2,13 @@ package syndeticlogic.catena.type;
 
 import syndeticlogic.catena.type.Type;
 
-public abstract class Operand {
+public abstract class Value {
     
     protected byte[] data;
     protected int offset;
     protected int length;
     
-    public Operand(byte[] data, int offset, int length) {
+    public Value(byte[] data, int offset, int length) {
         reset(data, offset, length);
     }
     

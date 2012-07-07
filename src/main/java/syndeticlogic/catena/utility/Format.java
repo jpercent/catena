@@ -18,7 +18,7 @@
 /**
  * 
  */
-package syndeticlogic.catena.type;
+package syndeticlogic.catena.utility;
 
 public class Format {
    

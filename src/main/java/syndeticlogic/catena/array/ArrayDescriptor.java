@@ -46,17 +46,17 @@ public class ArrayDescriptor {
     private final int typeSize;
     private final ReentrantLock lock;
     
-    public static class Value {
+    public static class ValueDescriptor {
         public CompositeKey segmentId;
         public int segmentOffset;
         public long byteOffset;
         public int index;
         public int valueSize;
 
-        public Value() {
+        public ValueDescriptor() {
         }
 
-        public Value(CompositeKey segmentId, int segmentOffset, 
+        public ValueDescriptor(CompositeKey segmentId, int segmentOffset, 
                 long byteOffset, int index, int size) {
             this.segmentId = segmentId;
             this.segmentOffset = segmentOffset;
@@ -225,21 +225,21 @@ public class ArrayDescriptor {
 	    // not sure this function makes any sense any more
         boolean ret = true;
         long size = 0;
-        Value value = null;
+        ValueDescriptor valueDescriptor = null;
 
         for(int index=0; index < length; index++) {
 	        //eDesc = valueIndex.find(index);
-            value = find(index);
-	        if(value == null) {
+            valueDescriptor = find(index);
+	        if(valueDescriptor == null) {
 	            log.error("checkIntegrity failed - less elements than expected");
 	            ret = false;
 	            break;
 	        }
 	        
-	        size += value.valueSize;
+	        size += valueDescriptor.valueSize;
 	        if(index+1 == length) {
-	            value = find(index+1);
-	            if(value != null) {
+	            valueDescriptor = find(index+1);
+	            if(valueDescriptor != null) {
 	                log.error("checkIntegrity failed - more elements than expected ");//index ="+index+" length = "+length);
 	                ret = false;
 	            }
@@ -261,12 +261,12 @@ public class ArrayDescriptor {
         }
     }
 
-    public synchronized Value find(int index) {
+    public synchronized ValueDescriptor find(int index) {
         if(index >= length) {
             return null;
         }
         
-        Value value = configureValue(index);
+        ValueDescriptor valueDescriptor = configureValue(index);
         long current = 0;
         long previousEnd = 0;
         // XXX segment lock here?
@@ -276,16 +276,16 @@ public class ArrayDescriptor {
                 Segment segment = iter.getValue();
                 previousEnd = current;
                 current += segment.size();
-                if (current > value.byteOffset) {
-                    int offset = (int) (value.byteOffset - previousEnd);
-                    value.segmentId = iter.getKey();
-                    value.segmentOffset = offset;
+                if (current > valueDescriptor.byteOffset) {
+                    int offset = (int) (valueDescriptor.byteOffset - previousEnd);
+                    valueDescriptor.segmentId = iter.getKey();
+                    valueDescriptor.segmentOffset = offset;
                 }
             }
         } finally {
             release();
         }
-        return value;
+        return valueDescriptor;
     }
     
     public synchronized int update(int index, int size) {
@@ -321,13 +321,13 @@ public class ArrayDescriptor {
         return ret;
     }
 
-    private Value configureValue(int index) {
+    private ValueDescriptor configureValue(int index) {
         if(typeSize != -1) {
             System.out.println("typesize = "+typeSize+" index "+index);
-            return  new Value(null, -1, index * typeSize, index, typeSize);
+            return  new ValueDescriptor(null, -1, index * typeSize, index, typeSize);
         }
         
-        Value v = new Value();
+        ValueDescriptor v = new ValueDescriptor();
         v.index = index;
 
         long pos = 0;

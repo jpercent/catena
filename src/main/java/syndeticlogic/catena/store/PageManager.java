@@ -41,8 +41,9 @@ public class PageManager {
         retryLimit = 2;
     }
 
-    public PageManager(PageFactory factory, Observer observer, HashMap<String, List<PageDescriptor>> pageSequences, 
-            ConcurrentLinkedQueue<ByteBuffer> freelist, int pageSize, int retryLimit) {
+    public PageManager(PageFactory factory, Observer observer, HashMap<String, 
+            List<PageDescriptor>> pageSequences, ConcurrentLinkedQueue<ByteBuffer> freelist, 
+            int pageSize, int retryLimit) {
         this.factory = factory;
         this.observer = observer;
         this.freelist = freelist;

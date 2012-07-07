@@ -3,10 +3,10 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.codec.Codec;
 
 
-public class ByteOperand extends Operand {
+public class ByteValue extends Value {
 	private byte decoded;
 	
-    ByteOperand(byte[] data, int offset) {
+    ByteValue(byte[] data, int offset) {
         super(data, offset, Type.BYTE.length());
         assert data.length - offset >= Type.BYTE.length();
         this.decoded = Codec.getCodec().decodeByte(data, offset);

@@ -69,6 +69,8 @@ public class Array {
         return (index == arrayDesc.length() ? false : true);
     }
 
+    
+    
     public ScanDescriptor scan(int n, byte[] buffer, int offset) {
         if (!configured) {
             return null;

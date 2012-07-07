@@ -18,7 +18,6 @@
 package syndeticlogic.catena.utility;
 import java.util.Arrays;
 
-import syndeticlogic.catena.type.Format;
 
 public class KeyElement implements Comparable<KeyElement> {
     

@@ -2,14 +2,14 @@ package syndeticlogic.catena.type;
 
 public class AtomicPredicate implements Predicate {
     private Operator operator;
-    private Operand operand;
+    private Value value;
     
-    public AtomicPredicate(Operator operator, Operand operand) {
+    public AtomicPredicate(Operator operator, Value value) {
         this.operator = operator;
-        this.operand = operand;
+        this.value = value;
     }
 
     public boolean satisfies(byte[] raw, int offset, int length) {
-        return operator.satisfies(operand, raw, offset, length);
+        return operator.satisfies(value, raw, offset, length);
     }
 }

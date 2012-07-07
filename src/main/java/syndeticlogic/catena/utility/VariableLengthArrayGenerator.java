@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-import syndeticlogic.catena.type.Format;
 
 public class VariableLengthArrayGenerator implements ArrayGenerator {
     
