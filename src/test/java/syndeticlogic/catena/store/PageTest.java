@@ -15,7 +15,7 @@ import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.utility.FixedLengthArrayGenerator;
 import syndeticlogic.catena.utility.Util;
 
-public class PageDescriptorTest {
+public class PageTest {
 	@Test
 	public void testEqualsCompareTo() throws Exception {
 	/*	String filename = Util.prefixToPath("target") + "pagedescriptortest";
