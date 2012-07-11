@@ -288,6 +288,43 @@ public class ArrayDescriptor {
         return valueDescriptor;
     }
     
+    public int valueSize(int index) {
+        if(index >= length) {
+            return -1;
+        } else if(typeSize != -1) {
+            return typeSize;
+        } else {
+            return sizes.get(index);
+        }
+    }
+    
+    private ValueDescriptor configureValue(int index) {
+        if(typeSize != -1) {
+            System.out.println("typesize = "+typeSize+" index "+index);
+            return  new ValueDescriptor(null, -1, index * typeSize, index, typeSize);
+        }
+        
+        ValueDescriptor v = new ValueDescriptor();
+        v.index = index;
+
+        long pos = 0;
+        Iterator<Integer> i = sizes.iterator();
+        Integer value = null;
+
+        do {
+            assert i.hasNext();
+            // throw new
+            // RuntimeException("Index given is out of range of what is actually stored; index = "+index+" pos = "+pos);
+            value = i.next();
+            v.byteOffset += value.intValue();
+            pos++;
+        } while (pos < index);
+        assert value != null;
+
+        v.valueSize = value.intValue();
+        return v;
+    }
+    
     public synchronized int update(int index, int size) {
         int ret = typeSize;
         if(typeSize == -1) {
@@ -320,34 +357,6 @@ public class ArrayDescriptor {
         arraySize -= ret;
         return ret;
     }
-
-    private ValueDescriptor configureValue(int index) {
-        if(typeSize != -1) {
-            System.out.println("typesize = "+typeSize+" index "+index);
-            return  new ValueDescriptor(null, -1, index * typeSize, index, typeSize);
-        }
-        
-        ValueDescriptor v = new ValueDescriptor();
-        v.index = index;
-
-        long pos = 0;
-        Iterator<Integer> i = sizes.iterator();
-        Integer value = null;
-
-        do {
-            assert i.hasNext();
-            // throw new
-            // RuntimeException("Index given is out of range of what is actually stored; index = "+index+" pos = "+pos);
-            value = i.next();
-            v.byteOffset += value.intValue();
-            pos++;
-        } while (pos < index);
-        assert value != null;
-
-        v.valueSize = value.intValue();
-        return v;
-    }
-    
     
     public synchronized void persist() {
         byte[] serialized = ArrayDescriptor.encode(this);
