@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.CompositeKey;
-import syndeticlogic.catena.utility.PropUtility;
+import syndeticlogic.catena.utility.PropertiesUtility;
 
 public class ArrayRegistry {
     private static final Log log = LogFactory.getLog(ArrayRegistry.class);
@@ -22,8 +22,8 @@ public class ArrayRegistry {
 	
 	public ArrayRegistry(Properties config) {
 	    arrays = new HashMap<CompositeKey, ArrayDescriptor>();
-		String baseDirectoryPath = config.getProperty(PropUtility.CONFIG_BASE_DIRECTORY);
-		splitThreshold = new Integer(config.getProperty(PropUtility.SPLIT_THRESHOLD)).intValue();
+		String baseDirectoryPath = config.getProperty(PropertiesUtility.CONFIG_BASE_DIRECTORY);
+		splitThreshold = new Integer(config.getProperty(PropertiesUtility.SPLIT_THRESHOLD)).intValue();
 		createBaseDirectory(baseDirectoryPath); 
 		loadDescriptors(baseDirectoryPath);
 	}
