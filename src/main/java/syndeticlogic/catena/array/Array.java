@@ -16,9 +16,12 @@
  */
 package syndeticlogic.catena.array;
 
+import java.util.LinkedList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import syndeticlogic.catena.type.Predicate;
+
+import syndeticlogic.catena.predicate.Predicate;
 import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.utility.Transaction;
 
@@ -28,30 +31,34 @@ import syndeticlogic.catena.array.SegmentCursor;
  * @author <a href="mailto:james@empty-set.net">James Percent</a>
  */
 public class Array {
+
     public enum LockType {
         ReadLock, WriteLock
-    };
-
+    };   
     private static final Log log = LogFactory.getLog(Array.class);
-    private ArrayDescriptor arrayDesc;
-    private SegmentController sctrl;
-    private SegmentCursor cursor;
+    private ArrayDescriptor arrayDescriptor;
+    private SegmentController segmentController;
+    private SegmentCursor segmentCursor;
     private int index;
     private boolean configured;
-
-    Array(ArrayDescriptor desc, SegmentController sctrl) {
-        assert desc != null;
-        this.arrayDesc = desc;
-        this.sctrl = sctrl;
+    
+    Array(ArrayDescriptor descriptor, SegmentController segmentController) {
+        assert descriptor != null;
+        this.arrayDescriptor = descriptor;
+        this.segmentController = segmentController;
         this.index = 0;
-        this.cursor = new SegmentCursor();
+        this.segmentCursor = new SegmentCursor();
     }
 
     public ArrayDescriptor descriptor() {
-        return arrayDesc;
+        return arrayDescriptor;
     }
 
     public void configure(Predicate p, Transaction t) {
+        configured = true;
+    }
+    public IODescriptor createIODescriptor(byte[] buffer, int offset) {
+        return new IODescriptor(arrayDescriptor, index, buffer, offset);
     }
 
     public long position() {
@@ -60,45 +67,38 @@ public class Array {
 
     public void position(int position, LockType lt) {
         long offset = convertIndexToOffset(position);
-        sctrl.findAndLockSegment(cursor, lt, offset);
+        segmentController.findAndLockSegment(segmentCursor, lt, offset);
         index = position;
         configured = true;
     }
 
     public boolean hasMore() {
-        return (index == arrayDesc.length() ? false : true);
+        return (index == arrayDescriptor.length() ? false : true);
     }
 
-    
-    
-    public ScanDescriptor scan(int n, byte[] buffer, int offset) {
-        if (!configured) {
-            return null;
-        }
-
-        if (log.isTraceEnabled()) {
-            log.debug("pos=" + index);
-        }
-
-        ScanDescriptor scandes = new ScanDescriptor(arrayDesc, n);
-        int size = buffer.length - offset;
+    public IODescriptor scan(IODescriptor ioDescriptor) {
+        if (!configured) { return null; }
+        if (log.isTraceEnabled()) { log.debug("pos=" + index); }
+        
+        int size = ioDescriptor.ioSize();
+        int offset = ioDescriptor.offset();
         int accumulation = 0;
         boolean moreToScan = true;
 
-        while (scandes.elements() < n && accumulation < size && moreToScan) {
-            int scanSize = scandes.recordElementsScanned(cursor);
-            int scanned = cursor.scan(buffer, offset, scanSize);
+        while (accumulation < size && moreToScan) {
+            int scanSize = ioDescriptor.recordValuesScanned(segmentCursor);
+            int scanned = segmentCursor.scan(ioDescriptor.buffer(), offset, scanSize);
             assert scanSize == scanned;
             accumulation += scanned;
             offset += scanned;
 
             if (accumulation < size) {
-                moreToScan = sctrl.unlockAndLockNextSegment(cursor);
+                moreToScan = segmentController.unlockAndLockNextSegment(segmentCursor);
             }
         }
 
-        if (moreToScan && cursor.scanned()) {
-            moreToScan = sctrl.unlockAndLockNextSegment(cursor);
+        if (moreToScan && segmentCursor.scanned()) {
+            moreToScan = segmentController.unlockAndLockNextSegment(segmentCursor);
         }
 
         if (!moreToScan) {
@@ -106,88 +106,87 @@ public class Array {
             // complete(Array.LockType.ReadLock);
         }
 
-        index += scandes.elements();
-        return scandes;
+        index += ioDescriptor.valuesScanned();
+        return ioDescriptor;
     }
 
     public void updateScan(byte[] buffer, int offset) {
-        assert arrayDesc.isFixedLength();
-        update(buffer, offset, arrayDesc.typeSize());
+        assert arrayDescriptor.isFixedLength();
+        update(buffer, offset, arrayDescriptor.typeSize());
         throw new RuntimeException("Not supported");
     }
 
     public void updateScan(byte[] buffer, int offset, int size) {
         assert configured;
-        int oldSize = arrayDesc.update(index, size);
-        cursor.update(buffer, offset, oldSize, size);
+        int oldSize = arrayDescriptor.update(index, size);
+        segmentCursor.update(buffer, offset, oldSize, size);
         throw new RuntimeException("Not supported");
         // complete(LockType.WriteLock);
     }
 
     public void update(byte[] buffer, int offset) {
-        assert arrayDesc.isFixedLength();
-        update(buffer, offset, arrayDesc.typeSize());
+        assert arrayDescriptor.isFixedLength();
+        update(buffer, offset, arrayDescriptor.typeSize());
     }
 
     public void update(byte[] buffer, int offset, int size) {
         assert configured;
-        int oldSize = arrayDesc.update(index, size);
-        cursor.update(buffer, offset, oldSize, size);
+        int oldSize = arrayDescriptor.update(index, size);
+        segmentCursor.update(buffer, offset, oldSize, size);
         // complete(LockType.WriteLock);
     }
 
     public void append(byte[] buffer, int offset) {
-        assert arrayDesc.isFixedLength();
-        append(buffer, offset, arrayDesc.typeSize());
+        assert arrayDescriptor.isFixedLength();
+        append(buffer, offset, arrayDescriptor.typeSize());
     }
 
     public void append(byte[] buffer, int offset, int size) {
         assert buffer.length - offset >= size && size > 0;
-        arrayDesc.acquire();
+        arrayDescriptor.acquire();
         try {
-            arrayDesc.append(size);
-            position(arrayDesc.length() - 1, LockType.WriteLock);
+            arrayDescriptor.append(size);
+            position(arrayDescriptor.length() - 1, LockType.WriteLock);
         } finally {
-            arrayDesc.release();
+            arrayDescriptor.release();
         }
-        cursor.append(buffer, offset, size);
+        segmentCursor.append(buffer, offset, size);
         complete(LockType.WriteLock);
     }
 
     public void deleteScan() {
         
-        int size = arrayDesc.delete(index);
-        cursor.delete(size);
+        int size = arrayDescriptor.delete(index);
+        segmentCursor.delete(size);
         throw new RuntimeException("Not supported");
         // complete(LockType.WriteLock);
     }
 
     public void delete() {
-        int size = arrayDesc.delete(index);
-        cursor.delete(size);
+        int size = arrayDescriptor.delete(index);
+        segmentCursor.delete(size);
         // complete(LockType.WriteLock);
     }
 
     public void complete(LockType lt) {
         if (configured) {
-            sctrl.unlockSegment(cursor, lt);
+            segmentController.unlockSegment(segmentCursor, lt);
             configured = false;
         }
     }
 
     public void commit() {
-        arrayDesc.acquire();
-
-        for (Segment s : arrayDesc.segments()) {
+        arrayDescriptor.acquire();
+        for (Segment s : arrayDescriptor.segments()) {
             s.commit();
         }
-        arrayDesc.persist();
-        arrayDesc.release();
+        arrayDescriptor.persist();
+        arrayDescriptor.release();
     }
 
     private long convertIndexToOffset(long index) throws IndexOutOfBoundsException {
-        if (arrayDesc.isFixedLength()) {
-            return index * arrayDesc.typeSize();
+        if (arrayDescriptor.isFixedLength()) {
+            return index * arrayDescriptor.typeSize();
         } else {
             throw new RuntimeException("unsupported");
         }

@@ -114,10 +114,11 @@ public class ArrayTest {
 
         buf = new byte[12];
         array.position(0, Array.LockType.ReadLock);
-        ScanDescriptor sdesc = array.scan(3, buf, 0);
+        
+        IODescriptor sdesc = array.scan(array.createIODescriptor(buf, 0));
         array.complete(Array.LockType.ReadLock);
 
-        assertEquals(3, sdesc.elements());
+        assertEquals(3, sdesc.valuesScanned());
         assertEquals(4, sdesc.size(0));
         assertEquals(4, sdesc.size(1));
         assertEquals(4, sdesc.size(2));
@@ -132,11 +133,11 @@ public class ArrayTest {
         Codec.getCodec().encode(1023, buf, 4);
         array.position(2, Array.LockType.WriteLock);
         array.update(buf, 4);
-        sdesc = array.scan(1, buf, 8);
+        sdesc = array.scan(array.createIODescriptor(buf, 8));
 
         third = Codec.getCodec().decodeInteger(buf, 8);
 
-        assertEquals(1, sdesc.elements());
+        assertEquals(1, sdesc.valuesScanned());
         assertEquals(4, sdesc.size(0));
         assertEquals(1023, third);
         array.complete(Array.LockType.WriteLock);
@@ -147,10 +148,10 @@ public class ArrayTest {
 
         buf = new byte[12];
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(3, buf, 0);
+        sdesc = array.scan(array.createIODescriptor(buf, 0));
         array.complete(Array.LockType.ReadLock);
 
-        assertEquals(2, sdesc.elements());
+        assertEquals(2, sdesc.valuesScanned());
         assertEquals(4, sdesc.size(0));
         assertEquals(4, sdesc.size(1));
 
@@ -162,7 +163,6 @@ public class ArrayTest {
 
     @Test
     public void appendTest() {
-        
         byte[] buf = new byte[4];
         byte[] total = new byte[1048576*4];
         Codec.getCodec().encode(0xffffffff, buf, 0);
@@ -171,7 +171,7 @@ public class ArrayTest {
         }
 
         array.position(0, Array.LockType.ReadLock);
-        ScanDescriptor sdesc = array.scan(1048576, total, 0);
+        IODescriptor sdesc = array.scan(array.createIODescriptor(total, 0));
         array.complete(Array.LockType.ReadLock);
         for(int i = 0; i < 1048576; i++) {
             for(int j = 0; j < 4; j++) {
@@ -179,20 +179,19 @@ public class ArrayTest {
             }
         }
 
-        sdesc = array.scan(133, total, 0);
+        sdesc = array.scan(array.createIODescriptor(total, 0));
         assertEquals(null,sdesc);
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(1048576, total, 0);
+        sdesc = array.scan(array.createIODescriptor(total, 0));
         array.complete(Array.LockType.ReadLock);
         for(int i = 0; i < 1048576; i++) {
             for(int j = 0; j < 4; j++) {
                 assertEquals(buf[j], total[4*i+j]);
             }
         }
-
     }
 
-    @Test
+   @Test
     public void appendCommitTest() {
 
         byte[] buf = new byte[4];
@@ -203,7 +202,7 @@ public class ArrayTest {
         }
 
         array.position(0, Array.LockType.ReadLock);
-        ScanDescriptor sdesc = array.scan(1048576, total, 0);
+        IODescriptor sdesc = array.scan(array.createIODescriptor(total, 0));
         array.complete(Array.LockType.ReadLock);
         array.commit();
 
@@ -213,8 +212,8 @@ public class ArrayTest {
         }
 
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(1048576, total, 0);
-        /* test */ sdesc.elements();
+        sdesc = array.scan(array.createIODescriptor(total, 0));
+        //sdesc.value();
         array.complete(Array.LockType.ReadLock);
         for (int i = 0; i < 1048576; i++) {
             for (int j = 0; j < 4; j++) {
@@ -223,7 +222,7 @@ public class ArrayTest {
         }
     }
     
-    @Test
+   // @Test
     public void updateTest() {
 
         byte[] buf = new byte[4];
@@ -241,8 +240,8 @@ public class ArrayTest {
             array.append(buf, 0);
         }
         array.position(0, Array.LockType.ReadLock);
-        ScanDescriptor sdesc = array.scan(1048576, total, 0);
-        /* test */ sdesc.elements();
+        IODescriptor sdesc = array.scan(array.createIODescriptor(total, 0));
+
         for (int i = 0; i < 1048576; i++) {
             int r = i % 5;
             
@@ -267,7 +266,7 @@ public class ArrayTest {
         }
         
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(1048576, total, 0);
+        sdesc = array.scan(array.createIODescriptor(total, 0));
         for (int i = 0; i < 1048576; i++) {
             int r = i % 5;
             if(r == 0) {
@@ -282,6 +281,7 @@ public class ArrayTest {
         }
         array.complete(Array.LockType.ReadLock);
     }
+    
         /*
         
                 for (int j = 0; j < 4; j++) {
