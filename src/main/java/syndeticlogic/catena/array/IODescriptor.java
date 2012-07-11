@@ -17,14 +17,6 @@
 package syndeticlogic.catena.array;
 
 import java.util.LinkedList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import syndeticlogic.catena.predicate.Predicate;
-import syndeticlogic.catena.store.Segment;
-import syndeticlogic.catena.utility.Transaction;
-
 import syndeticlogic.catena.array.SegmentCursor;
 /**
  * @author <a href="mailto:james@empty-set.net">James Percent</a>
@@ -35,7 +27,6 @@ public class IODescriptor {
     private final ValueSizeRecorder valueSizeRecorder; 
     private final byte[] buffer;
     private final int offset;
-    private int values;
     
     public IODescriptor(ArrayDescriptor arrayDescriptor, int index, byte[] buffer, int offset) {
         

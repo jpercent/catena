@@ -33,7 +33,6 @@ import org.junit.Test;
 
 import syndeticlogic.catena.array.Array;
 import syndeticlogic.catena.array.ArrayRegistry;
-import syndeticlogic.catena.array.ScanDescriptor;
 import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.store.PageManager;
@@ -202,7 +201,7 @@ public class ArrayTest {
         }
 
         array.position(0, Array.LockType.ReadLock);
-        IODescriptor sdesc = array.scan(array.createIODescriptor(total, 0));
+        array.scan(array.createIODescriptor(total, 0));
         array.complete(Array.LockType.ReadLock);
         array.commit();
 
@@ -212,7 +211,7 @@ public class ArrayTest {
         }
 
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(array.createIODescriptor(total, 0));
+        array.scan(array.createIODescriptor(total, 0));
         //sdesc.value();
         array.complete(Array.LockType.ReadLock);
         for (int i = 0; i < 1048576; i++) {
@@ -222,7 +221,7 @@ public class ArrayTest {
         }
     }
     
-   // @Test
+   @Test
     public void updateTest() {
 
         byte[] buf = new byte[4];
@@ -240,7 +239,7 @@ public class ArrayTest {
             array.append(buf, 0);
         }
         array.position(0, Array.LockType.ReadLock);
-        IODescriptor sdesc = array.scan(array.createIODescriptor(total, 0));
+        array.scan(array.createIODescriptor(total, 0));
 
         for (int i = 0; i < 1048576; i++) {
             int r = i % 5;
@@ -266,7 +265,7 @@ public class ArrayTest {
         }
         
         array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(array.createIODescriptor(total, 0));
+        array.scan(array.createIODescriptor(total, 0));
         for (int i = 0; i < 1048576; i++) {
             int r = i % 5;
             if(r == 0) {
