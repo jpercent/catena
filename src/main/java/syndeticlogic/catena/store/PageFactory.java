@@ -106,13 +106,10 @@ public class PageFactory {
                             && (size / pageSize + 1) < Integer.MAX_VALUE;
 
                     int pages = (int) (size / pageSize + 1);
-                    List<Page> pageSequence = new ArrayList<Page>(
-                            pages);
-                    long offset = 0;
+                    List<Page> pageSequence = new ArrayList<Page>(pages);
 
                     for (int i = 0; i < pages; i++) {
                         pageSequence.add(createPageDescriptor());
-                        offset += pageSize;
                     }
                     pageSequences.put(file, pageSequence);
                 }
