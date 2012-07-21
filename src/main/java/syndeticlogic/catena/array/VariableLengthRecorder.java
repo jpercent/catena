@@ -10,6 +10,7 @@ public class VariableLengthRecorder implements ValueRecorder {
     public VariableLengthRecorder(ArrayDescriptor arrayDescriptor, int startIndex) {
         this.arrayDescriptor = arrayDescriptor;
         this.start = startIndex;
+        this.recordedSizes = new LinkedList<Integer>();
     }
     
     public int recordValuesScanned(SegmentCursor cursor) {

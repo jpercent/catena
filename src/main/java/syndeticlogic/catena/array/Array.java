@@ -55,6 +55,7 @@ public class Array {
     public void configure(Predicate p, Transaction t) {
         configured = true;
     }
+   
     public IODescriptor createIODescriptor(byte[] buffer, int offset) {
         return new IODescriptor(arrayDescriptor, index, buffer, offset);
     }
@@ -64,7 +65,7 @@ public class Array {
     }
 
     public void position(int position, LockType lt) {
-        long offset = convertIndexToOffset(position);
+        int offset = arrayDescriptor.convertIndexToOffset(position);
         segmentController.findAndLockSegment(segmentCursor, lt, offset);
         index = position;
         configured = true;
@@ -180,13 +181,5 @@ public class Array {
         }
         arrayDescriptor.persist();
         arrayDescriptor.release();
-    }
-
-    private long convertIndexToOffset(long index) throws IndexOutOfBoundsException {
-        if (arrayDescriptor.isFixedLength()) {
-            return index * arrayDescriptor.typeSize();
-        } else {
-            throw new RuntimeException("unsupported");
-        }
     }
 }
