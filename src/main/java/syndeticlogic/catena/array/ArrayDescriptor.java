@@ -266,6 +266,8 @@ public class ArrayDescriptor {
         			break;
         		}
         		ret += size.intValue();
+        		assert ret > 0;
+        		i++;
         	}
         }
         return ret;
