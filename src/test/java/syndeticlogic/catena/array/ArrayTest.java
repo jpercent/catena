@@ -111,14 +111,14 @@ public class ArrayTest {
         array = arrayRegistry.createArrayInstance(key);
     	
     	VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
-    	List<byte[]> arrayValues = vlag.generateMemoryArray(13);
+    	List<byte[]> arrayValues = vlag.generateMemoryArray(3);
     	assertEquals(0, array.position());
     	
     	for(byte[] value : arrayValues) {
-    		array.append(value,0);
+    		array.append(value,0, value.length);
     	}
     	    	
-    	assertEquals(12, array.position());
+    	assertEquals(2, array.position());
     	assertTrue(array.hasMore());
     	array.position(0, Array.LockType.ReadLock);
     	for(byte[] value : arrayValues) {
