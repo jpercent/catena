@@ -253,6 +253,26 @@ public class ArrayDescriptor {
 	    return ret;
 	}
 	
+	public synchronized int convertIndexToOffset(int index) {
+		if (index >= length) {
+			throw new RuntimeException("index out of range");
+		}
+		int ret = index * typeSize;
+        if (!isFixedLength()) {
+        	ret = 0;
+        	int i = 0;
+        	for(Integer size : sizes) {
+        		if (!(i < index)) { 
+        			break;
+        		}
+        		ret += size.intValue();
+        		assert ret > 0;
+        		i++;
+        	}
+        }
+        return ret;
+	}
+	
     public synchronized void addSegment(CompositeKey key, Segment s) {
         segments.put(key, s);
         if(lastKey == null || key.compareTo(lastKey) > 0) {

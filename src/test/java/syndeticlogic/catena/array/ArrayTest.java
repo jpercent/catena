@@ -102,6 +102,35 @@ public class ArrayTest {
     }
     
     @Test
+    public void basicVariableLengthArrayTest() {
+    	CompositeKey key = new CompositeKey();
+    	key.append(this.key);
+    	key.append(1);
+    	
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+    	
+    	VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+    	List<byte[]> arrayValues = vlag.generateMemoryArray(3);
+    	assertEquals(0, array.position());
+    	
+    	for(byte[] value : arrayValues) {
+    		array.append(value,0, value.length);
+    	}
+    	    	
+    	assertEquals(2, array.position());
+    	assertTrue(array.hasMore());
+    	array.position(0, Array.LockType.ReadLock);
+    	for(byte[] value : arrayValues) {
+    		byte[] buffer = new byte[value.length];
+    		array.scan(array.createIODescriptor(buffer, 0));
+    		assertArrayEquals(value, buffer); 
+    	}
+    	array.complete(Array.LockType.ReadLock);
+
+    }
+    
+    @Test
     public void basicTest() {
         byte[] buf = new byte[4];
         Codec.getCodec().encode(42, buf, 0);
