@@ -13,8 +13,7 @@ public class VariableLengthRecorder implements ValueRecorder {
         this.recordedSizes = new LinkedList<Integer>();
     }
     
-    public int recordValuesScanned(SegmentCursor cursor) {
-        int remainingBytes = cursor.remaining();
+    public int recordValuesScanned(int remainingBytes) {
         int scanSize = 0;
         for(int i = start + recordedSizes.size(); remainingBytes > 0; i++) {
             int nextValueSize = arrayDescriptor.valueSize(i);

@@ -9,8 +9,7 @@ public class FixedLengthRecorder implements ValueRecorder {
         this.scanned = 0;
     }
     
-    public int recordValuesScanned(SegmentCursor cursor) {
-        int remainingBytes = cursor.remaining();
+    public int recordValuesScanned(int remainingBytes) {
         assert remainingBytes % size == 0;
         assert remainingBytes >= 0;
         int newValues = remainingBytes / size;

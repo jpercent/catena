@@ -45,7 +45,9 @@ public class IODescriptor {
     }
     
     public int recordValuesScanned(SegmentCursor cursor) {
-        return valueSizeRecorder.recordValuesScanned(cursor);
+        int bufferRemaining = buffer.length - offset;
+        int remainingBytes = (cursor.remaining() < bufferRemaining ? cursor.remaining() : bufferRemaining); 
+        return valueSizeRecorder.recordValuesScanned(remainingBytes);
     }
     
     public int ioSize() {
