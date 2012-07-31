@@ -161,8 +161,12 @@ public class Array {
         return arrayDescriptor;
     }
 
+    public int position() {
+        return index;
+    }
+
     public void position(int position, LockType lt) {
-        long offset = convertIndexToOffset(position);
+        long offset = arrayDescriptor.convertIndexToOffset(position);
         segmentController.findAndLockSegment(segmentCursor, lt, offset);
         index = position;
         configured = true;
@@ -175,12 +179,5 @@ public class Array {
     public IODescriptor createIODescriptor(byte[] buffer, int offset) {
         return new IODescriptor(arrayDescriptor, index, buffer, offset);
     }
-    
-    private long convertIndexToOffset(long index) throws IndexOutOfBoundsException {
-        if (arrayDescriptor.isFixedLength()) {
-            return index * arrayDescriptor.typeSize();
-        } else {
-            throw new RuntimeException("unsupported");
-        }
-    }
+  
 }
