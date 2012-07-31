@@ -21,8 +21,10 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -32,6 +34,7 @@ import org.junit.Test;
 
 
 import syndeticlogic.catena.array.Array;
+import syndeticlogic.catena.array.Array.LockType;
 import syndeticlogic.catena.array.ArrayRegistry;
 import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.PageFactory;
@@ -103,30 +106,80 @@ public class ArrayTest {
     
     @Test
     public void basicVariableLengthArrayTest() {
-    	CompositeKey key = new CompositeKey();
-    	key.append(this.key);
-    	key.append(1);
-    	
+        CompositeKey key = new CompositeKey();
+        key.append(this.key);
+        key.append(1);
+        
         arrayRegistry.createArray(key, Type.BINARY);
         array = arrayRegistry.createArrayInstance(key);
-    	
-    	VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
-    	List<byte[]> arrayValues = vlag.generateMemoryArray(3);
-    	assertEquals(0, array.position());
-    	
-    	for(byte[] value : arrayValues) {
-    		array.append(value,0, value.length);
-    	}
-    	    	
-    	assertEquals(2, array.position());
-    	assertTrue(array.hasMore());
-    	array.position(0, Array.LockType.ReadLock);
-    	for(byte[] value : arrayValues) {
-    		byte[] buffer = new byte[value.length];
-    		array.scan(array.createIODescriptor(buffer, 0));
-    		assertArrayEquals(value, buffer); 
-    	}
-    	array.complete(Array.LockType.ReadLock);
+        
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+                
+        assertEquals(299, array.position());
+        assertFalse(array.hasMore());
+        array.position(0, Array.LockType.ReadLock);
+        for(byte[] value : arrayValues) {
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
+
+    }
+
+    @Test
+    public void updateVariableLengthArrayTest() {
+        CompositeKey key = new CompositeKey();
+        key.append(this.key);
+        key.append(1);
+        
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> skipList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(299, array.position());
+        assertFalse(array.hasMore());
+        
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                byte[] updateBytes = new byte[r.nextInt(8192)+1];
+                r.nextBytes(updateBytes);
+                skipList.add(updateBytes);
+                array.position(i, LockType.WriteLock);
+                array.update(updateBytes, 0, updateBytes.length);
+                array.complete(LockType.WriteLock);
+            }
+        }
+        
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            if(i % skip == 0) {
+                value = skipList.get(j);
+                j++;
+            }
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
 
     }
     
