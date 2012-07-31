@@ -21,7 +21,7 @@ package syndeticlogic.catena.array;
  */
 public class IODescriptor {
 
-    private final ValueSizeRecorder valueSizeRecorder; 
+    private final ValueRecorder valueSizeRecorder; 
     private final byte[] buffer;
     private final int offset;
     
