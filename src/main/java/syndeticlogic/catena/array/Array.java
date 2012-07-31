@@ -1,5 +1,5 @@
 /*
- *   Copyright 2010, 2011 James Percent
+ *   Copyright 2010 - 2012 James Percent
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import syndeticlogic.catena.predicate.Predicate;
 import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.utility.Transaction;
-
 import syndeticlogic.catena.array.SegmentCursor;
 
 /**
@@ -30,9 +29,7 @@ import syndeticlogic.catena.array.SegmentCursor;
  */
 public class Array {
 
-    public enum LockType {
-        ReadLock, WriteLock
-    };   
+    public enum LockType { ReadLock, WriteLock };  
     private static final Log log = LogFactory.getLog(Array.class);
     private ArrayDescriptor arrayDescriptor;
     private SegmentController segmentController;
@@ -46,32 +43,6 @@ public class Array {
         this.segmentController = segmentController;
         this.index = 0;
         this.segmentCursor = new SegmentCursor();
-    }
-
-    public ArrayDescriptor descriptor() {
-        return arrayDescriptor;
-    }
-
-    public void configure(Predicate p, Transaction t) {
-        configured = true;
-    }
-    public IODescriptor createIODescriptor(byte[] buffer, int offset) {
-        return new IODescriptor(arrayDescriptor, index, buffer, offset);
-    }
-
-    public long position() {
-        return index;
-    }
-
-    public void position(int position, LockType lt) {
-        long offset = convertIndexToOffset(position);
-        segmentController.findAndLockSegment(segmentCursor, lt, offset);
-        index = position;
-        configured = true;
-    }
-
-    public boolean hasMore() {
-        return (index == arrayDescriptor.length() ? false : true);
     }
 
     public IODescriptor scan(IODescriptor ioDescriptor) {
@@ -182,6 +153,29 @@ public class Array {
         arrayDescriptor.release();
     }
 
+    public void configure(Predicate p, Transaction t) {
+        configured = true;
+    }
+    
+    public ArrayDescriptor descriptor() {
+        return arrayDescriptor;
+    }
+
+    public void position(int position, LockType lt) {
+        long offset = convertIndexToOffset(position);
+        segmentController.findAndLockSegment(segmentCursor, lt, offset);
+        index = position;
+        configured = true;
+    }
+
+    public boolean hasMore() {
+        return (index == arrayDescriptor.length() ? false : true);
+    }
+
+    public IODescriptor createIODescriptor(byte[] buffer, int offset) {
+        return new IODescriptor(arrayDescriptor, index, buffer, offset);
+    }
+    
     private long convertIndexToOffset(long index) throws IndexOutOfBoundsException {
         if (arrayDescriptor.isFixedLength()) {
             return index * arrayDescriptor.typeSize();
