@@ -173,7 +173,7 @@ public class Array {
     }
 
     public boolean hasMore() {
-        return (index == arrayDescriptor.length() ? false : true);
+        return (index == (arrayDescriptor.length() - 1) ? false : true);
     }
 
     public IODescriptor createIODescriptor(byte[] buffer, int offset) {
