@@ -4,17 +4,22 @@ import syndeticlogic.catena.codec.Codec;
 
 
 public class ByteValue extends Value {
-	private byte decoded;
 	
+    public ByteValue(byte value) {
+        super(null, 0, 0);
+        byte[] rawvalue = new byte[1];
+        Codec.getCodec().encode(value, rawvalue, 0);
+        reset(rawvalue, 0, Type.BYTE.length());
+    }
+    
     ByteValue(byte[] data, int offset) {
         super(data, offset, Type.BYTE.length());
         assert data.length - offset >= Type.BYTE.length();
-        this.decoded = Codec.getCodec().decodeByte(data, offset);
     }
     
     @Override
     public Object objectize() {
-        return new Byte(decoded);
+        return new Byte(Codec.getCodec().decodeByte(data, offset));
     }
 
     @Override
@@ -26,7 +31,7 @@ public class ByteValue extends Value {
     public int compareTo(byte[] rawBytes, int offset, int length) {
         assert rawBytes.length - offset >= length && length == Type.BYTE.length();
         byte value = Codec.getCodec().decodeByte(rawBytes, offset);
-        
+        byte decoded = Codec.getCodec().decodeByte(data, this.offset);
         if(decoded > value)
             return 1;
         else if(decoded < value)
@@ -39,6 +44,5 @@ public class ByteValue extends Value {
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= Type.BYTE.length();
         super.reset(data, offset, length);
-        this.decoded = Codec.getCodec().decodeByte(data, offset);
     }
 }

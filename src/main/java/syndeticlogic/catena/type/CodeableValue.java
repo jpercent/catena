@@ -1,19 +1,26 @@
 package syndeticlogic.catena.type;
 
+import syndeticlogic.catena.codec.CodeHelper;
 import syndeticlogic.catena.codec.Codec;
 
 
 public class CodeableValue extends Value {
-	Codeable decodedValue;
+
+    public CodeableValue(Codeable value) {
+        super(null, 0, 0);
+        CodeHelper coder = Codec.getCodec().coder();
+        coder.append(value);
+        byte[] rawvalue = coder.encodeByteArray();
+        reset(rawvalue, 0, rawvalue.length);
+    }	
 	
     CodeableValue(byte[] data, int offset, int length) {
         super(data, offset, length);
-        this.decodedValue = Codec.getCodec().decodeCodeable(data, offset);
     }
     
     @Override
     public Object objectize() {
-        return this.decodedValue;
+        throw new RuntimeException("Unsupprted");
     }
 
     @Override
@@ -25,12 +32,12 @@ public class CodeableValue extends Value {
     public int compareTo(byte[] rawBytes, int offset, int length) {
         assert rawBytes.length - offset >= length && length == 4;
         Codeable value = Codec.getCodec().decodeCodeable(rawBytes, offset);
+        Codeable decodedValue = Codec.getCodec().decodeCodeable(data, this.offset);
         return value.compareTo(decodedValue);
     }
     
     @Override
     public void reset(byte[] data, int offset, int length) {
         super.reset(data, offset, length);
-        this.decodedValue = Codec.getCodec().decodeCodeable(data, offset);
     }
 }

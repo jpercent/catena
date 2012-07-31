@@ -4,22 +4,22 @@ import syndeticlogic.catena.codec.Codec;
 
 
 public class CharValue extends Value {
-	private char decoded;
 	
-	public CharValue(char data) {
+	public CharValue(char value) {
 	    super(null, 0, 0);
-	    decoded = data;
+	    byte[] rawvalue = new byte[Type.CHAR.length()];
+	    Codec.getCodec().encode(value, rawvalue, 0);
+	    reset(rawvalue, 0, Type.CHAR.length());
 	}
 	
     public CharValue(byte[] data, int offset) {
         super(data, offset, Type.CHAR.length());
         assert data.length - offset >= Type.CHAR.length();
-        this.decoded = Codec.getCodec().decodeChar(data, offset);
     }
     
     @Override
     public Object objectize() {
-        return new Character(decoded);
+        return new Character(Codec.getCodec().decodeChar(data, offset));
     }
 
     @Override
@@ -31,6 +31,7 @@ public class CharValue extends Value {
     public int compareTo(byte[] rawBytes, int offset, int length) {
         assert rawBytes.length - offset >= length && length == Type.CHAR.length();
         char value = Codec.getCodec().decodeChar(rawBytes, offset);
+        char decoded = Codec.getCodec().decodeChar(data, this.offset);
         if(decoded > value) 
             return 1;
         else if(decoded == value)
@@ -43,6 +44,5 @@ public class CharValue extends Value {
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.CHAR.length();
         super.reset(data, offset, length);
-        this.decoded = Codec.getCodec().decodeChar(data, offset);
     }
 }

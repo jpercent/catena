@@ -4,22 +4,22 @@ import syndeticlogic.catena.codec.Codec;
 
 
 public class BooleanValue extends Value {
-	private boolean decoded;
-	
-    public BooleanValue(boolean data) {
+    
+    public BooleanValue(boolean value) {
         super(null, 0, 0);
-        decoded = data;
+        byte[] rawvalue = new byte[Type.BOOLEAN.length()];
+        Codec.getCodec().encode(value, rawvalue, 0);
+        reset(rawvalue, 0, Type.BOOLEAN.length());
     }
 	
     public BooleanValue(byte[] data, int offset) {
         super(data, offset, Type.BOOLEAN.length());
         assert data.length - offset >= Type.BOOLEAN.length();
-        this.decoded = Codec.getCodec().decodeBoolean(data, offset);
     }
     
     @Override
     public Object objectize() {
-        return new Boolean(decoded);
+        return new Boolean(Codec.getCodec().decodeBoolean(data, offset));
     }
 
     @Override
@@ -31,6 +31,7 @@ public class BooleanValue extends Value {
     public int compareTo(byte[] rawBytes, int offset, int length) {
         assert rawBytes.length - offset >= length && length == Type.BOOLEAN.length();
         boolean value = Codec.getCodec().decodeBoolean(rawBytes, offset);
+        boolean decoded = new Boolean(Codec.getCodec().decodeBoolean(data, this.offset));
         
         if(decoded && !value)
             return 1;
@@ -44,6 +45,5 @@ public class BooleanValue extends Value {
     public void reset(byte[] data, int offset, int length) {
         assert ((data.length - offset) >= length && Type.BOOLEAN.length() == length);
         super.reset(data, offset, length);
-        this.decoded = Codec.getCodec().decodeBoolean(data, offset);
     }
 }
