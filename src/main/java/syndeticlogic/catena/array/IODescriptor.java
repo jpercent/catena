@@ -23,7 +23,6 @@ import syndeticlogic.catena.array.SegmentCursor;
  */
 public class IODescriptor {
 
-//    private static final Log log = LogFactory.getLog(IODescriptor.class);
     private final ValueSizeRecorder valueSizeRecorder; 
     private final byte[] buffer;
     private final int offset;
@@ -37,7 +36,6 @@ public class IODescriptor {
         }
         this.buffer = buffer;
         this.offset = offset;
-//        this.values = n;
     }
 
     public int size(int i) {
