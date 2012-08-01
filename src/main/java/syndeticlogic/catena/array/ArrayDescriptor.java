@@ -254,7 +254,7 @@ public class ArrayDescriptor {
 	}
 	
 	public synchronized int convertIndexToOffset(int index) {
-		if (index >= length) {
+		if (index > length) {
 			throw new RuntimeException("index out of range");
 		}
 		int ret = index * typeSize;
