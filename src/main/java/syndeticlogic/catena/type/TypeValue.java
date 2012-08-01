@@ -5,8 +5,7 @@ import syndeticlogic.catena.codec.Codec;
 
 public class TypeValue extends Value {
 	private Type data;
-	
-    
+
     public TypeValue(byte[] data, int offset) {
         super(data, offset, Type.TYPE.length());
         this.data = Codec.getCodec().decodeCodecType(data, offset);
