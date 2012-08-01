@@ -121,7 +121,7 @@ public class ArrayTest {
             array.append(value,0, value.length);
         }
                 
-        assertEquals(299, array.position());
+        assertEquals(300, array.position());
         assertFalse(array.hasMore());
         array.position(0, Array.LockType.ReadLock);
         for(byte[] value : arrayValues) {
@@ -154,7 +154,7 @@ public class ArrayTest {
             array.append(value,0, value.length);
         }
         
-        assertEquals(299, array.position());
+        assertEquals(300, array.position());
         assertFalse(array.hasMore());
         
         for(int i = 0; i < arrayValues.size(); i++) {
@@ -182,6 +182,50 @@ public class ArrayTest {
         array.complete(Array.LockType.ReadLock);
 
     }
+    
+
+    @Test
+    public void deleteVariableLengthArrayTest() {
+        CompositeKey key = new CompositeKey();
+        key.append(this.key);
+        key.append(1);
+        
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                array.position(i, LockType.WriteLock);
+                array.delete();
+                array.complete(LockType.WriteLock);
+                arrayValues.remove(i);
+            }
+        }
+        
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+    
     
     @Test
     public void basicTest() {
@@ -494,7 +538,6 @@ public class ArrayTest {
         int position = 0;
         for (byte[] element : bytes) {
             fm.append(element, 0, element.length);
-            // System.out.println("I "+i+"Position "+ position);
             if (testUpdate && i % 2 == 1) {
                 fm.update(last, 0, position, element.length, last.length);
                 position += last.length;
