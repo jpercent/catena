@@ -48,7 +48,7 @@ public class Array {
     public IODescriptor scan(IODescriptor ioDescriptor) {
         if (!configured) { return null; }
         if (log.isTraceEnabled()) { log.debug("pos=" + index); }
-        
+
         int size = ioDescriptor.ioSize();
         int offset = ioDescriptor.offset();
         int accumulation = 0;
@@ -72,25 +72,10 @@ public class Array {
 
         if (!moreToScan) {
             configured = false;
-            // complete(Array.LockType.ReadLock);
         }
 
         index += ioDescriptor.valuesScanned();
         return ioDescriptor;
-    }
-
-    public void updateScan(byte[] buffer, int offset) {
-        assert arrayDescriptor.isFixedLength();
-        update(buffer, offset, arrayDescriptor.typeSize());
-        throw new RuntimeException("Not supported");
-    }
-
-    public void updateScan(byte[] buffer, int offset, int size) {
-        assert configured;
-        int oldSize = arrayDescriptor.update(index, size);
-        segmentCursor.update(buffer, offset, oldSize, size);
-        throw new RuntimeException("Not supported");
-        // complete(LockType.WriteLock);
     }
 
     public void update(byte[] buffer, int offset) {
@@ -102,7 +87,6 @@ public class Array {
         assert configured;
         int oldSize = arrayDescriptor.update(index, size);
         segmentCursor.update(buffer, offset, oldSize, size);
-        // complete(LockType.WriteLock);
     }
 
     public void append(byte[] buffer, int offset) {
@@ -120,21 +104,14 @@ public class Array {
             arrayDescriptor.release();
         }
         segmentCursor.append(buffer, offset, size);
+        index++;
         complete(LockType.WriteLock);
-    }
-
-    public void deleteScan() {
-        
-        int size = arrayDescriptor.delete(index);
-        segmentCursor.delete(size);
-        throw new RuntimeException("Not supported");
-        // complete(LockType.WriteLock);
     }
 
     public void delete() {
         int size = arrayDescriptor.delete(index);
         segmentCursor.delete(size);
-        // complete(LockType.WriteLock);
+        index--;
     }
 
     public void complete(LockType lt) {
@@ -173,7 +150,7 @@ public class Array {
     }
 
     public boolean hasMore() {
-        return (index == (arrayDescriptor.length() - 1) ? false : true);
+        return (index == (arrayDescriptor.length()) ? false : true);
     }
 
     public IODescriptor createIODescriptor(byte[] buffer, int offset) {
