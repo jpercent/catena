@@ -108,6 +108,7 @@ public class ArrayDescriptor {
     }
     
     public static ArrayDescriptor decode(byte[] buffer, int offset) {
+        assert buffer.length > 0 && buffer.length > offset;
         CodeHelper coder = Codec.getCodec().coder();
         List<Object> members = coder.decode(buffer, offset, 1);
         int elements = ((Integer)members.get(0)).intValue();
@@ -202,6 +203,7 @@ public class ArrayDescriptor {
             if(!f.exists()) {
                 assert f.createNewFile();
             }
+            System.out.println("file name == "+path+ARRAY_DESC_FILE_NAME);
             FileOutputStream metaFlusher = new FileOutputStream(f);
             commitChannel = metaFlusher.getChannel();
         } catch (FileNotFoundException e) {
@@ -381,10 +383,13 @@ public class ArrayDescriptor {
     public synchronized void persist() {
         byte[] serialized = ArrayDescriptor.encode(this);
         try {
+            System.out.println(" serialized length "+serialized.length);
             commitChannel.position(0);
             commitChannel.truncate(serialized.length);
             commitChannel.write(ByteBuffer.wrap(serialized));
             commitChannel.force(false);
+            System.out.println(" file toString = "+commitChannel.toString());
+            System.out.println(" position = "+commitChannel.position());
             //valueIndex.persist();
         } catch (IOException e) {
             String msg = " could not sync array identified by "+master.toString();
