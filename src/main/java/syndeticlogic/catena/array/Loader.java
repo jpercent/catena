@@ -53,10 +53,16 @@ public class Loader extends DirectoryWalker {
             }
                 
             FileInputStream fi = new FileInputStream(arrayDescFile);
-            byte[] arrayDescEncoded = new byte[fi.available()];
-            fi.read(arrayDescEncoded);
-            current.push(ArrayDescriptor.decode(arrayDescEncoded, 0));
-            walk(arrayDescFile, arrays);
+            if(fi.available() > 0) {
+                byte[] arrayDescEncoded = new byte[fi.available()];
+                fi.read(arrayDescEncoded);
+                current.push(ArrayDescriptor.decode(arrayDescEncoded, 0));
+                walk(arrayDescFile, arrays);
+            } else {
+                log.error("empty array descriptor; skipping directory: "+baseDir);
+                current.push(null);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
