@@ -108,6 +108,7 @@ public class ArrayDescriptor {
     }
     
     public static ArrayDescriptor decode(byte[] buffer, int offset) {
+        assert buffer != null && offset > 0;
         assert buffer.length > 0 && buffer.length > offset;
         CodeHelper coder = Codec.getCodec().coder();
         List<Object> members = coder.decode(buffer, offset, 1);
