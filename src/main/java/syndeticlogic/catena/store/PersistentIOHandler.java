@@ -197,7 +197,7 @@ public class PersistentIOHandler {
     }
 
     public synchronized void commit(int dataSize) throws IOException, InterruptedException,
-            ExecutionException 
+        ExecutionException 
     {
         long fileoffset = 0;
         int dirtyIndex = 0;
@@ -210,53 +210,81 @@ public class PersistentIOHandler {
 
         if (dirtyIndex == pages.size())
             return;
+        
+        writeDirtyPages(dataSize, dirtyIndex, fileoffset, configureCompressors(dirtyIndex));
+    }
+    
+    private List<Compressor> configureCompressors(int dirtyIndex) {
 
         for (int i = dirtyIndex; i < pages.size(); i++)
             pageOffsets.remove(i);
 
-        List<Compressor> compressors = new LinkedList<Compressor>();
-        int total = 0;
         int offset = 0;
+        int accumulation = 0;
         int pageSize = pageManager.pageSize();
-        Compressor compressor = SegmentManager.get().createCompressor(pageManager, pageSize);
+
+        List<Compressor> compressors = new LinkedList<Compressor>();
+        Compressor compressor = SegmentManager.get().createCompressor(
+                pageManager, pageSize);
+
         Page page = null;
-        for (int i = dirtyIndex; i < pages.size(); i++) {
-            page = pages.get(i);
-            compressor.add(offset, page);
-            int amountAdded = page.limit() - total;
-            total += page.limit();
-            
-            if (total > pageSize) {
-                compressors.add(compressor);
+        page = pages.get(dirtyIndex);
+        System.out.println("page = " + page + " offset = " + offset);
+        compressor.add(offset, page);
+        compressors.add(compressor);
+
+        System.out.println(" dirtyIndex = " + dirtyIndex + " Pages.size() = "
+                + pages.size());
+
+        for (int i = dirtyIndex; i < pages.size();) {
+
+            int difference = page.limit() - offset;
+            int available = accumulation + difference;
+
+            if (available > pageSize) {
+                accumulation = 0;
+                offset = available - pageSize;
                 compressor = SegmentManager.get().createCompressor(pageManager,
                         pageSize);
-
-                offset = amountAdded;
+                compressors.add(compressor);
                 compressor.add(offset, page);
-                total = amountAdded;
+
+            } else if (available == pageSize) {
                 offset = 0;
-            } else if (total == pageSize) {
-                compressors.add(compressor);
+                accumulation = 0;
+                i++;
+                if (i < pages.size()) {
+                    page = pages.get(i);
+                }
                 compressor = SegmentManager.get().createCompressor(pageManager,
                         pageSize);
+                compressors.add(compressor);
+                compressor.add(offset, page);
 
-                total = 0;
-                offset = 0;
             } else {
+                assert available < pageSize;
+                accumulation = available;
                 offset = 0;
-                if (i + 1 == pages.size())
-                    compressors.add(compressor);
-
+                i++;
+                if (i < pages.size())
+                    page = pages.get(i);
             }
         }
-
-        for(Future<Object> f : pool.invokeAll(compressors)) {
-         f.get();
-         assert f.isDone();
+        return compressors;
+    }
+    
+    private void writeDirtyPages(int dataSize, int dirtyIndex, long fileoffset, List<Compressor> compressors) 
+        throws IOException, InterruptedException, ExecutionException 
+    {
+        //for(Future<Object> f : pool.invokeAll(compressors)) {
+        // f.get();
+        // assert f.isDone();
+       // }
+        int i = 0;
+        for (Compressor c : compressors) {
+            System.out.println("i = "+i++);
+            c.run();
         }
-        //for (Compressor c : compressors)
-        //    c.run();
-
         numPages = pageOffsets.size();
         Codec coder = Codec.getCodec();
         ByteBuffer length = ByteBuffer.allocate(Type.INTEGER.length());
@@ -281,5 +309,6 @@ public class PersistentIOHandler {
         writeHeader(dataSize);
         channel.force(true);
         length = null;
+        
     }
 }
