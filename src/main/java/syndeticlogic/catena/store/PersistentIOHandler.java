@@ -280,11 +280,9 @@ public class PersistentIOHandler {
         // f.get();
         // assert f.isDone();
        // }
-        int i = 0;
-        for (Compressor c : compressors) {
-            System.out.println("i = "+i++);
+        for (Compressor c : compressors) 
             c.run();
-        }
+
         numPages = pageOffsets.size();
         Codec coder = Codec.getCodec();
         ByteBuffer length = ByteBuffer.allocate(Type.INTEGER.length());
