@@ -158,28 +158,33 @@ public class PageManager {
         ByteBuffer buffer = null;
         if (freelist.size() == 0)
             observer.notify(null);
-
+        
+        int retries = 0;            
         while (true) {
-            int retries = 0;            
             try {
                 buffer = freelist.poll();
                 if (buffer == null) {
                     long timelimit = 8L * 1000L * 1000L * 1000L;
-                    long timeout = condition.awaitNanos(timelimit);
-                    if(timelimit == timeout) {
-                        retries ++;
-                        if(retries < retryLimit) {
-                            continue;
-                        } else {
-                            throw new RuntimeException("pageManager waiting for page, retries exceeded");
-                        }
+                    long then = System.nanoTime();
+
+                    while(timelimit > 0) {
+                        condition.awaitNanos(timelimit);
+                        timelimit -= (System.nanoTime() - then);
                     }
-                }
+
+                    retries ++;
+                    if(retries < retryLimit) {
+                        continue;
+                    } else {
+                        throw new RuntimeException("pageManager waiting for page, retries exceeded");
+                    }
+                } 
                 break;
             } catch (InterruptedException e) {
-                log.debug("pageManager interrupted while waiting for pages; retrying", e);
+                log.info("pageManager interrupted while waiting for pages; retrying", e);
             }
         }
+       
         assert buffer != null;
         return buffer;
     }
