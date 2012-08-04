@@ -29,6 +29,8 @@ public class NullCompressor implements Compressor {
     
     @Override
     public synchronized void add(int offset, Page page) {
+        assert page != null && offset >= 0;
+        
         pages.add(page);
         if (isDirect) {
             isDirect = page.isDirect();
@@ -83,11 +85,17 @@ public class NullCompressor implements Compressor {
         int total = 0;
         int offset = 0;
         int i = 0;
+
         while (total <= compressionSize) {
             Page page = pages.get(i);
             offset = offsets.get(i);
             int size = page.limit() - offset;
-            target.limit(target.position() + size);
+
+            if(target.position() + size > target.capacity())
+                target.limit(target.capacity());
+            else
+                target.limit(target.position()+size);
+                        
             int bytesRead = page.read(target, offset);
             total += bytesRead;
             target.limit(compressionSize);
@@ -96,7 +104,6 @@ public class NullCompressor implements Compressor {
             if (i == pages.size())
                 break;
         }
-        assert total == compressionSize;
         return target;
     }
 
