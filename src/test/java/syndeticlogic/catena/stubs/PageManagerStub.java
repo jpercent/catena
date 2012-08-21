@@ -7,11 +7,11 @@ import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageManager;
 
 public class PageManagerStub extends PageManager {
-	public int pageSize;
+	public int pageSize = 4096;
 	public int unreleasedBuffers = 0;
 	public List<Page> pages=null;
 	public int pageDesc = 0;
-
+	
 	@Override
 	public void createPageSequence(String fileName) {
 	}
