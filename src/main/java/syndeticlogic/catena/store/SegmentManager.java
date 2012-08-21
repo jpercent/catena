@@ -5,10 +5,6 @@ import syndeticlogic.catena.type.Type;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.HashMap;
 
@@ -32,7 +28,6 @@ public class SegmentManager {
     private CompressionType compressionType;
     private HashMap<String, Segment> files;
     private PageManager pageManager;
-    private ExecutorService pool;
     private int cores;
 
     private SegmentManager(CompressionType compressionType,
@@ -41,7 +36,7 @@ public class SegmentManager {
         this.pageManager = pageManager;
         this.files = new HashMap<String, Segment>();
         cores = Runtime.getRuntime().availableProcessors();
-        pool = Executors.newFixedThreadPool(this.cores);
+        //pool = Executors.newFixedThreadPool(this.cores);
     }
 
     public synchronized Segment create(String filename, Type type)
@@ -52,8 +47,11 @@ public class SegmentManager {
             throw new RuntimeException("file exists");
         }
         RandomAccessFile file = new RandomAccessFile(filename, "rw");
-        Segment fm = new Segment(type, file.getChannel(),
-                new ReentrantReadWriteLock(), pageManager, pool, filename);
+        SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
+        header.load();
+        SerializedObjectChannel channel = new SerializedObjectChannel(file.getChannel());
+        Segment fm = new Segment(type, header, channel,
+                new ReentrantReadWriteLock(), pageManager, filename);
         files.put(filename, fm);
         fm.pin();
         return fm;
@@ -79,8 +77,11 @@ public class SegmentManager {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
+            SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
+            SerializedObjectChannel channel = new SerializedObjectChannel(file.getChannel());
+
             fm = new Segment(new ReentrantReadWriteLock(),
-                    file.getChannel(), pageManager, pool, filename);
+                    header, channel, pageManager, filename);
             files.put(filename, fm);
         } else {
             assert filename.equals(fm.getQualifiedFileName());
@@ -93,7 +94,7 @@ public class SegmentManager {
         assert files.containsKey(segment.getQualifiedFileName());
         segment.unpin();
     }
-    
+    /*
     public Compressor createCompressor(PageManager pageManager,
             int compressionSize) {
         Compressor c = null;
@@ -121,4 +122,6 @@ public class SegmentManager {
         }
         return d;
     }
+    */
+    
 }
