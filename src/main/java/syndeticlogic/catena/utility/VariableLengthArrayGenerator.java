@@ -25,13 +25,14 @@ import java.util.Random;
 
 public class VariableLengthArrayGenerator implements ArrayGenerator {
     
-    private static int MAX_ARRAY_SIZE = 65536;
+    private static int MAX_ELEMENT_SIZE = 65536;
 	private File dataFile;
 	private File metaFile;
 	private Random random;
 	private int seed;
     private int length;
     private long totalBytes;
+    private int maxSize;
     
     public VariableLengthArrayGenerator(int seed, int length) {
         this.seed = seed;
@@ -40,6 +41,7 @@ public class VariableLengthArrayGenerator implements ArrayGenerator {
         metaFile = null;
         random = null;
         totalBytes = 0;
+        maxSize = MAX_ELEMENT_SIZE;
     }
     
     public VariableLengthArrayGenerator(String baseName, int seed, int length) throws Exception {
@@ -51,6 +53,7 @@ public class VariableLengthArrayGenerator implements ArrayGenerator {
         this.seed = seed;
         this.length = length;
         this.totalBytes = 0;
+        maxSize = MAX_ELEMENT_SIZE;
         
     }
     
@@ -70,7 +73,7 @@ public class VariableLengthArrayGenerator implements ArrayGenerator {
         for(int i = 0; i < length; i++) {
             int meta = 0;
             while(meta == 0) {
-                meta = localRandom.nextInt(MAX_ARRAY_SIZE);
+                meta = localRandom.nextInt(maxSize);
             }
             byte[] element = new byte[meta]; 
             localRandom.nextBytes(element);
@@ -102,7 +105,7 @@ public class VariableLengthArrayGenerator implements ArrayGenerator {
 		for(int i = 0; i < length; i++) {
 		      int meta = 0;
 		      while(meta == 0) {
-		          meta = random.nextInt(MAX_ARRAY_SIZE); 
+		          meta = random.nextInt(maxSize);
 		      }
 		      
 		      byte[] element = new byte[meta];
@@ -126,6 +129,10 @@ public class VariableLengthArrayGenerator implements ArrayGenerator {
 		return dataFile;
 	}
 
+	public void setMaxSize(int size) {
+	    maxSize = size;
+	}
+	
 	@Override
 	public void reset() {
 		random = null;
