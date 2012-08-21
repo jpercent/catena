@@ -2,7 +2,6 @@ package syndeticlogic.catena.stubs;
 
 
 import syndeticlogic.catena.store.Segment;
-import syndeticlogic.catena.type.Value;
 import syndeticlogic.catena.type.Type;
 
 public class SegmentStub extends Segment {
