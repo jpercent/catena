@@ -86,5 +86,6 @@ public class SegmentReader {
     private void loadPage(Page page) throws IOException {
         channel.read(page.getBuffer());
         page.getBuffer().rewind();
+        page.setLimit(page.getBuffer().remaining());
     }
 }
