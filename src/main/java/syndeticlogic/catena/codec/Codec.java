@@ -25,7 +25,6 @@ import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
 
-
 public class Codec {
 
     private static final byte TYPE_TYPE = 0;
@@ -44,7 +43,7 @@ public class Codec {
     private static final byte BITS_PER_TYPE = 4;
     private static final byte TYPES_PER_BYTE = 2;
     
-    private static Codec singleton;
+    private static Codec singleton = new Codec(null);
     private TypeFactory factory;
 
     public synchronized static void configureCodec(TypeFactory factory) {
@@ -52,9 +51,6 @@ public class Codec {
     }
 
     public static synchronized Codec getCodec() {
-        if (singleton == null) {
-            throw new RuntimeException("Codec has not been injected");
-        }
         return singleton;
     }
 
