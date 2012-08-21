@@ -68,6 +68,7 @@ public class SerializedObjectChannel {
             assert bytesRead == Type.INTEGER.length();
             length.rewind();
             int object_size = coder.decodeInteger(length);
+            length.rewind();
             assert target.capacity() >= target.position() + object_size;
             target.limit(target.position()+object_size);
             bytesRead = channel.read(target);
