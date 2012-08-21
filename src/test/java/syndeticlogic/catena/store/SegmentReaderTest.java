@@ -117,6 +117,7 @@ public class SegmentReaderTest {
         assertEquals(0, pageManager.getPageSequence(fileName).size());
         SegmentReader reader = new SegmentReader(header, channel, pageManager, pageManager.getPageSequence(fileName), fileName);
         reader.load();
+        assertEquals(header.pages(),pageManager.getPageSequence(fileName).size());
         readPages(pageManager.getPageSequence(fileName));
     }
 }
