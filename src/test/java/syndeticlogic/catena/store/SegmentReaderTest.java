@@ -3,7 +3,6 @@ package syndeticlogic.catena.store;
 import static org.junit.Assert.*;
 
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
