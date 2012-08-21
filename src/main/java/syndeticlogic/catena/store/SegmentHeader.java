@@ -48,7 +48,6 @@ public class SegmentHeader {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("bytes read = "+bytesRead);
 
             assert bytesRead == HEADER_SIZE;
             buff.rewind();
@@ -83,7 +82,7 @@ public class SegmentHeader {
         coder.append(type);
         coder.append(pages);
         coder.append(dataSize);
-
+        
         byte[] content = coder.encodeByteArray();
         CRC32 crc = new CRC32();
         crc.update(content, 0, content.length);
@@ -100,7 +99,6 @@ public class SegmentHeader {
             channel.position(0L);
             channel.write(buffer);
             channel.force(true);
-            //System.out.println("Channel.pos ="+channel.position());
             channel.position(0L);
         } catch (IOException e) {
             e.printStackTrace();
