@@ -50,6 +50,7 @@ public class SegmentWriter {
     
     private void writeDirtyPages(List<Page> pages, int dirtyIndex, long fileoffset) throws IOException {        
         channel.position(fileoffset);
+        long total = 0;
         
         for(int i = dirtyIndex; i < pages.size(); i++) {
             pageOffsets.put(i, fileoffset);
@@ -57,8 +58,10 @@ public class SegmentWriter {
             ByteBuffer source = page.getBuffer();
             source.limit(page.limit());
             int bytesWritten = channel.write(source);
+            source.rewind();
+            total += source.remaining();
             fileoffset += bytesWritten;
         }
-        channel.writeHeader(pageManager, fileoffset, pages.size());
+        channel.writeHeader(pageManager, total, pages.size());
      }
 }
