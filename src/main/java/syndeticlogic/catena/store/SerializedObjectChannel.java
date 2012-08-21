@@ -49,6 +49,19 @@ public class SerializedObjectChannel {
         }
     }
     
+    public void skip() {
+        try {
+            int bytesRead = channel.read(length);
+            assert bytesRead == Type.INTEGER.length();
+            length.rewind();
+            int objectSize = coder.decodeInteger(length);
+            channel.position(channel.position() + objectSize);
+        } catch (IOException e) {
+            log.error(e);
+            throw new RuntimeException(e);
+        }
+    }
+    
     public int read(ByteBuffer target) {
         try {
             int bytesRead = channel.read(length);
@@ -66,6 +79,20 @@ public class SerializedObjectChannel {
         }
     }
 
+    public void writeHeader(PageManager pageManager, long dataSize, int pages) {
+        try {
+            channel.position(0L);
+        } catch (IOException e) {
+            log.error(e);
+            throw new RuntimeException(e);
+        }
+        SegmentHeader header = new SegmentHeader(channel, pageManager);
+        header.load();
+        header.dataSize(dataSize);
+        header.pages(pages);
+        header.store();
+    }
+    
     public long size() {
         try {
             return channel.size();
@@ -75,9 +102,9 @@ public class SerializedObjectChannel {
         }
     }
     
-    public FileChannel truncate(long offset) {
+    public void truncate(long offset) {
         try {
-            return channel.truncate(offset);
+            this.channel = channel.truncate(offset);
         } catch (IOException e) {
             log.error(e);
             throw new RuntimeException(e);
