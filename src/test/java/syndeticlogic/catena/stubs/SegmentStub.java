@@ -61,7 +61,7 @@ public class SegmentStub extends Segment {
     public String getQualifiedFileName() {
         return name;
     }
-
+/*
     @Override
     public Type getType() {
         return type;
@@ -71,27 +71,10 @@ public class SegmentStub extends Segment {
     public void setType(Type type) {
         this.type = type;
     }
+*/
 
     @Override
-    public Value getSmallest() {
-        return null;
-    }
-
-    @Override
-    public void setSmallest(Value smallest) {
-    }
-
-    @Override
-    public Value getLargest() {
-        return null;
-    }
-
-    @Override
-    public void setLargest(Value largest) {
-    }
-
-    @Override
-    public int size() {
+    public long size() {
         return size;
     }
 
