@@ -388,7 +388,6 @@ public class ArrayTest {
         List<byte[]> arrayValues = vlag.generateMemoryArray(300);
         Random r = new Random(337);
         int skip = r.nextInt() % 13;
-        List<byte[]> updateList = new LinkedList<byte[]>();
         
         assertEquals(0, array.position());
         
@@ -449,9 +448,10 @@ public class ArrayTest {
         assertEquals(300, array.position());
         assertFalse(array.hasMore());
         
-        for(int i = 0; i < arrayValues.size(); i++) {
+        for(int i = 0, alternator = 0; i < arrayValues.size(); i++) {
             if(i % skip == 0) {
-                if(i % 2 == 0) {
+                
+                if(alternator % 2 == 0) {
                     array.position(i, LockType.WriteLock);
                     array.delete();
                     array.complete(LockType.WriteLock);
@@ -465,22 +465,23 @@ public class ArrayTest {
                     array.update(updateBytes, 0, updateBytes.length);
                     array.complete(LockType.WriteLock);                    
                 }
+                alternator++;
             }
         }
         
-        System.out.println("--------------------------------------- array size before reconfigure "+array.descriptor().size()+array.descriptor().checkIntegrity());        
         array.commit();
         reconfigure();
 
-        System.out.println("-------------------- array size after reconfigure "+array.descriptor().size()+array.descriptor().checkIntegrity());
-
         array.position(0, Array.LockType.ReadLock);
-        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+        for(int i = 0, j = 0, alternator = 0; i < arrayValues.size(); i++) {
             byte[] value = arrayValues.get(i);
-            /*if(i % skip == 0 && i % 2 != 0) {
-                value = updateList.get(j);
-                j++;
-            }*/
+            if(i % skip == 0) {
+                if(alternator % 2 != 0) {
+                    value = updateList.get(j);
+                    j++;
+                }
+                alternator++;
+            }
             
             byte[] buffer = new byte[value.length];
             array.scan(array.createIODescriptor(buffer, 0));
