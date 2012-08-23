@@ -71,10 +71,8 @@ public class PageIOHandler {
         assert (pageOffset == endPageOffset && endPage == page)
                 || total == length;
         if (total < length) {
-            // increase
             insert();
         } else if (endPage != page || endPageOffset != pageOffset) {
-            // decrease
             truncate();
         }
         complete();
@@ -106,122 +104,6 @@ public class PageIOHandler {
         complete();
     }
 
-    private void prepareAppend(byte[] buffer, int bufferOffset, int length) {
-        prepare(buffer, bufferOffset, length, -1);
-        page = pages.get(pages.size() - 1);
-        pageOffset = page.limit();
-    }
-
-    private void prepareScan(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        prepare(buffer, bufferOffset, length, loffset);
-        setIndexAndPageOffset();
-    }
-
-    private void prepareUpdate(byte[] buffer, int bOffset, int oldlen,
-            int newlen, long loffset) {
-        prepare(buffer, bOffset, newlen, loffset);
-        long cursor = setIndexAndPageOffset();
-
-        this.endPage = null;
-        this.endPageOffset = -1;
-        this.endIndex = -1;
-        this.endOffset = loffset + (long) oldlen;
-        endIndex = index;
-        Page pageIter = page;
-        while (endIndex < pages.size()) {
-            if (cursor + pageIter.limit() < endOffset) {
-                cursor += pageIter.limit();
-                endIndex++;
-            } else if (cursor + pageIter.limit() == endOffset) {
-                cursor += pageIter.limit();
-                break;
-            } else {
-                break;
-            }
-            pageIter = pages.get(endIndex);
-        }
-
-        endPage = pages.get(endIndex);
-        assert cursor <= endOffset;
-        if (cursor != endOffset) {
-            endPageOffset = (int) (endOffset - cursor);
-        } else {
-            endPageOffset = endPage.limit();
-        }
-
-        if (log.isTraceEnabled()) {
-            log.trace("endindex" + endIndex + "pages" + pages.size()
-                    +"endPageOffset "+endPageOffset
-                    +"elimit() "+endPage.limit());
-        }
-    }
-
-    private void prepare(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        this.page = null;
-        this.pageOffset = -1;
-        this.buffer = buffer;
-        this.bufferOffset = bufferOffset;
-        this.logicalOffset = loffset;
-        this.length = length;
-        this.remaining = length;
-        this.total = 0;
-        this.index = 0;
-    }
-    
-    private void complete() {
-        this.page = null;
-        this.endPage = null;
-        this.pageOffset = -1;
-        this.endPageOffset = -1;
-        this.buffer = null;
-        this.bufferOffset = -1;
-        this.logicalOffset = -1;
-        this.endOffset = -1;
-        this.length = -1;
-        this.total = -1;
-        this.remaining = -1;
-        this.index = -1;
-        this.endIndex = -1;
-    }
-
-    private long setIndexAndPageOffset() {
-        long cursor = 0;
-
-        for (Page pageIter : pages) {
-            if (cursor + pageIter.limit() < logicalOffset) {
-                cursor += pageIter.limit();
-                index++;
-            } else if (cursor + pageIter.limit() == logicalOffset) {
-                cursor += pageIter.limit();
-                index++;
-                break;
-            } else {
-                break;
-            }
-        }
-
-        assert cursor <= logicalOffset;
-        pageOffset = (int) (logicalOffset - cursor);
-        page = pages.get(index);
-        
-        if (log.isTraceEnabled()) {
-            log.trace("logicalOffset" + logicalOffset + "cursor" + cursor
-                    + "index" + index + "pages" + pages.size() + "pageoffset"
-                    + pageOffset);
-        }
-        return cursor;
-    }
-
-    private void advance(int iobytes) {
-        assert pageOffset <= page.size();
-        total += iobytes;
-        bufferOffset += iobytes;
-        pageOffset += iobytes;
-        remaining -= iobytes;
-    }
-
     private void overwrite() {
         int iobytes = 0;
         boolean done = false;
@@ -241,11 +123,11 @@ public class PageIOHandler {
                 break;
             }
             
-            if(log.isTraceEnabled()) {
-                log.trace("OVERWRITE: total "+total+" leng "+length+" index "+index
-                        +" spages "+pages.size()+" remaining"+remaining+" size "+size
-                        +" pageOffset "+pageOffset+" page limit "+page.limit()
-                        +" bufferOffset "+bufferOffset);
+            if(log.isDebugEnabled()) {
+                log.debug("OVERWRITE: total = "+total+" leng = "+length+" index = "+index
+                        +" pages = "+pages.size()+" remaining = "+remaining+" size = "+size
+                        +" pageOffset = "+pageOffset+" page limit = "+page.limit()
+                        +" bufferOffset = "+bufferOffset);
             }
             
             iobytes = page.write(buffer, bufferOffset, pageOffset, size);
@@ -265,11 +147,11 @@ public class PageIOHandler {
     }
 
     private void truncate() {
-        if(log.isTraceEnabled()) {
-            log.trace("endpage == page "+(endPage == page)
-                    +" endoffset"+endPageOffset+" pageoffset"+pageOffset
-                    +" endPage.limit() "+endPage.limit()
-                    +" page.limit() "+page.limit());
+        if(log.isDebugEnabled()) {
+            log.debug("endpage == page "+(endPage == page)
+                    +" endoffset = "+endPageOffset+" pageoffset = "+pageOffset
+                    +" endPage.limit() = "+endPage.limit()
+                    +" page.limit() = "+page.limit());
         }
         
         int tail = endPage.limit() - endPageOffset;
@@ -290,7 +172,7 @@ public class PageIOHandler {
             return;
         } else {
             // otherwise set teh page limit.  there is a least 1 partial page
-            // after page, that has dead data on it
+            // after "page", that has dead data on it
             page.setLimit(pageOffset);
         }
 
@@ -337,7 +219,6 @@ public class PageIOHandler {
                 deadindex++;
             }
         }
-
         pages.removeAll(deadpages);
         for (Page deadpage : deadpages) {
             pageManager.releasePageDescriptor(deadpage);
@@ -398,5 +279,123 @@ public class PageIOHandler {
             page.setLimit(iobytes);
         }
         pages.addAll(index, newPages);
+    }
+    
+
+    private void prepare(byte[] buffer, int bufferOffset, int length,
+            long loffset) {
+        this.page = null;
+        this.pageOffset = -1;
+        this.buffer = buffer;
+        this.bufferOffset = bufferOffset;
+        this.logicalOffset = loffset;
+        this.length = length;
+        this.remaining = length;
+        this.total = 0;
+        this.index = 0;
+    }
+
+
+    private void prepareAppend(byte[] buffer, int bufferOffset, int length) {
+        prepare(buffer, bufferOffset, length, -1);
+        page = pages.get(pages.size() - 1);
+        pageOffset = page.limit();
+    }
+
+    private void prepareScan(byte[] buffer, int bufferOffset, int length,
+            long loffset) {
+        prepare(buffer, bufferOffset, length, loffset);
+        setIndexAndPageOffset();
+    }
+
+    private void prepareUpdate(byte[] buffer, int bOffset, int oldlen,
+            int newlen, long loffset) {
+        prepare(buffer, bOffset, newlen, loffset);
+        long cursor = setIndexAndPageOffset();
+
+        this.endPage = null;
+        this.endPageOffset = -1;
+        this.endIndex = -1;
+        this.endOffset = loffset + (long) oldlen;
+        endIndex = index;
+        Page pageIter = page;
+        while (endIndex < pages.size()) {
+            if (cursor + pageIter.limit() < endOffset) {
+                cursor += pageIter.limit();
+                endIndex++;
+            } else if (cursor + pageIter.limit() == endOffset) {
+                cursor += pageIter.limit();
+                break;
+            } else {
+                break;
+            }
+            pageIter = pages.get(endIndex);
+        }
+
+        endPage = pages.get(endIndex);
+        assert cursor <= endOffset;
+        if (cursor != endOffset) {
+            endPageOffset = (int) (endOffset - cursor);
+        } else {
+            endPageOffset = endPage.limit();
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("endindex = " + endIndex + " pages = " + pages.size()
+                    +" endPageOffset = "+endPageOffset
+                    +" enpage.limit() = "+endPage.limit());
+        }
+    }
+    
+    private void complete() {
+        this.page = null;
+        this.endPage = null;
+        this.pageOffset = -1;
+        this.endPageOffset = -1;
+        this.buffer = null;
+        this.bufferOffset = -1;
+        this.logicalOffset = -1;
+        this.endOffset = -1;
+        this.length = -1;
+        this.total = -1;
+        this.remaining = -1;
+        this.index = -1;
+        this.endIndex = -1;
+    }
+
+    private long setIndexAndPageOffset() {
+        long cursor = 0;
+
+        for (Page pageIter : pages) {
+            if (cursor + pageIter.limit() < logicalOffset) {
+                cursor += pageIter.limit();
+                index++;
+            } else if (cursor + pageIter.limit() == logicalOffset) {
+                cursor += pageIter.limit();
+                index++;
+                break;
+            } else {
+                break;
+            }
+        }
+
+        assert cursor <= logicalOffset;
+        pageOffset = (int) (logicalOffset - cursor);
+        page = pages.get(index);
+        
+        if (log.isDebugEnabled()) {
+            log.debug(" logicalOffset = " + logicalOffset + " cursor = " + cursor
+                    + "index = " + index + "pages = " + pages.size() + "pageoffset = "
+                    + pageOffset);
+        }
+        return cursor;
+    }
+
+    private void advance(int iobytes) {
+        assert pageOffset <= page.size();
+        total += iobytes;
+        bufferOffset += iobytes;
+        pageOffset += iobytes;
+        remaining -= iobytes;
     }
 }
