@@ -39,16 +39,12 @@ import syndeticlogic.catena.array.ArrayRegistry;
 import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.store.PageManager;
-import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.store.SegmentManager;
 import syndeticlogic.catena.store.SegmentManager.CompressionType;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
-import syndeticlogic.catena.utility.ArrayGenerator;
 import syndeticlogic.catena.utility.CompositeKey;
-import syndeticlogic.catena.utility.FixedLengthArrayGenerator;
 import syndeticlogic.catena.utility.PropertiesUtility;
-import syndeticlogic.catena.utility.Util;
 import syndeticlogic.catena.utility.VariableLengthArrayGenerator;
 
 public class ArrayTest {
@@ -83,7 +79,7 @@ public class ArrayTest {
                 PageFactory.CachingPolicy.PinnableLru, PageFactory.PageDescriptorType.Unsynchronized, 
                 retryLimit);
 
-        pm = pf.createPageManager(null, 4096, 4096);
+        pm = pf.createPageManager(null, 4096, 8192);
         SegmentManager.configureSegmentManager(CompressionType.Null, pm);
         arrayRegistry = new ArrayRegistry(p);
         arrayRegistry.createArray(key, Type.INTEGER);
@@ -91,16 +87,14 @@ public class ArrayTest {
     }
 
     public void reconfigure() {
-        key = new CompositeKey();
-        key.append(prefix);
-
         pf = new PageFactory(PageFactory.BufferPoolMemoryType.Java, 
                 PageFactory.CachingPolicy.PinnableLru, PageFactory.PageDescriptorType.Unsynchronized, 
                 retryLimit);
 
-        pm = pf.createPageManager(null, 4096, 4096);
+        pm = pf.createPageManager(null, 4096, 8192);
         SegmentManager.configureSegmentManager(CompressionType.Null, pm);
         arrayRegistry = new ArrayRegistry(p);
+        System.out.println("key =--------------------- "+key.toString());
         array = arrayRegistry.createArrayInstance(key);
     }
     
@@ -135,9 +129,10 @@ public class ArrayTest {
 
     @Test
     public void updateVariableLengthArrayTest() {
-        CompositeKey key = new CompositeKey();
-        key.append(this.key);
-        key.append(1);
+        CompositeKey newKey = new CompositeKey();
+        newKey.append(this.key);
+        newKey.append(1);
+        this.key = newKey;
         
         arrayRegistry.createArray(key, Type.BINARY);
         array = arrayRegistry.createArrayInstance(key);
@@ -189,6 +184,7 @@ public class ArrayTest {
         CompositeKey key = new CompositeKey();
         key.append(this.key);
         key.append(1);
+        this.key = key;
         
         arrayRegistry.createArray(key, Type.BINARY);
         array = arrayRegistry.createArrayInstance(key);
@@ -226,6 +222,276 @@ public class ArrayTest {
         assertFalse(array.hasMore());
     }
     
+
+    @Test
+    public void updateDeleteVariableLengthArrayTest() {
+        CompositeKey key = new CompositeKey();
+        key.append(this.key);
+        key.append(1);
+        
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> skipList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                if(i % 2 == 0) {
+                    array.position(i, LockType.WriteLock);
+                    array.delete();
+                    array.complete(LockType.WriteLock);
+                    arrayValues.remove(i);
+                } else {
+                    byte[] updateBytes = new byte[r.nextInt(8192)+1];
+                    r.nextBytes(updateBytes);
+                    skipList.add(updateBytes);
+                    array.position(i, LockType.WriteLock);
+                    array.update(updateBytes, 0, updateBytes.length);
+                    array.complete(LockType.WriteLock);                    
+                }
+            }
+        }
+        
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            if(i % skip == 0 && i % 2 != 0) {
+                value = skipList.get(j);
+                j++;
+            }
+            
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+    
+
+    @Test
+    public void commitAppendVariableLengthArrayTest() throws InterruptedException {
+        CompositeKey newKey = new CompositeKey();
+        newKey.append(this.key);
+        newKey.append("1"+System.getProperty("file.separator"));
+        key = newKey;
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> skipList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        array.commit();
+        reconfigure();
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            if(i % skip == 0 && i % 2 != 0) {
+                value = skipList.get(j);
+                j++;
+            }
+            
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+
+
+    @Test
+    public void commitUpdateVariableLengthArrayTest() {
+        CompositeKey newKey = new CompositeKey();
+        newKey.append(this.key);
+        newKey.append("1"+System.getProperty("file.separator"));
+        key = newKey;
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> updateList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        int cumdelta = 0;
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                byte[] updateBytes = new byte[r.nextInt(8192)+1];
+                r.nextBytes(updateBytes);
+                updateList.add(updateBytes);
+                array.position(i, LockType.WriteLock);
+                
+                int delta = updateBytes.length - arrayValues.get(i).length;
+                cumdelta += delta;
+                array.update(updateBytes, 0, updateBytes.length);
+                array.complete(LockType.WriteLock);                    
+            }   
+        }
+        array.commit();
+        reconfigure();
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            if(i % skip == 0) {
+                value = updateList.get(j);
+                j++;
+            }
+            
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            System.out.println("i = "+ i+" value.size = "+value.length);
+            assertArrayEquals(value, buffer); 
+            
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+
+    @Test
+    public void commitDeleteVariableLengthArrayTest() {
+        CompositeKey newKey = new CompositeKey();
+        newKey.append(this.key);
+        newKey.append("1"+System.getProperty("file.separator"));
+        key = newKey;
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> updateList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            System.out.println(" boject size = "+value.length);
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                array.position(i, LockType.WriteLock);
+                array.delete();
+                array.complete(LockType.WriteLock);
+                arrayValues.remove(i);
+            }
+        }
+        array.commit();
+        reconfigure();
+
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            System.out.println("i = "+ i+" value.size = "+value.length);
+       
+            assertArrayEquals(value, buffer); 
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+    
+
+    @Test
+    public void commitUpdateDeleteVariableLengthArrayTest() {
+        CompositeKey newKey = new CompositeKey();
+        newKey.append(this.key);
+        newKey.append("1"+System.getProperty("file.separator"));
+        key = newKey;
+        System.out.println("---------------------------------------key = "+key.toString());
+        arrayRegistry.createArray(key, Type.BINARY);
+        array = arrayRegistry.createArrayInstance(key);
+        VariableLengthArrayGenerator vlag = new VariableLengthArrayGenerator(37, 13);
+        List<byte[]> arrayValues = vlag.generateMemoryArray(300);
+        Random r = new Random(337);
+        int skip = r.nextInt() % 13;
+        List<byte[]> updateList = new LinkedList<byte[]>();
+        
+        assertEquals(0, array.position());
+        
+        for(byte[] value : arrayValues) {
+            array.append(value,0, value.length);
+        }
+        
+        assertEquals(300, array.position());
+        assertFalse(array.hasMore());
+        
+        for(int i = 0; i < arrayValues.size(); i++) {
+            if(i % skip == 0) {
+                if(i % 2 == 0) {
+                    array.position(i, LockType.WriteLock);
+                    array.delete();
+                    array.complete(LockType.WriteLock);
+                    arrayValues.remove(i);
+                    
+                } else {
+                    byte[] updateBytes = new byte[r.nextInt(8192)+1];
+                    r.nextBytes(updateBytes);
+                    updateList.add(updateBytes);
+                    array.position(i, LockType.WriteLock);
+                    array.update(updateBytes, 0, updateBytes.length);
+                    array.complete(LockType.WriteLock);                    
+                }
+            }
+        }
+        
+        System.out.println("--------------------------------------- array size before reconfigure "+array.descriptor().size()+array.descriptor().checkIntegrity());        
+        array.commit();
+        reconfigure();
+
+        System.out.println("-------------------- array size after reconfigure "+array.descriptor().size()+array.descriptor().checkIntegrity());
+
+        array.position(0, Array.LockType.ReadLock);
+        for(int i = 0, j = 0; i < arrayValues.size(); i++) {
+            byte[] value = arrayValues.get(i);
+            /*if(i % skip == 0 && i % 2 != 0) {
+                value = updateList.get(j);
+                j++;
+            }*/
+            
+            byte[] buffer = new byte[value.length];
+            array.scan(array.createIODescriptor(buffer, 0));
+            System.out.println("i = "+ i+" value.size = "+value.length);
+            assertArrayEquals(value, buffer); 
+            
+        }
+        array.complete(Array.LockType.ReadLock);
+        assertFalse(array.hasMore());
+    }
+
     
     @Test
     public void basicTest() {
@@ -273,6 +539,7 @@ public class ArrayTest {
 
         buf = new byte[12];
         array.position(0, Array.LockType.ReadLock);
+        System.out.println("size "+array.descriptor().length());
         sdesc = array.scan(array.createIODescriptor(buf, 0));
         array.complete(Array.LockType.ReadLock);
 
@@ -399,182 +666,11 @@ public class ArrayTest {
             } else {
                 Codec.getCodec().encode(map.get(r), buf, 0);            
             }
-            System.out.println("I = "+i);            
+            
             for (int j = 0; j < 4; j++) {
                 assertEquals(buf[j], total[4*i+j]);
             }
         }
         array.complete(Array.LockType.ReadLock);
-    }
-    
-        /*
-        
-                for (int j = 0; j < 4; j++) {
-                    assertEquals(buf[j], total[4 * i + j]);
-                }
-            }
-        }
-    }
-    
-    @Test
-    public void updateCommitTest() {
-
-        /* array.commit();
-
-        reconfigure();
-        for (int i = 0; i < 1048576 * 4; i++) {
-            total[i] = 0;
-        }
-*/
-        
-        /*
-        byte[] buf = new byte[4];
-        byte[] total = new byte[1048576 * 4];
-        HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-        map.put(0, 0xdeadbeef);
-        map.put(1, 0xffffffff);
-        map.put(2, 0xadaddeee);
-        map.put(3, 0xabaddade);
-        map.put(4, 0xabcdefab);
-        
-        for (int i = 0; i < 1048576; i++) {
-            int r = i % 5;
-            Codec.getCodec().encode(map.get(r), buf, 0);
-            array.append(buf, 0);
-        }
-
-        array.position(0, Array.LockType.ReadLock);
-        ScanDescriptor sdesc = array.scan(1048576, total, 0);
-        array.complete(Array.LockType.ReadLock);
-        array.commit();
-
-        reconfigure();
-        for (int i = 0; i < 1048576 * 4; i++) {
-            total[i] = 0;
-        }
-
-        array.position(0, Array.LockType.ReadLock);
-        sdesc = array.scan(1048576, total, 0);
-        array.complete(Array.LockType.ReadLock);
-        for (int i = 0; i < 1048576; i++) {
-            for (int j = 0; j < 4; j++) {
-                assertEquals(buf[j], total[4 * i + j]);
-                /*
-                 * if(i % 1024 == 0) { System.out.println("total i, j "+i +
-                 * ", "+4*i+": "+ Integer.toHexString(total[4*i])); }
-                 *
-            }
-        }
-*/
-    
-    
-            /*  OLD
-        CompositeKey key1 = new CompositeKey();
-        int nextKey = 0;
-        key1.append(key);
-        key1.append(nextKey);
-       
-        Segment seg = SegmentManager.get().lookup(key1.toString());
-        //assertEquals(1048576, seg.size());
-        byte[] buf1 = new byte[4];
-        for(int i = 0; i < 1048576; i++) {
-            seg.scan(buf1, 0, i, 4);
-            assertArrayEquals(buf, buf1);
-            if(i == 1048576/4 || 
-               i == 1048576/2||
-               i == 1048576/4*3) {
-                key1 = new CompositeKey();
-                nextKey++;
-                key1.append(key);
-                key1.append(nextKey);
-                seg = SegmentManager.get().lookup(key1.toString());
-            }
-        }
-
-        /*assertEquals(3, sdesc.elements());
-        assertEquals(4, sdesc.size(0));
-        assertEquals(4, sdesc.size(1));
-        assertEquals(4, sdesc.size(2));
-        */
-    
-    
-    public void testAppendScan() throws Exception {
-        int seed = 37;
-        int elementSize = 8;
-        int elements = 314159;
-        boolean flush = false;
-        boolean fixedLengthData = true;
-        boolean updates = false;
-        appendUpdateScanTest(seed, elementSize, elements, flush, fixedLengthData, updates, CompressionType.Snappy);
-    }
-
-    public void appendUpdateScanTest(int seed, int elementSize, int elements, boolean flush, boolean fixedLengthData,
-            boolean testUpdate, SegmentManager.CompressionType compressionType) throws Exception {
-
-        Codec.configureCodec(new TypeFactory());
-
-        PageFactory pa =
-            new PageFactory(PageFactory.BufferPoolMemoryType.Native, PageFactory.CachingPolicy.PinnableLru,
-                    PageFactory.PageDescriptorType.Unsynchronized, retryLimit);
-
-        ArrayGenerator fagen = null;
-        if (fixedLengthData)
-            fagen = new FixedLengthArrayGenerator(seed, elementSize, elements);
-        else
-            fagen = new VariableLengthArrayGenerator(seed, elements);
-
-        SegmentManager.configureSegmentManager(compressionType, pa.createPageManager(null, 4096, 4096));
-        SegmentManager fsa = SegmentManager.get();
-
-        Util.delete("target/filesTest");
-        CompositeKey fileId = new CompositeKey();
-        fileId.append("target/filesTest");
-        Segment fm = fsa.create(fileId.toString(), Type.BINARY);
-        assertTrue(fm != null);
-
-        List<byte[]> bytes = fagen.generateMemoryArray(elements);
-        int i = 0;
-        byte[] last = null;
-        int position = 0;
-        for (byte[] element : bytes) {
-            fm.append(element, 0, element.length);
-            if (testUpdate && i % 2 == 1) {
-                fm.update(last, 0, position, element.length, last.length);
-                position += last.length;
-                last = null;
-            } else {
-                position += element.length;
-                last = element;
-            }
-            assertEquals(position, (int) fm.size());
-            i++;
-        }
-
-        if (flush) {
-            fm.commit();
-            fm = null;
-            SegmentManager.configureSegmentManager(compressionType, pa.createPageManager(null, 4096, 4096));
-            fsa = SegmentManager.get();
-            fm = fsa.lookup(fileId.toString());
-
-        }
-        assertEquals(position, (int) fm.size());
-        long fileoffset = 0;
-        i = 0;
-        last = null;
-
-        for (byte[] actual : bytes) {
-            if (testUpdate && i % 2 == 1) {
-                actual = last;
-            }
-            byte[] expected = new byte[actual.length];
-            // System.out.println("I "+i+"Position "+ fileoffset);
-            fm.scan(expected, 0, fileoffset, actual.length);
-            fileoffset += actual.length;
-            System.out.println("element = " + i);
-            assertArrayEquals(actual, expected);
-            last = actual;
-            i++;
-        }
     }
 }
