@@ -55,7 +55,7 @@ public class SegmentCursor {
         if(offset == -1 || segment == null) {
             return -1;
         }
-        return segment.size() - offset;
+        return (int)segment.size() - offset;
     }
     
     public Segment segment() {
