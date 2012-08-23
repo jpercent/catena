@@ -56,8 +56,8 @@ public class ArrayDescriptor {
         public ValueDescriptor() {
         }
 
-        public ValueDescriptor(CompositeKey segmentId, int segmentOffset, 
-                long byteOffset, int index, int size) {
+        public ValueDescriptor(CompositeKey segmentId, int segmentOffset, long byteOffset, 
+                int index, int size) {
             this.segmentId = segmentId;
             this.segmentOffset = segmentOffset;
             this.byteOffset = byteOffset;
@@ -108,7 +108,7 @@ public class ArrayDescriptor {
     }
     
     public static ArrayDescriptor decode(byte[] buffer, int offset) {
-        assert buffer != null && offset > 0;
+        assert buffer != null && offset >= 0;
         assert buffer.length > 0 && buffer.length > offset;
         CodeHelper coder = Codec.getCodec().coder();
         List<Object> members = coder.decode(buffer, offset, 1);
@@ -125,13 +125,14 @@ public class ArrayDescriptor {
         long arraySize = ((Long)members.get(5)).longValue();
         
         LinkedList<Integer> sizes = null;
+        int current = 6;
         if(!type.isFixedLength()) {
             sizes = new LinkedList<Integer>();
-            for(int i=6; i < length+6; i++) {
-                sizes.add(((Integer)members.get((int)i)));
+            for(; current < length+6; current++) {
+                sizes.add(((Integer)members.get(current)));
             }
         }
-        long crc32 = ((Long)members.get(6)).longValue();
+        long crc32 = ((Long)members.get(current)).longValue();
         
         coder.reset();
         coder.append(stringKey);
@@ -174,7 +175,6 @@ public class ArrayDescriptor {
         }
         assert newSeg != null && nextKey != null;
         arrayDesc.addSegment(nextKey, newSeg);
-        log.debug("first segment of array "+arrayDesc.id().toString()+" created "); 
     }      
    
 	public ArrayDescriptor(CompositeKey key, Type type, int splitThreshold) {
@@ -204,7 +204,6 @@ public class ArrayDescriptor {
             if(!f.exists()) {
                 assert f.createNewFile();
             }
-            System.out.println("file name == "+path+ARRAY_DESC_FILE_NAME);
             FileOutputStream metaFlusher = new FileOutputStream(f);
             commitChannel = metaFlusher.getChannel();
         } catch (FileNotFoundException e) {
@@ -225,13 +224,11 @@ public class ArrayDescriptor {
 	}
 	
 	public synchronized boolean checkIntegrity() {
-	    // not sure this function makes any sense any more
         boolean ret = true;
         long size = 0;
         ValueDescriptor valueDescriptor = null;
 
         for(int index=0; index < length; index++) {
-	        //eDesc = valueIndex.find(index);
             valueDescriptor = find(index);
 	        if(valueDescriptor == null) {
 	            log.error("checkIntegrity failed - less elements than expected");
@@ -323,7 +320,6 @@ public class ArrayDescriptor {
     
     private ValueDescriptor configureValue(int index) {
         if(typeSize != -1) {
-            System.out.println("typesize = "+typeSize+" index "+index);
             return  new ValueDescriptor(null, -1, index * typeSize, index, typeSize);
         }
         
@@ -341,16 +337,18 @@ public class ArrayDescriptor {
             value = i.next();
             v.byteOffset += value.intValue();
             pos++;
-        } while (pos < index);
+        } while (pos <= index);
         assert value != null;
-
         v.valueSize = value.intValue();
+        assert v.valueSize == sizes.get(index).intValue();
         return v;
     }
     
     public synchronized int update(int index, int size) {
         int ret = typeSize;
         if(typeSize == -1) {
+            arraySize -= sizes.get(index).intValue();
+            arraySize += size;
             ret = sizes.set(index, new Integer(size)).intValue();            
         }
         return ret;
@@ -358,6 +356,7 @@ public class ArrayDescriptor {
     }
 
     public synchronized void append(int size) {
+        assert lastSegment != null;
         if(lastSegment.size() + size > splitThreshold) {
             ArrayDescriptor.createSegment(this);
         }
@@ -384,13 +383,10 @@ public class ArrayDescriptor {
     public synchronized void persist() {
         byte[] serialized = ArrayDescriptor.encode(this);
         try {
-            System.out.println(" serialized length "+serialized.length);
             commitChannel.position(0);
             commitChannel.truncate(serialized.length);
             commitChannel.write(ByteBuffer.wrap(serialized));
             commitChannel.force(false);
-            System.out.println(" file toString = "+commitChannel.toString());
-            System.out.println(" position = "+commitChannel.position());
             //valueIndex.persist();
         } catch (IOException e) {
             String msg = " could not sync array identified by "+master.toString();
