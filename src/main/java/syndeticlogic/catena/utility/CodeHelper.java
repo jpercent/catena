@@ -1,4 +1,4 @@
-package syndeticlogic.catena.codec;
+package syndeticlogic.catena.utility;
 
 import java.nio.ByteBuffer;
 import java.util.LinkedList;

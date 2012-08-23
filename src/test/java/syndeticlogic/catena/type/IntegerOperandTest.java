@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.IntegerValue;
 import syndeticlogic.catena.type.TypeFactory;
+import syndeticlogic.catena.utility.Codec;
 
 public class IntegerOperandTest {
 

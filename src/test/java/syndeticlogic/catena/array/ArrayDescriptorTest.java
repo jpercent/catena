@@ -10,10 +10,10 @@ import org.junit.Test;
 import syndeticlogic.catena.stubs.SegmentStub;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
+import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.CompositeKey;
 
 import syndeticlogic.catena.array.ArrayDescriptor;
-import syndeticlogic.catena.codec.Codec;
 
 public class ArrayDescriptorTest {
     

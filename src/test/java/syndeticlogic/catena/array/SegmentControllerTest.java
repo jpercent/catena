@@ -12,10 +12,10 @@ import syndeticlogic.catena.array.Array;
 import syndeticlogic.catena.array.ArrayDescriptor;
 import syndeticlogic.catena.array.SegmentController;
 import syndeticlogic.catena.array.SegmentCursor;
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.stubs.SegmentStub;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
+import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.CompositeKey;
 
 public class SegmentControllerTest {

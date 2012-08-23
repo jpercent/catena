@@ -7,8 +7,8 @@ import java.nio.channels.FileChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.Codec;
 
 public class SerializedObjectChannel {
     private static Log log = LogFactory.getLog(SerializedObjectChannel.class);

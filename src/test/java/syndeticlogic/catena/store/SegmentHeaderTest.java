@@ -9,9 +9,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.stubs.PageManagerStub;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.Codec;
 
 public class SegmentHeaderTest {
      PageManager pageManager;

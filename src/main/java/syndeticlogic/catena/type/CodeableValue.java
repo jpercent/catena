@@ -1,7 +1,7 @@
 package syndeticlogic.catena.type;
 
-import syndeticlogic.catena.codec.CodeHelper;
-import syndeticlogic.catena.codec.Codec;
+import syndeticlogic.catena.utility.CodeHelper;
+import syndeticlogic.catena.utility.Codec;
 
 
 public class CodeableValue extends Value {

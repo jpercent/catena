@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.codec.CodeHelper;
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.CodeHelper;
+import syndeticlogic.catena.utility.Codec;
 
 public class CodeHelperTest {
 

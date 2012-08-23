@@ -10,8 +10,8 @@ import java.util.Random;
 import org.junit.Test;
 import org.xerial.snappy.Snappy;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.SnappyDecorator;
+import syndeticlogic.catena.utility.Codec;
 
 public class SnappyDecoratorTest {
     

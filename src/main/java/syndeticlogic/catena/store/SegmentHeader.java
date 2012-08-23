@@ -9,9 +9,9 @@ import java.util.zip.CRC32;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.codec.CodeHelper;
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.CodeHelper;
+import syndeticlogic.catena.utility.Codec;
 
 public class SegmentHeader {
     private static final Log log = LogFactory.getLog(SegmentHeader.class);

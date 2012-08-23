@@ -1,6 +1,6 @@
 package syndeticlogic.catena.type;
 
-import syndeticlogic.catena.codec.Codec;
+import syndeticlogic.catena.utility.Codec;
 
 
 public class ByteValue extends Value {

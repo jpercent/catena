@@ -9,8 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.Codec;
 
 public class CodecTest {
 	Type t;

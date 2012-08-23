@@ -1,7 +1,7 @@
 package syndeticlogic.catena.type;
 
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.Codec;
 
 public class IntegerValue extends Value {
 	private int decoded;

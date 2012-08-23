@@ -28,14 +28,14 @@ public class SegmentManager {
     private CompressionType compressionType;
     private HashMap<String, Segment> files;
     private PageManager pageManager;
-    private int cores;
+    //private int cores;
 
     private SegmentManager(CompressionType compressionType,
             PageManager pageManager) {
         this.compressionType = compressionType;
         this.pageManager = pageManager;
         this.files = new HashMap<String, Segment>();
-        cores = Runtime.getRuntime().availableProcessors();
+        //cores = Runtime.getRuntime().availableProcessors();
         //pool = Executors.newFixedThreadPool(this.cores);
     }
 
@@ -77,11 +77,17 @@ public class SegmentManager {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
-            SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
-            SerializedObjectChannel channel = new SerializedObjectChannel(file.getChannel());
-
-            fm = new Segment(new ReentrantReadWriteLock(),
-                    header, channel, pageManager, filename);
+            SegmentHeader header = new SegmentHeader(file.getChannel(),
+                    pageManager);
+            SerializedObjectChannel channel;
+            if (compressionType == CompressionType.Snappy) {
+                channel = new SnappyDecorator(file.getChannel(),
+                        pageManager.pageSize(), true);
+            } else {
+                channel = new SerializedObjectChannel(file.getChannel());
+            }
+            fm = new Segment(new ReentrantReadWriteLock(), header, channel,
+                    pageManager, filename);
             files.put(filename, fm);
         } else {
             assert filename.equals(fm.getQualifiedFileName());

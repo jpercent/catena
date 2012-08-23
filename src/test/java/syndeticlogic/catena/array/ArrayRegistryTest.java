@@ -10,13 +10,13 @@ import org.junit.Test;
 
 import syndeticlogic.catena.array.ArrayDescriptor;
 import syndeticlogic.catena.array.ArrayRegistry;
-import syndeticlogic.catena.codec.Codec;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.store.PageManager;
 import syndeticlogic.catena.store.SegmentManager;
 import syndeticlogic.catena.store.SegmentManager.CompressionType;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.TypeFactory;
+import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.CompositeKey;
 import syndeticlogic.catena.utility.PropertiesUtility;
 
