@@ -100,7 +100,7 @@ public class ArrayDescriptorTest {
         assertEquals(prefix+"4",adesc.nextId().toString());
     }
     
-    //@Test
+    @Test
     public void testVarLength() throws Exception {
         String sep = System.getProperty("file.separator");
         String prefix = "target"+sep+"arrayDesccriptorTest"+sep;
@@ -121,12 +121,12 @@ public class ArrayDescriptorTest {
         SegmentStub stub = new SegmentStub();
         stub.size = 32;
         stub.name = "arrayDescTest";
+
+        adesc.addSegment(adesc.nextId(), stub);
         adesc.append(16);
         adesc.append(16);
-        
-        assertEquals(false,adesc.checkIntegrity());
-        adesc.addSegment(new CompositeKey(), stub);
-        assertEquals(true, adesc.checkIntegrity());
+        key.append('1');
+        assertEquals(true,adesc.checkIntegrity());
         
         assertEquals(key,adesc.id());
         assertEquals(Type.BINARY,adesc.type());
@@ -138,14 +138,6 @@ public class ArrayDescriptorTest {
         
         assertEquals(key,adesc.id());
         assertEquals(Type.BINARY,adesc.type());
-        assertEquals(2,adesc.length());
-        assertEquals(32,adesc.size());
-         
-        adesc.append(313);
-        assertEquals(adesc.size(), 11613);
-        assertEquals(adesc.length(), 3);
-        
-        adesc.delete(3);
         assertEquals(2,adesc.length());
         assertEquals(32,adesc.size());
     }
