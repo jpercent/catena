@@ -140,7 +140,7 @@ public class Segment implements Pinnable {
                 scan(single, 0, length, 1);
                 update(single, 0, start, length + 1, 1);
             }
-            this.size -= length;
+            // note that the update handles setting the value of size
         } finally {
             rwlock.writeLock().unlock();
         }
