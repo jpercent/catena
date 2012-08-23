@@ -142,9 +142,9 @@ public class Array {
         return index;
     }
 
-    public void position(int position, LockType lt) {
+    public void position(int position, LockType lockType) {
         long offset = arrayDescriptor.convertIndexToOffset(position);
-        segmentController.findAndLockSegment(segmentCursor, lt, offset);
+        segmentController.findAndLockSegment(segmentCursor, lockType, offset);
         index = position;
         configured = true;
     }
