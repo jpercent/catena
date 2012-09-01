@@ -26,11 +26,13 @@ public class SnappyDecorator extends SerializedObjectChannel {
         try {
             if (source.isDirect() && snappyBuffer.isDirect()) {
                 Snappy.compress(source, snappyBuffer);
+                snappyBuffer.rewind();
             } else if (!source.isDirect() && !snappyBuffer.isDirect()) {
                 byte[] sourceArray = source.array();
                 byte[] snappyBufferArray = snappyBuffer.array();
                 int compressedBytes = Snappy.rawCompress(sourceArray, 0, sourceArray.length, snappyBufferArray, 0);
                 snappyBuffer.limit(compressedBytes);
+                snappyBuffer.rewind();
             } else {
                 log.debug("buffer source memory type mismatch; not compressing");
                 dataToStore = source;
@@ -39,8 +41,7 @@ public class SnappyDecorator extends SerializedObjectChannel {
             log.error(e);
             throw new RuntimeException(e);
         }
-        
-        dataToStore.rewind();
+
         int written = 0;
         written = super.write(dataToStore);
         snappyBuffer.limit(snappyBuffer.capacity());
@@ -58,7 +59,7 @@ public class SnappyDecorator extends SerializedObjectChannel {
                 if(Snappy.isValidCompressedBuffer(snappyBuffer)) {
                     assert Snappy.uncompressedLength(snappyBuffer) <= target.limit();
                     bytesRead = Snappy.uncompress(snappyBuffer, target);
-                    target.limit(bytesRead);
+                    target.limit(target.position() + bytesRead);
                     snappyBuffer.rewind();
                     snappyBuffer.limit(snappyBuffer.capacity());
                 } else {
@@ -68,14 +69,31 @@ public class SnappyDecorator extends SerializedObjectChannel {
                 if(Snappy.isValidCompressedBuffer(snappyBuffer.array(), 0, snappyBuffer.remaining())) {
                     assert Snappy.uncompressedLength(snappyBuffer.array(), 0, snappyBuffer.remaining()) <= target.limit();
                     bytesRead = Snappy.uncompress(snappyBuffer.array(), 0, snappyBuffer.remaining(), target.array(), 0);
-                    target.limit(bytesRead);
+                    target.limit(target.position() + bytesRead);
                     snappyBuffer.rewind();
                     snappyBuffer.limit(snappyBuffer.capacity());
                 } else {    
                     uncompressed = true;
                 }
+            } else if(snappyBuffer.isDirect() && !target.isDirect()) {
+                if(Snappy.isValidCompressedBuffer(snappyBuffer)) {
+                    ByteBuffer tempBuffer = ByteBuffer.allocateDirect(target.limit() - target.position());
+                    bytesRead = Snappy.uncompress(snappyBuffer, tempBuffer);
+                    System.out.println(" temp buffer = "+tempBuffer.position());
+                    target.put(tempBuffer);
+                    target.limit(target.position() + bytesRead);
+                    snappyBuffer.rewind();
+                    snappyBuffer.limit(snappyBuffer.capacity());
+                } else {
+                    uncompressed = true;
+                }
+            } else {
+                System.out.println("SnappyDecorator: target is compressed and snappy buffer is not");
+                assert false;
+                if(Snappy.isValidCompressedBuffer(snappyBuffer.array(), 0, snappyBuffer.remaining())) {
+                }
             }
-            
+           
             if(uncompressed) {
                 target.put(snappyBuffer);
                 snappyBuffer.rewind();
