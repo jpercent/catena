@@ -1,0 +1,33 @@
+protocol Predicate {
+   
+   enum Operator {
+     LessThan,
+     LessThanEqual,
+     Equal,
+     NotEqual,
+     GreaterThan,
+     GreaterThanEqual
+   }
+   
+   enum Connector {
+     Conjunction,
+     Disjunction
+   }
+   
+   record Value {
+    bytes data;
+    int offset;
+    int length;
+  }
+  
+  record Predicate {
+     Value v;
+     Operator op;
+  }
+  
+  record CompoundPredicate {
+    Predicate p;
+    Predicate q;
+    Connector c;
+  }
+}
