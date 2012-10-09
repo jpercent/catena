@@ -1,0 +1,31 @@
+@namespace("syndeticlogic.catena.avro")
+protocol Array {
+    import "predicate.idl"
+
+    error UnknownArrayException {
+    }
+    
+    error UnopenedArrayException {
+    }
+    
+    record Scan {
+        bytes data;
+        int records;
+        boolean hasMore;
+    }
+    
+    Void open(string id) throws UnknownArrayException;
+    Void close(string id) throws UnopenedArrayException, UnknownArrayException;
+    
+    Scan scan(Predicate p);
+    Scan scan(CompoundPredicate p);
+    Scan scan();
+    
+    void update(Predicate p) oneway;
+    void update(CompoundPredicate p) oneway;
+    void update() oneway;
+    
+    void delete(Predicate p) oneway;
+    void delete(CompoundPredicate p) oneway;
+    void delete() oneway;
+}
