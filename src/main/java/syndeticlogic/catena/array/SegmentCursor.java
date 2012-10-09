@@ -2,7 +2,7 @@ package syndeticlogic.catena.array;
 
 import syndeticlogic.catena.store.Segment;
 
-import syndeticlogic.catena.array.Array.LockType;
+import syndeticlogic.catena.array.BinaryArray.LockType;
 
 public class SegmentCursor {
     private Segment segment;

@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import syndeticlogic.catena.store.Segment;
 
-import syndeticlogic.catena.array.Array.LockType;
+import syndeticlogic.catena.array.BinaryArray.LockType;
 
 public class SegmentController {
 

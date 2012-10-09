@@ -53,13 +53,13 @@ public class ArrayRegistry {
 		throw new RuntimeException("need to cleanup persistent resources");
 	}
 
-	public Array createArrayInstance(CompositeKey id) {
+	public BinaryArray createArrayInstance(CompositeKey id) {
 		ArrayDescriptor arrayDesc = arrays.get(id);
 		if(arrayDesc == null) {
 			throw new RuntimeException("Array does not exist");
 		}
 		SegmentController sctrl = new SegmentController(arrayDesc);
-		return new Array(arrayDesc, sctrl);
+		return new BinaryArray(arrayDesc, sctrl);
 	}
 
 	public ArrayDescriptor arrayDescriptor(CompositeKey id) {

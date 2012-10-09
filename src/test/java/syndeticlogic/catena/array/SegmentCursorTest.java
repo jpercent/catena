@@ -7,7 +7,7 @@ import org.junit.Test;
 
 
 import syndeticlogic.catena.array.SegmentCursor;
-import syndeticlogic.catena.array.Array.LockType;
+import syndeticlogic.catena.array.BinaryArray.LockType;
 import syndeticlogic.catena.store.SegmentTest;
 import syndeticlogic.catena.stubs.SegmentStub;
 

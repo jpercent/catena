@@ -8,7 +8,7 @@ import java.io.File;
 import org.apache.commons.io.FileUtils;
 import org.junit.*;
 
-import syndeticlogic.catena.array.Array;
+import syndeticlogic.catena.array.BinaryArray;
 import syndeticlogic.catena.array.ArrayDescriptor;
 import syndeticlogic.catena.array.SegmentController;
 import syndeticlogic.catena.array.SegmentCursor;
@@ -72,7 +72,7 @@ public class SegmentControllerTest {
         SegmentController sctrl = new SegmentController(adesc);
         SegmentCursor loc = new SegmentCursor();
 
-        sctrl.findAndLockSegment(loc, Array.LockType.WriteLock, 8);
+        sctrl.findAndLockSegment(loc, BinaryArray.LockType.WriteLock, 8);
         assertEquals(stub, loc.segment());
         assertEquals(true, stub.writeLock);
         assertEquals(8, loc.offset());
@@ -95,7 +95,7 @@ public class SegmentControllerTest {
         assertEquals(null, loc.segment());
         
         
-        sctrl.findAndLockSegment(loc, Array.LockType.WriteLock, 32);
+        sctrl.findAndLockSegment(loc, BinaryArray.LockType.WriteLock, 32);
         assertEquals(false, stub.writeLock);
         assertEquals(stub1, loc.segment());
         assertEquals(true, stub1.writeLock);
