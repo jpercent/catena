@@ -342,7 +342,7 @@ public class ArrayTest {
         }
         assertEquals(300, array.position());
         assertFalse(array.hasMore());
-        int cumdelta = 0;
+        //int cumdelta = 0;
         for(int i = 0; i < arrayValues.size(); i++) {
             if(i % skip == 0) {
                 byte[] updateBytes = new byte[r.nextInt(8192)+1];
@@ -350,8 +350,8 @@ public class ArrayTest {
                 updateList.add(updateBytes);
                 array.position(i, LockType.WriteLock);
                 
-                int delta = updateBytes.length - arrayValues.get(i).length;
-                cumdelta += delta;
+                //int delta = updateBytes.length - arrayValues.get(i).length;
+                //cumdelta += delta;
                 array.update(updateBytes, 0, updateBytes.length);
                 array.complete(LockType.WriteLock);                    
             }   
