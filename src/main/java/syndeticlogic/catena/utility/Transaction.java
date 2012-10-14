@@ -1,5 +1,5 @@
 /*
- *    Copyright 2010, 2011 James Percent
+ *    Copyright 2010 - 2012 James Percent
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author <a href="mailto:james@empty-set.net">James Percent</a>
  */
 public class Transaction {
-    static AtomicLong idGenerator = new AtomicLong(0);
-    long id;
+    private static AtomicLong idGenerator = new AtomicLong(0);
+    private final long id;
 
     public Transaction() {
         id = idGenerator.getAndIncrement();
@@ -35,7 +35,11 @@ public class Transaction {
         }
         return ret;
     }
-
+    
+    public long id() {
+        return id;
+    }
+    
     @Override
 	public boolean equals(Object obj) {
 		if (this == obj)
