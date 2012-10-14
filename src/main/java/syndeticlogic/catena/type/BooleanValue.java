@@ -4,7 +4,9 @@ import syndeticlogic.catena.utility.Codec;
 
 
 public class BooleanValue extends Value {
-    
+    public BooleanValue() {
+    }
+
     public BooleanValue(boolean value) {
         super(null, 0, 0);
         byte[] rawvalue = new byte[Type.BOOLEAN.length()];
@@ -43,7 +45,7 @@ public class BooleanValue extends Value {
     
     @Override
     public void reset(byte[] data, int offset, int length) {
-        assert ((data.length - offset) >= length && Type.BOOLEAN.length() == length);
-        super.reset(data, offset, length);
+        assert (data.length - offset) >= length && Type.BOOLEAN.length() == length;
+        super.reset(data, offset, Type.BOOLEAN.length());
     }
 }

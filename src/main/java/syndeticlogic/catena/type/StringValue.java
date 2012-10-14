@@ -6,6 +6,9 @@ import syndeticlogic.catena.utility.Codec;
 public class StringValue extends Value {
 	private String data;
     
+	public StringValue() {
+	}
+	
     public StringValue(byte[] data, int offset, int length) {
         super(data, offset, length);
         this.data = new String(data, offset, length);

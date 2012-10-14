@@ -6,6 +6,9 @@ import syndeticlogic.catena.utility.Codec;
 public class LongValue extends Value {
 	private long decoded;
 	
+	public LongValue() {
+	}
+	
     public LongValue(long data) {
         super(null,0,0);
         decoded = data;
@@ -42,7 +45,7 @@ public class LongValue extends Value {
     @Override
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.LONG.length();
-        super.reset(data, offset, length);
+        super.reset(data, offset, Type.LONG.length());
         this.decoded = Codec.getCodec().decodeLong(data, offset);
     }
 }

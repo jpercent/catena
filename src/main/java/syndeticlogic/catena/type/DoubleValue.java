@@ -6,6 +6,9 @@ import syndeticlogic.catena.utility.Codec;
 public class DoubleValue extends Value {
 	private double decoded;
 	
+	public DoubleValue() {
+	}
+	
     public DoubleValue(int data) {
         super(null,0,0);
         this.decoded = data;
@@ -42,7 +45,7 @@ public class DoubleValue extends Value {
     @Override
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.DOUBLE.length();
-        super.reset(data, offset, length);
+        super.reset(data, offset, Type.DOUBLE.length());
         this.decoded = Codec.getCodec().decodeDouble(data, offset);
     }
 }

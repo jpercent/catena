@@ -4,6 +4,8 @@ import syndeticlogic.catena.utility.Codec;
 
 
 public class ByteValue extends Value {
+	public ByteValue() {
+	}
 	
     public ByteValue(byte value) {
         super(null, 0, 0);
@@ -42,7 +44,7 @@ public class ByteValue extends Value {
     
     @Override
     public void reset(byte[] data, int offset, int length) {
-        assert data.length - offset >= Type.BYTE.length();
-        super.reset(data, offset, length);
+        assert data.length - offset >= Type.BYTE.length() && length == Type.BYTE.length();
+        super.reset(data, offset, Type.BYTE.length());
     }
 }

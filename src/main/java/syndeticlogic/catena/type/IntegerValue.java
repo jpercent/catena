@@ -6,6 +6,10 @@ import syndeticlogic.catena.utility.Codec;
 public class IntegerValue extends Value {
 	private int decoded;
 
+	public IntegerValue() {
+	    
+	}
+	
 	public IntegerValue(int data) {
 	    super(null, 0, 0);
 	    decoded = data;
@@ -41,8 +45,8 @@ public class IntegerValue extends Value {
 	
 	@Override
 	public void reset(byte[] data, int offset, int length) {
-        assert data.length - offset >= Type.INTEGER.length();
-	    super.reset(data, offset, length);
+        assert data.length - offset >= Type.INTEGER.length() && length == Type.INTEGER.length();
+	    super.reset(data, offset, Type.INTEGER.length());
 	    this.decoded = Codec.getCodec().decodeInteger(data, offset);
 	}
 }

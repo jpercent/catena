@@ -6,6 +6,9 @@ import syndeticlogic.catena.utility.Codec;
 public class ShortValue extends Value {
 	private short decoded;
 	
+	public ShortValue() {
+	}
+	
 	public ShortValue(short data) {
 	    super(null,0,0);
 	    decoded = data;
@@ -42,7 +45,7 @@ public class ShortValue extends Value {
     @Override
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.SHORT.length();
-        super.reset(data, offset, length);
+        super.reset(data, offset, Type.SHORT.length());
         this.decoded = Codec.getCodec().decodeShort(data, offset);
     }
 }

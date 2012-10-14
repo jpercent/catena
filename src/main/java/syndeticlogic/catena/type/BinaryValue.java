@@ -2,6 +2,9 @@ package syndeticlogic.catena.type;
 
 public class BinaryValue extends Value {
 
+    public BinaryValue() {
+    }
+    
 	public BinaryValue(byte[] data, int offset, int length) {
 	    super(data, offset, length);
 	}

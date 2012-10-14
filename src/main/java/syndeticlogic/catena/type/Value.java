@@ -8,6 +8,9 @@ public abstract class Value {
     protected int offset;
     protected int length;
     
+    public Value() {
+    }
+    
     public Value(byte[] data, int offset, int length) {
         reset(data, offset, length);
     }

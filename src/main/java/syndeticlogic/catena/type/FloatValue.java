@@ -5,6 +5,8 @@ import syndeticlogic.catena.utility.Codec;
 
 public class FloatValue extends Value {
 	private float decoded;
+	public FloatValue() {
+	}
 	
     public FloatValue(int data) {
         super(null,0,0);
@@ -42,7 +44,7 @@ public class FloatValue extends Value {
     @Override
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.FLOAT.length();
-        super.reset(data, offset, length);
+        super.reset(data, offset, Type.FLOAT.length());
         this.decoded = Codec.getCodec().decodeFloat(data, offset);
     }
 }

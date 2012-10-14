@@ -4,7 +4,9 @@ import syndeticlogic.catena.utility.Codec;
 
 
 public class CharValue extends Value {
-	
+	public CharValue() {
+	}
+
 	public CharValue(char value) {
 	    super(null, 0, 0);
 	    byte[] rawvalue = new byte[Type.CHAR.length()];
@@ -43,6 +45,6 @@ public class CharValue extends Value {
     @Override
     public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= length && length == Type.CHAR.length();
-        super.reset(data, offset, length);
+        super.reset(data, offset, Type.CHAR.length());
     }
 }
