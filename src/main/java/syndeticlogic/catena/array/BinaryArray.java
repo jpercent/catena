@@ -156,5 +156,8 @@ public class BinaryArray {
     public IODescriptor createIODescriptor(byte[] buffer, int offset) {
         return new IODescriptor(arrayDescriptor, index, buffer, offset);
     }
-  
+    
+    public int remaining() {
+        return 1048576;
+    }
 }
