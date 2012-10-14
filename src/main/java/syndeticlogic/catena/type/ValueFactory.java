@@ -46,7 +46,7 @@ public class ValueFactory implements PropertyEventListener {
     }
     
     @Override
-    public void eventOccured() {
+    public void eventNotification() {
         updateTypes();
     }
 }
