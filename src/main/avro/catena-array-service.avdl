@@ -1,0 +1,151 @@
+@namespace("syndeticlogic.catena.avro")
+protocol CatenaArrayService {
+    import idl "predicate.avdl";
+
+    error UnknownArrayException {
+        string message;
+    }
+
+    error UnopenedArrayException {
+        string message;
+    }
+
+    enum ServerError { 
+        PredicateRequired, Busy, InternalError, DeviceFailure 
+    }
+    
+    error InternalServerError {
+        string message
+        ServerError error;
+    }
+    
+    /**
+     * Provides the necessary information to execute a scan, update, append
+     * or delete.  The arrayId uniquely identifies the array to execute the
+     * call against.  For all 4 methods, transactionId is
+     * optional. If a transactionId is not supplied, then 1 will be
+     * generated.  If the commitIfDone is set, then for update, append and
+     * delete, the transaction will be committed at the end of the call.  For
+     * scan, if commitIfDone is set, then the transaction will be committed
+     * when the last record is scanned.  The predicate is required for update
+     * and delete.  The predicate is optional for scan and meaningless
+     * for append.  Data and sizes are only valid for append.
+     */
+    record OperationDescriptor {
+        string arrayId;
+        union {null, long transactionId};
+        union {null, Predicate p};
+        boolean commitIfDone;
+        /* only used by append */
+        union {null, bytes data };
+        union {null, array<int> sizes };
+        
+    }
+    
+    record ScanResult {
+        string id;
+        long transactionId;
+        bytes data;
+        array<int> sizes;
+        boolean hasMore;
+    }
+
+    record DeltaResult {
+        string arrayId;
+        long transactionId;
+    }
+        
+    /**
+     * Creates a new array.
+     * @param the Type of the array being created. 
+     * @return the id of the new array.  use this id in further operations.
+     * @throws InternalServerError if for any reason this array is not created.
+     */
+    string createArray(Type t) throws InternalServerError;
+    
+    /**
+     * Returns the Type of an array.
+     * @param array identifier.
+     * @throws UnknownArrayException if the array identifier is unknown.
+     */
+    Type type(string arrayId) throws UnknownArrayException, InternalServerError;
+
+    /**
+     * Creates a new transaction.
+     * @param unique id of the array.
+     * @return a new transaction id.
+     * @throws UnknownArrayException if the array is unknown.
+     * @throws InternalServerError if the transaction is not created.
+     */
+    long beginTranscation(string arrayId) throws UnknownArrayException, InternalServerError;
+    
+    /**
+     * Closes a transaction.
+     * @param unique id of the array
+     * @param transaction id
+     * @throws UnknownArrayException if the array id is unknown
+     * @throws InvalidTransactionException if the transaction id is not valid
+     * @throws InternalServerError if for any reason the close is aborted          
+     */
+    void commitTransaction(string arrayId, long transactionId) throws UnknownArrayException, InvalidTransactionException InternalServerError;
+
+    /**
+     * Starts a transaction for a given ScanDescriptor.  If the descriptor.transactionId 
+     * is null, then a new transaction will be created and its id will be returned in the ScanResult.  To scan a single array may 
+     * require multiple calls to scan depending on the size of the array.  If the predicate is the same, then it should be sent as null 
+     * in subsequent calls - the array server remembers the predicate for a given scan transaction.  If the ScanDescriptor.commitIfDone is set to true, then
+     * the descriptor will commit the transaction when the last row is scanned.
+     * 
+     * @param OperationDescriptor defines characteristics of the scan
+     * @return ScanResult which contains the arrayId, transactionId, scanned data, and a boolean that indicates if the last row was read.
+     * @throws InvalidTransactionException if the transactionId is invalid
+     * @throws UnknownArrayException if the array id is unknown
+     * @throws InternalServerError if for any reason the scan cannot be completed
+     */
+    ScanResult scan(OperationDescriptor operationDescriptor) throws InvalidTransactionException, UnknownArrayException, InternalServerError;
+
+    /**
+     * Performs an update on an array.  Predicate is required.  If OperationDescriptor.transactionId
+     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * then a transaction is created and committed inside the call.  If the
+     * OperationDescriptor.transactionId is null and the
+     * OperationDescriptor.commitIfDone is false then a new transaction is
+     * created and persists after the call - its id is retuned in the
+     * DeltaResult.
+     * @param OperationDescriptor defines characteristics of the update
+     * @throws InvalidTransactionException if the transactionId is invalid
+     * @throws UnknownArrayException if the array id is unknown
+     * @throws InternalServerError if for any reason the scan cannot be completed
+     */
+    DeltaResult update(OperationDescriptor operationDescriptor) throws InvalidTransactionException, UnknownArrayException, InternalServerError;
+    
+    /**
+     * Appends data to the end of the array.  If OperationDescriptor.transactionId
+     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * then a transaction is created and committed inside the call.  If the
+     * OperationDescriptor.transactionId is null and the
+     * OperationDescriptor.commitIfDone is false then a new transaction is
+     * created and persists after the call - its id is retuned in the
+     * DeltaResult.
+     * @param OperationDescriptor defines characteristics of the update
+     * @throws InvalidTransactionException if the transactionId is invalid
+     * @throws UnknownArrayException if the array id is unknown
+     * @throws InternalServerError if for any reason the scan cannot be completed
+     */
+    DeltaResult append(OperationDescriptor operationDescriptor) throws InvalidTransactionException, UnknownArrayException, InternalServerError;
+
+    /**
+     * Deletes objects, based on the predicate, from the array.  If OperationDescriptor.transactionId
+     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * then a transaction is created and committed inside the call.  If the
+     * OperationDescriptor.transactionId is null and the
+     * OperationDescriptor.commitIfDone is false then a new transaction is
+     * created and persists after the call - its id is retuned in the
+     * DeltaResult.
+     * @param OperationDescriptor defines characteristics of the update
+     * @throws InvalidTransactionException if the transactionId is invalid
+     * @throws UnknownArrayException if the array id is unknown
+     * @throws InternalServerError if for any reason the scan cannot be completed
+     */
+    DeltaResult delete(OperationDescriptor operationDescriptor) throws InvalidTransactionException, UnknownArrayException, InternalServerError;    
+}
