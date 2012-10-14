@@ -1,33 +1,22 @@
+@namespace("syndeticlogic.catena.avro")
 protocol Predicate {
    
-   enum Operator {
-     LessThan,
-     LessThanEqual,
-     Equal,
-     NotEqual,
-     GreaterThan,
-     GreaterThanEqual
+   enum Type {
+     Type,
+     Boolean,
+     Byte,
+     Character,
+     Short,
+     Integer,
+     Long,
+     Float,
+     Double,
+     String,
+     Binary,
+     Codeable
    }
-   
-   enum Connector {
-     Conjunction,
-     Disjunction
-   }
-   
-   record Value {
-    bytes data;
-    int offset;
-    int length;
-  }
-  
+
   record Predicate {
-     Value v;
-     Operator op;
-  }
-  
-  record CompoundPredicate {
-    Predicate p;
-    Predicate q;
-    Connector c;
+    bytes encodedPredicate;
   }
 }
