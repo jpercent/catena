@@ -9,14 +9,21 @@ protocol CatenaArrayService {
     error UnopenedArrayException {
         string message;
     }
+    
+    error InvalidTranscationException {
+        string message;
+    }
 
     enum ServerError { 
-        PredicateRequired, Busy, InternalError, DeviceFailure 
+        Busy,
+        PredicateRequired, 
+        DeviceFailure,  
+        InternalError 
     }
     
     error InternalServerError {
-        string message
-        ServerError error;
+        ServerError errorType;
+        string message;
     }
     
     /**
@@ -33,13 +40,12 @@ protocol CatenaArrayService {
      */
     record OperationDescriptor {
         string arrayId;
-        union {null, long transactionId};
-        union {null, Predicate p};
+        union {null, long}  transactionId;
+        union {null, Predicate} p;
         boolean commitIfDone;
         /* only used by append */
-        union {null, bytes data };
-        union {null, array<int> sizes };
-        
+        union {null, bytes} data;
+        union {null, array<int>} sizes;
     }
     
     record ScanResult {
@@ -87,7 +93,7 @@ protocol CatenaArrayService {
      * @throws InvalidTransactionException if the transaction id is not valid
      * @throws InternalServerError if for any reason the close is aborted          
      */
-    void commitTransaction(string arrayId, long transactionId) throws UnknownArrayException, InvalidTransactionException InternalServerError;
+    void commitTransaction(string arrayId, long transactionId) throws UnknownArrayException, InternalServerError;
 
     /**
      * Starts a transaction for a given ScanDescriptor.  If the descriptor.transactionId 
@@ -106,11 +112,11 @@ protocol CatenaArrayService {
 
     /**
      * Performs an update on an array.  Predicate is required.  If OperationDescriptor.transactionId
-     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * is null and the OperationDescriptor.commitIfDone variable is true,
      * then a transaction is created and committed inside the call.  If the
      * OperationDescriptor.transactionId is null and the
      * OperationDescriptor.commitIfDone is false then a new transaction is
-     * created and persists after the call - its id is retuned in the
+     * created and persists after the call - its id is returned in the
      * DeltaResult.
      * @param OperationDescriptor defines characteristics of the update
      * @throws InvalidTransactionException if the transactionId is invalid
@@ -121,11 +127,11 @@ protocol CatenaArrayService {
     
     /**
      * Appends data to the end of the array.  If OperationDescriptor.transactionId
-     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * is null and the OperationDescriptor.commitIfDone variable is true,
      * then a transaction is created and committed inside the call.  If the
      * OperationDescriptor.transactionId is null and the
      * OperationDescriptor.commitIfDone is false then a new transaction is
-     * created and persists after the call - its id is retuned in the
+     * created and persists after the call - its id is returned in the
      * DeltaResult.
      * @param OperationDescriptor defines characteristics of the update
      * @throws InvalidTransactionException if the transactionId is invalid
@@ -136,11 +142,11 @@ protocol CatenaArrayService {
 
     /**
      * Deletes objects, based on the predicate, from the array.  If OperationDescriptor.transactionId
-     * is null and the OperationDescriptor.commitIfDone varialbe is true,
+     * is null and the OperationDescriptor.commitIfDone variable is true,
      * then a transaction is created and committed inside the call.  If the
      * OperationDescriptor.transactionId is null and the
      * OperationDescriptor.commitIfDone is false then a new transaction is
-     * created and persists after the call - its id is retuned in the
+     * created and persists after the call - its id is returned in the
      * DeltaResult.
      * @param OperationDescriptor defines characteristics of the update
      * @throws InvalidTransactionException if the transactionId is invalid
