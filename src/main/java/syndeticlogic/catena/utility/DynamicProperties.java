@@ -11,7 +11,7 @@ import org.apache.commons.vfs2.FileChangeEvent;
 
 public class DynamicProperties extends FileSystemWatcher {
     private static final Log log = LogFactory.getLog(DynamicProperties.class); 
-    private Set<PropertyEventListener> listeners;
+    private Set<SimpleNotificationListener> listeners;
     private volatile Properties properties;
     private Set<URL> files;
     
@@ -50,8 +50,8 @@ public class DynamicProperties extends FileSystemWatcher {
             }
             synchronized (this) {
                 files.add(url);
-                for(PropertyEventListener listener : listeners) {
-                    listener.eventOccured();
+                for(SimpleNotificationListener listener : listeners) {
+                    listener.notified();
                 }
             }
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class DynamicProperties extends FileSystemWatcher {
         }
     }
     
-    public void addPropertyEventListener(PropertyEventListener listener) {
+    public void addPropertyEventListener(SimpleNotificationListener listener) {
         synchronized(this) {
             listeners.add(listener);
         }

@@ -8,9 +8,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.utility.DynamicProperties;
-import syndeticlogic.catena.utility.PropertyEventListener;
+import syndeticlogic.catena.utility.SimpleNotificationListener;
 
-public class ValueFactory implements PropertyEventListener {
+public class ValueFactory implements SimpleNotificationListener {
     private final Log log = LogFactory.getLog(ValueFactory.class);
     private final HashMap<String, String> types = new HashMap<String, String>();
     private final DynamicProperties dynamicProperties;
@@ -46,7 +46,7 @@ public class ValueFactory implements PropertyEventListener {
     }
     
     @Override
-    public void eventNotification() {
+    public void notified() {
         updateTypes();
     }
 }
