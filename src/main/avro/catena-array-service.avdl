@@ -10,7 +10,7 @@ protocol CatenaArrayService {
         string message;
     }
     
-    error InvalidTranscationException {
+    error InvalidTransactionException {
         string message;
     }
 
