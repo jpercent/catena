@@ -7,28 +7,42 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.catena.utility.DynamicClassLoader;
 import syndeticlogic.catena.utility.DynamicProperties;
 import syndeticlogic.catena.utility.SimpleNotificationListener;
 
 public class ValueFactory implements SimpleNotificationListener {
     private final Log log = LogFactory.getLog(ValueFactory.class);
-    private final HashMap<String, String> types = new HashMap<String, String>();
+    private final HashMap<String, String> systemTypes;
+    private final HashMap<String, String> userDefinedTypes;
     private final DynamicProperties dynamicProperties;
+    private final DynamicClassLoader dynamicLoader;
     
-    public ValueFactory(DynamicProperties properties) {
-        dynamicProperties = properties;
+    public ValueFactory(DynamicProperties properties, DynamicClassLoader loader, HashMap<String, String> systemTypes) {
+        this.dynamicProperties = properties;
+        this.dynamicLoader = loader;
+        this.systemTypes = systemTypes;
+        this.userDefinedTypes = new HashMap<String, String>();
         updateTypes();
     }
     
     public Value getValue(String valueType) {
-        synchronized (this) {
+        if (systemTypes.containsKey(valueType)) {
             try {
-                String valueClass = types.get(valueType).toString();
-                Class<?> clazz = Class.forName(valueClass);
+                Class<?> clazz = Class.forName(valueType);
                 return (Value) clazz.newInstance();
             } catch (Exception e) {
-                log.error("Excpetion creating class " + valueType + ": " + e, e);
+                log.error("Excpetion creating class "+valueType+": "+e, e);
             }
+        } else if (userDefinedTypes.containsKey(valueType)) {
+            try {
+                Class<?> clazz = Class.forName(valueType, true, dynamicLoader.loader());
+                return (Value) clazz.newInstance();
+            } catch (Exception e) {
+                log.error("Exception error creating class "+valueType+": "+e, e);
+            }
+        } else {
+            log.warn("Type undefined in system and user defined type lists");
         }
         return null;
     }
@@ -39,9 +53,9 @@ public class ValueFactory implements SimpleNotificationListener {
             if(!(prop.getKey() instanceof java.lang.String && prop.getValue() instanceof java.lang.String)) {
                 continue;
             }
-            String clazz = (String) prop.getKey();
-            String qualifiedClass = (String) prop.getValue();
-            types.put(clazz, qualifiedClass);
+            String qualifiedClass = (String) prop.getKey();
+            String ordinal = (String) prop.getValue();
+            userDefinedTypes.put(qualifiedClass, ordinal);
         }
     }
     
