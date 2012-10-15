@@ -11,7 +11,12 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return true;
-        }      
+        }
+
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.TypeValue";
+        }
     },
     
     BOOLEAN {
@@ -23,6 +28,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return true;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.TypeValue";
         }
     }, 
     
@@ -36,6 +46,10 @@ public enum Type {
         public boolean isFixedLength() {
             return true;
         }
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.ByteValue";
+        }
     },
     
     CHAR {
@@ -47,6 +61,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return true;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.CharValue";
         }
     },
     
@@ -60,6 +79,11 @@ public enum Type {
         public boolean isFixedLength() {
             return true;
         }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.ShortValue";
+        }
     },
     
     INTEGER {
@@ -71,6 +95,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return true;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.IntegerValue";
         }
     },
     
@@ -84,6 +113,11 @@ public enum Type {
         public boolean isFixedLength() {
             return true;
         }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.LongValue";
+        }
     },
     
     FLOAT {
@@ -95,6 +129,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return true;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.FloatValue";
         }
     },
     
@@ -108,6 +147,11 @@ public enum Type {
         public boolean isFixedLength() {
             return true;
         }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.DoubleValue";
+        }
     },
     
     STRING {
@@ -119,6 +163,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return false;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.StringValue";
         }
     },
     
@@ -132,6 +181,11 @@ public enum Type {
         public boolean isFixedLength() {
             return false;
         }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.BinaryValue";
+        }
     },
     
     CODEABLE() {
@@ -143,6 +197,11 @@ public enum Type {
         @Override
         public boolean isFixedLength() {
             return false;
+        }
+        
+        @Override
+        public String qualifiedValueName() {
+            return "syndeticlogic.catena.type.CodeableValue";
         }
     };
     
@@ -158,4 +217,5 @@ public enum Type {
 
     public abstract int length();
     public abstract boolean isFixedLength();
+    public abstract String qualifiedValueName();
 }
