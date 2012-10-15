@@ -23,10 +23,11 @@ public class ValueFactory implements SimpleNotificationListener {
         this.dynamicLoader = loader;
         this.systemTypes = systemTypes;
         this.userDefinedTypes = new HashMap<String, String>();
+        this.dynamicProperties.addPropertyEventListener(this);
         updateTypes();
     }
     
-    public Value getValue(String valueType) {
+    public synchronized Value getValue(String valueType) {
         if (systemTypes.containsKey(valueType)) {
             try {
                 Class<?> clazz = Class.forName(valueType);
@@ -47,7 +48,8 @@ public class ValueFactory implements SimpleNotificationListener {
         return null;
     }
 
-    public void updateTypes() {
+    public synchronized void updateTypes() {
+        
         Set<Entry<Object, Object>> props = dynamicProperties.properties().entrySet();
         for(Entry<Object, Object> prop : props) {
             if(!(prop.getKey() instanceof java.lang.String && prop.getValue() instanceof java.lang.String)) {
