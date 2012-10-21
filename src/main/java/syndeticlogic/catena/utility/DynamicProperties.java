@@ -1,6 +1,7 @@
 package syndeticlogic.catena.utility;
 
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -16,13 +17,13 @@ public class DynamicProperties extends FileSystemWatcher {
     private Set<URL> files;
     
     public DynamicProperties(Properties baseProperties, String directory) {
-        this(directory);
+        super(directory);
         this.properties = baseProperties;
+        this.listeners = new HashSet<SimpleNotificationListener>();
     }
     
     public DynamicProperties(String directory) {
-        super(directory);
-        this.properties = new Properties();
+        this(new Properties(), directory);
     }
 
     @Override
