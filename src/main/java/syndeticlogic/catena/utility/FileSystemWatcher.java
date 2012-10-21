@@ -43,5 +43,4 @@ public abstract class FileSystemWatcher implements FileListener {
     @Override
     public void fileDeleted(FileChangeEvent arg0) throws Exception {
     }
-
 }

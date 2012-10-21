@@ -20,6 +20,7 @@ public class DynamicProperties extends FileSystemWatcher {
         super(directory);
         this.properties = baseProperties;
         this.listeners = new HashSet<SimpleNotificationListener>();
+        this.files = new HashSet<URL>();
     }
     
     public DynamicProperties(String directory) {
