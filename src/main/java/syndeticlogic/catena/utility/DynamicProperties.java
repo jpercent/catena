@@ -69,7 +69,7 @@ public class DynamicProperties extends FileSystemWatcher {
         }
     }
     
-    public void addPropertyEventListener(SimpleNotificationListener listener) {
+    public void addSimpleNotificationListener(SimpleNotificationListener listener) {
         synchronized(this) {
             listeners.add(listener);
         }
