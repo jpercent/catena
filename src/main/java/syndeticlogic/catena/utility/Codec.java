@@ -410,9 +410,9 @@ public class Codec {
     }
 
     public int encode(Codeable c, byte[] dest, int offset) {
-        int size = c.computeSize();
+        int size = c.size();
         assert size <= 65536;
-        byte type = c.getTypeId();
+        byte type = c.oridinal();
         encode(type, dest, offset);
         offset += Type.BYTE.length();
         c.encode(dest, offset);
@@ -512,7 +512,7 @@ public class Codec {
     }
 
     public int encode(Codeable c, ByteBuffer dest) {
-        int size = c.computeSize();
+        int size = c.size();
         assert size <= 65536;
         // byte type = c.getTypeId();
         throw new RuntimeException("Not implemented");

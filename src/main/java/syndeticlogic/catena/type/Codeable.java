@@ -1,8 +1,8 @@
 package syndeticlogic.catena.type;
 
 public interface Codeable extends Comparable<Codeable>  {
-	byte getTypeId();
-	int computeSize();
+	String oridinal();
+	int size();
 	int encode(byte[] dest, int offset);
 	int decode(byte[] source, int offset);
 	int hashCode();

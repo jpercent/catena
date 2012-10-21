@@ -237,7 +237,7 @@ public class CodeHelper {
 			case CODEABLE:
 				Codeable c = coder.decodeCodeable(rawData, offset);
 				components.add(c);
-				offset += Type.CODEABLE.length()+c.computeSize();
+				offset += Type.CODEABLE.length()+c.size();
 				break;
 			default:	
 				assert false;
@@ -315,7 +315,7 @@ public class CodeHelper {
 				size += ((byte[])components.get(index)).length;  
 				break;
 			case CODEABLE:
-				size += ((Codeable)components.get(index)).computeSize();  
+				size += ((Codeable)components.get(index)).size();  
 				break;
 			}
 			index++;
