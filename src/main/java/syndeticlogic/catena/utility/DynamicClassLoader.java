@@ -48,7 +48,7 @@ public class DynamicClassLoader extends FileSystemWatcher {
         }
     }
     
-    public void addListener(SimpleNotificationListener listener) {
+    public void addSimpleNotificationListener(SimpleNotificationListener listener) {
         synchronized(this) {        
             listeners.add(listener);
         }
