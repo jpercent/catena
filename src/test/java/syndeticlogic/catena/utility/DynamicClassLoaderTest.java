@@ -13,7 +13,7 @@ import org.junit.Test;
 public class DynamicClassLoaderTest implements SimpleNotificationListener {
     
     String baseDirectory = FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(new File(".").getAbsolutePath(), "src"), "test"), "resources");
-    String loaderDirectory = FilenameUtils.concat(baseDirectory, "loader-test");
+    String loaderDirectory = FilenameUtils.concat(baseDirectory, "classes");
     String jar = "hive-cli-0.7.0-cdh3u0.jar";
     String jar1 = "hive-jdbc-0.7.0-cdh3u0.jar";
     File loaderDirectoryFile = new File(loaderDirectory);
