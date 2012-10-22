@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import syndeticlogic.catena.type.IntegerValue;
-import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.Codec;
 
 public class IntegerOperandTest {
@@ -14,7 +13,7 @@ public class IntegerOperandTest {
     public void test() {
         byte[] test = new byte[33];
         byte[] test1 = new byte[21];
-        Codec.configureCodec(new TypeFactory());
+        Codec.configureCodec(null);
         Codec.getCodec().encode(31, test, 17);
         Codec.getCodec().encode(31, test1, 12);    
       

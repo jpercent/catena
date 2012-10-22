@@ -23,7 +23,7 @@ import java.util.List;
 
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.type.TypeFactory;
+import syndeticlogic.catena.type.ValueFactory;
 
 public class Codec {
 
@@ -44,9 +44,9 @@ public class Codec {
     private static final byte TYPES_PER_BYTE = 2;
     
     private static Codec singleton = new Codec(null);
-    private TypeFactory factory;
+    private ValueFactory factory;
 
-    public synchronized static void configureCodec(TypeFactory factory) {
+    public synchronized static void configureCodec(ValueFactory factory) {
         singleton = new Codec(factory);
     }
 
@@ -54,7 +54,7 @@ public class Codec {
         return singleton;
     }
 
-    public Codec(TypeFactory factory) {
+    public Codec(ValueFactory factory) {
         this.factory = factory;
     }
 
@@ -618,9 +618,9 @@ public class Codec {
     }
 
     public Codeable decodeCodeable(byte[] source, int offset) {
-        byte type = decodeByte(source, offset);
-        offset += Type.BYTE.length();
-        Codeable c = (Codeable) factory.create(type);
+        String type = decodeString(source, offset);
+        offset += Type.STRING.length() + type.length();
+        Codeable c = (Codeable) factory.getValue(type);
         c.decode(source, offset);
         return c;
     }

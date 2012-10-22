@@ -9,7 +9,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import syndeticlogic.catena.stubs.SegmentStub;
 import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.CompositeKey;
 
@@ -41,7 +40,7 @@ public class ArrayDescriptorTest {
 
         FileUtils.forceMkdir(new File(prefix));
         
-        Codec.configureCodec(new TypeFactory());
+        Codec.configureCodec(null);
         
         CompositeKey key = new CompositeKey();
         key.append(prefix);
@@ -112,7 +111,7 @@ public class ArrayDescriptorTest {
 
         FileUtils.forceMkdir(new File(prefix));
         
-        Codec.configureCodec(new TypeFactory());
+        Codec.configureCodec(null);
         
         CompositeKey key = new CompositeKey();
         key.append(prefix);

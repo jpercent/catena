@@ -8,7 +8,6 @@ import org.junit.Test;
 import syndeticlogic.catena.store.Segment;
 import syndeticlogic.catena.store.SegmentManager;
 import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.type.TypeFactory;
 import syndeticlogic.catena.utility.ArrayGenerator;
 import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.CompositeKey;
@@ -562,7 +561,7 @@ public class SegmentTest {
             boolean flush, boolean fixedLengthData, boolean testUpdate,
             SegmentManager.CompressionType compressionType) throws Exception {
 
-        Codec.configureCodec(new TypeFactory());
+        Codec.configureCodec(null);
         int retryLimit = 2;
         PageFactory pa = new PageFactory(PageFactory.BufferPoolMemoryType.Java,
                 PageFactory.CachingPolicy.PinnableLru,
