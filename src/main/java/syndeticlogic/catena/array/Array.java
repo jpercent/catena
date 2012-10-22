@@ -30,6 +30,7 @@ public class Array<Type extends Value> {
 	
 	Type[] scan() {
 	    int size = binaryArray.remaining();
+	    return null;
 	    //binaryArray.
 	}
 	
