@@ -3,6 +3,7 @@ package syndeticlogic.catena.utility;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -32,7 +33,7 @@ public class DynamicClassLoader extends FileSystemWatcher {
             URL url = event.getFile().getURL();
             synchronized (this) {
                 jarFiles.add(url);
-                loader = new URLClassLoader((URL[])jarFiles.toArray());
+                loader = createNewLoader();
                 for(SimpleNotificationListener listener : listeners) {
                     listener.notified();
                 }
@@ -40,6 +41,15 @@ public class DynamicClassLoader extends FileSystemWatcher {
         } catch (Exception e) {
             log.error("Exception on file changed event " + e, e);
         }
+    }
+    
+    protected URLClassLoader createNewLoader() {
+        URL[] urls = new URL[jarFiles.size()];
+        Iterator<URL> urlIter = jarFiles.iterator();
+        for(int i = 0; i < jarFiles.size(); i++) {
+            urls[i] = urlIter.next();
+        }
+        return new URLClassLoader(urls);
     }
     
     public ClassLoader loader() {
