@@ -4,16 +4,59 @@ Catena
 Overview
 ---------
 
+Catena is a transactional, column-oriented storage engine.  It is
+designed to be used as part of a larger, more complete data management
+system.  
 
-High-level design
-------------------
+The motivation behind Catena extends to the larger system, so it makes
+sense to talk a bit about that here.  The vision is to create a data
+management system that can be easily extended and analyzed.  Pretty
+simple goals.
 
-Catena is a column-oriented storage system.  It is composed of a
-hierarchy of storage abstractions.  At the Highest level of
-abstraction are the vectors.  Vectors are comprised of 1 or more
+Most modern data management systems consist of 3 components: an
+interpreter or compiler, an optimizer, and a storage engine.  It is
+convenient to view these components as a stack.
+
+At the bottom of the stack is the compiler.  It transforms data
+management requests into a objects for execution.  The next layer is
+the optimizer. It generates a new plan that is [hopefully] optimized.
+Finally, the optimized object is executed against the storage engine.
+
+Back to the vision.  To accomplish the goals set out in our
+vision, we employ 2 ideas.
+
+Firstly, we define clear, simple and generalized interfaces between
+the 3 major components, so that these components can be composed,
+interchanged and injected together at run-time.
+
+For example, image you want to create an optimizer that is composed of
+two existing optimizers and uses a decision engine to choose which
+optimizer to use.  We can think of fabulously innovative software
+compositions using kind of computing paradigm
+
+Secondly, automated, performance analysis is burned into every layer.
+A holistic approach that provides both micro and macro metrics across
+the system.  If you rewrite a portion of the optimizer, you get
+instant, standard feedback across a wide range of characteristic
+workloads.
+
+Basically, the vision is to build a data management system that is
+highly conducive to research and experimentation.
+
+Core concepts
+---------------
+
+Catena is a column-oriented storage engine.n It provides a general
+executor interface which supports defining, querying and mutating data
+sets.  Catena is designed to optimize workloads that scan a large
+number of rows from small number of columns.  A important objective of
+Catena is to make this use-case very fast.
+
+Catena is composed of a hierarchy of storage abstractions.  At the highest
+level of abstraction are vectors.  Vectors are comprised of 1 or more
 segments.
 
-Segments are in turn comprised of pages, the lowest level abstraction.
+A segment is in turn comprised of pages, the lowest level abstraction.
 Pages contain binary data that is read and written to and from
 segments by vectors.
 
@@ -33,17 +76,17 @@ loaded into memory.  Both cache-misses and cache-hits increment the
 pin count and update the statistics.
 
 Each vector resides in its own directory on the local filesystem.
-Each vector directory consists of an vector descriptor and 0 or more
+Each vector directory consists of a vector descriptor and 0 or more
 segments files.
 
 The vector descriptor file represents the ondisk meta data for the
 vector.  It consists of the vector type, length and unique identifier.
-When an vector is created a descriptor is also created.  The
+When a vector is created a descriptor is also created.  The
 descriptor is passed the master key.  The master key is a CompositeKey
 whose first component is the base directory and the vector name
 concatenated together.
 
-The first segment of an vector is associated with a CompositeKey whose
+The first segment of a vector is associated with a CompositeKey whose
 first component is the master key and whose second component is 0.  As
 elements are added to the end of the vector at some point the vector
 append split boundary is crossed a new segment will be created.
@@ -90,9 +133,5 @@ Transactions
 
 MVCC: To be completed
 
-Excecutor
-----------
-
-
-Examples
----------
+Excecutor Examples
+-------------------
