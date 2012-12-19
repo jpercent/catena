@@ -3,27 +3,26 @@
 ### Overview
 
 Catena is a transactional, column-oriented storage engine.  It is
-designed to be used as part of a larger, more complete data management
-system.  The motivation behind Catena extends to the larger system, so
-it makes sense to talk a bit about that here.
+designed to be used as part of a larger, data management system.  The
+motivation behind Catena extends to the larger system, so it makes
+sense to talk a bit about that here.
 
-The vision is to build a data management system that is highly
-conducive to research and experimentation.  To accomplish this, we
-employ 2 simple ideas.  
+The vision is to build a complete data management system that is
+highly conducive to research and experimentation.  To accomplish this,
+we employ 2 simple ideas.
 
 Firstly, provide a clear separation of concerns by defining simple,
-generalized interfaces among the compiler, optimizer and
-executor/storage engine compnents.  This is so that these components
-can be composed, interchanged and injected together dynamically.
+generalized interfaces among the compiler, optimizer and storage
+engine compnents.  This is so these components can be composed,
+interchanged and injected dynamically.
 
 Secondly, burn performance analysis into every layer of the system.
 
 ### Core Concepts
 
-Catena is a column-oriented storage engine.  It provides a simple,
-generalized executor interface which supports defining, querying and
-mutating data sets.  Catena is designed to optimize workloads that
-scan a large number of rows from small number of columns.  
+Catena is a column-oriented storage engine, designed to optimize
+execution of workloads that scan a large number of rows from small
+number of columns.
 
 ##### Architecture
 
@@ -85,12 +84,13 @@ result of an update, Catena creates a new segment between the other
 segments.  To keep track of this a 3rd component is added to the key.
 This component follows the same natural ordering as the second
 component.  Consider the following keys:
-
+<p><code>
 MasterKey component0:basdir+name
 Segment0Key component0:MasterKey component1:0
 Segement1Key component0:MasterKey component1:0 component:0
 Segement2Key component0:MasterKey component1:0 component:1
 Segement3Key component0:MasterKey component1:1
+</code></p>
 
 The collation defined by the CompositeKey enforces the correct
 ordering in searches.
