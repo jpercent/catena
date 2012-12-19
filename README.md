@@ -22,34 +22,34 @@ management requests into a objects for execution.  The next layer is
 the optimizer. It generates a new plan that is [hopefully] optimized.
 Finally, the optimized object is executed against the storage engine.
 
-Back to the vision.  To accomplish the goals set out in our
-vision, we employ 2 ideas.
+Basically, the vision is to build a data management system that is
+highly conducive to research and experimentation.  To accomplish this,
+we employ 2 ideas.
 
-Firstly, we define clear, simple and generalized interfaces between
-the 3 major components, so that these components can be composed,
-interchanged and injected together at run-time.
+Firstly, we provide a clear separation of concerns by defining simple,
+generalized interfaces between the 3 major components, so that these
+components can be composed, interchanged and injected together at
+run-time.
 
 For example, image you want to create an optimizer that is composed of
 two existing optimizers and uses a decision engine to choose which
 optimizer to use.  We can think of fabulously innovative software
-compositions using kind of computing paradigm
+compositions using kind of computing paradigm.
 
-Secondly, automated, performance analysis is burned into every layer.
-A holistic approach that provides both micro and macro metrics across
-the system.  If you rewrite a portion of the optimizer, you get
-instant, standard feedback across a wide range of characteristic
-workloads.
+Secondly, automated, performance analysis is burned into every layer
+of the system.  The idea is to provide a holistic view of micro and
+macro metrics across the system.  For example, suppose a developer
+tests a new algorthim in the optimizer.  The vision is to provide the
+developer with feedback, across a wide range of characteristic
+workloads, by incorporating automation that employs standard analysis
+at each layer and from the system as a whole.  
 
-Basically, the vision is to build a data management system that is
-highly conducive to research and experimentation.
+### Core Concepts
 
-###Core Concepts
-
-Catena is a column-oriented storage engine.n It provides a general
-executor interface which supports defining, querying and mutating data
-sets.  Catena is designed to optimize workloads that scan a large
-number of rows from small number of columns.  A important objective of
-Catena is to make this use-case very fast.
+Catena is a column-oriented storage engine.  It provides a simple,
+generalized executor interface which supports defining, querying and
+mutating data sets.  Catena is designed to optimize workloads that
+scan a large number of rows from small number of columns.  
 
 ##### Architecture
 
@@ -66,6 +66,14 @@ segments.  Each segment corresponds to an on-disk file.  The on-disk
 meta data for a segment consists of the segment's type, page count and
 size.
 
+Each array resides in its own directory on the local filesystem.
+Each array directory consists of an array descriptor and 0 or more
+segments files.
+
+The array descriptor file represents the ondisk meta data for the
+array.  It consists of the array type, length and unique identifier.
+When an array is created a descriptor is also created.
+
 ##### Caching
 
 Segments are designed to be loaded into memory as a unit.  We call
@@ -78,22 +86,14 @@ always returns a pinned page.  A cache-miss causes the page to be
 loaded into memory.  Both cache-misses and cache-hits increment the
 pin count and update the statistics.
 
-Each array resides in its own directory on the local filesystem.
-Each array directory consists of an array descriptor and 0 or more
-segments files.
-
-The array descriptor file represents the ondisk meta data for the
-array.  It consists of the array type, length and unique identifier.
-When an array is created a descriptor is also created.  The
-descriptor is passed the master key.  The master key is a CompositeKey
-whose first component is the base directory and the array name
-concatenated together.
-
 ##### Keys
 
-The first segment of an array is associated with a CompositeKey whose
-first component is the master key and whose second component is 0.  As
-elements are added to the end of the array at some point the array
+When an array is created an ArrayDescriptor and CompositeKey, the
+master key, are also created.  The descriptor is passed the master
+key.  The master key is a CompositeKey whose first component is the
+base directory and the array name concatenated together.
+
+As elements are added to the end of the array at some point the array
 append split boundary is crossed a new segment will be created.
 
 Segments are always created on an even object boundary - an element of
