@@ -39,14 +39,12 @@ segments.  Each segment corresponds to an on-disk file.  The on-disk
 meta data for a segment consists of the segment's type, page count and
 size.
 
-Each array resides in its own directory on the local filesystem.
-Each array directory consists of an array descriptor and 0 or more
-segments files.
-
-The array descriptor file, which is created at the time of array
-creation, represents the ondisk meta data for the array.  It consists
-of the array type, length and unique identifier.  n array is created a
-descriptor is also created.
+Each array resides in its own directory on the local filesystem.  Each
+array directory consists of an array descriptor and 0 or more segments
+files.  The array descriptor file, which is created at the time of
+array creation, represents the ondisk meta data for the array.  It
+consists of the array type, length and unique identifier.  n array is
+created a descriptor is also created.
 
 ##### Caching
 
@@ -85,11 +83,11 @@ occurs, Catena creates a new segment between the other segments.  To
 keep track of this an additional component, governed by a natural
 ordering, is appended.  Consider the following keys:
 
-<p><code>
+<pre>
 Segment0Key = MasterKey:0
 Segment2Key = MasterKey:0:1
 Segment1Key = MasterKey:1
-</code></p>
+</pre>
 
 The collation defined by the composite key defines the correct
 ordering for searches.
