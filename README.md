@@ -4,10 +4,8 @@
 
 Catena is a transactional, column-oriented storage engine.  It is
 designed to be used as part of a larger, more complete data management
-system.  
-
-The motivation behind Catena extends to the larger system, so it makes
-sense to talk a bit about that here.  
+system.  The motivation behind Catena extends to the larger system, so
+it makes sense to talk a bit about that here.
 
 The vision is to build a data management system that is highly
 conducive to research and experimentation.  To accomplish this, we
@@ -15,8 +13,8 @@ employ 2 simple ideas.
 
 Firstly, provide a clear separation of concerns by defining simple,
 generalized interfaces among the compiler, optimizer and
-executor/storage engine compnents, so that these components can be
-composed, interchanged and injected together dynamically.
+executor/storage engine compnents.  This is so that these components
+can be composed, interchanged and injected together dynamically.
 
 Secondly, burn performance analysis into every layer of the system.
 
