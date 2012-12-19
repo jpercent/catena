@@ -43,9 +43,10 @@ Each array resides in its own directory on the local filesystem.
 Each array directory consists of an array descriptor and 0 or more
 segments files.
 
-The array descriptor file represents the ondisk meta data for the
-array.  It consists of the array type, length and unique identifier.
-When an array is created a descriptor is also created.
+The array descriptor file, which is created at the time of array
+creation, represents the ondisk meta data for the array.  It consists
+of the array type, length and unique identifier.  n array is created a
+descriptor is also created.
 
 ##### Caching
 
@@ -59,41 +60,42 @@ always returns a pinned page.  A cache-miss causes the page to be
 loaded into memory.  Both cache-misses and cache-hits increment the
 pin count and update the statistics.
 
-##### Keys
+##### Segments and Keys
 
-When an array is created an ArrayDescriptor and CompositeKey, the
-master key, are also created.  The descriptor is passed the master
-key.  The master key is a CompositeKey whose first component is the
-base directory and the array name concatenated together.
+When an array and its descriptor are created, a master key is also
+created and passed to the descriptor.  The master key is a
+concatenation of the base directory and the array name.
 
-As elements are added to the end of the array at some point the array
-append split boundary is crossed a new segment will be created.
+The first segment of an array is associated with a composite key whose
+first component is the master key and whose second component is 0.  As
+elements are added to the end of the array the append, at some point,
+the append-split-boundary threshold is crossed and a new segment will
+be created.  Segments are always created on an even object boundary -
+an element of an array never spans more than one segment.  The new
+segment will have a composite key that consists of the master key as
+the first component and the next natural number as the second
+component.
 
-Segments are always created on an even object boundary - an element of
-an array never spans more than one segment.  The new segment will have
-a CompositeKey that consists of the master key as the first component
-and the next natural number as the second component.
+The array's descriptor also maintain an update-split-boundary such
+that updates to variable length types keep an array to a manageable
+size.  When the update-split-boundary is crossed the array is split
+and new keys are created.
 
-ArrayDescriptors also maintain an update split boundary such that
-updates to variable length types keep an array to a manageable size.
-When the update split threshold is surpassed the array is split and
-new keys are created.
+Composite keys are hierarchically collated.  When an update-split
+occurs, Catena creates a new segment between the other segments.  To
+keep track of this a 3rd component is added to the key.  This
+component follows the same natural ordering as the second component.
+Consider the following keys:
 
-CompositeKeys are hierarchically collated.  When a split occurs as the
-result of an update, Catena creates a new segment between the other
-segments.  To keep track of this a 3rd component is added to the key.
-This component follows the same natural ordering as the second
-component.  Consider the following keys:
 <p><code>
-MasterKey component0:basdir+name
-Segment0Key component0:MasterKey component1:0
-Segement1Key component0:MasterKey component1:0 component:0
-Segement2Key component0:MasterKey component1:0 component:1
-Segement3Key component0:MasterKey component1:1
+Segment0Key = MasterKey:0
+Segment1Key = MasterKey:0:1
+Segment2Key = MasterKey:1
+Segment3Key = MasterKey:1:1
 </code></p>
 
-The collation defined by the CompositeKey enforces the correct
-ordering in searches.
+The collation defined by the composite key defines the correct
+ordering for searches.
 
 ##### Registry
 
