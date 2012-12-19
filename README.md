@@ -68,30 +68,27 @@ concatenation of the base directory and the array name.
 
 The first segment of an array is associated with a composite key whose
 first component is the master key and whose second component is 0.  As
-elements are added to the end of the array the append, at some point,
-the append-split-boundary threshold is crossed and a new segment will
-be created.  Segments are always created on an even object boundary -
-an element of an array never spans more than one segment.  The new
+elements are added to the end of the array, eventually, the
+append-split threshold will be crossed and a new segment will be
+created.  Segments are always created on an even object boundary - an
+element of an array never spans more than one segment.  The new
 segment will have a composite key that consists of the master key as
 the first component and the next natural number as the second
 component.
 
-The array's descriptor also maintain an update-split-boundary such
-that updates to variable length types keep an array to a manageable
-size.  When the update-split-boundary is crossed the array is split
-and new keys are created.
+The array's descriptor also maintains an update-split threshold such
+that updates to variable length types will never cause the array's
+size to become unmanageable.  
 
 Composite keys are hierarchically collated.  When an update-split
 occurs, Catena creates a new segment between the other segments.  To
-keep track of this a 3rd component is added to the key.  This
-component follows the same natural ordering as the second component.
-Consider the following keys:
+keep track of this an additional component, governed by a natural
+ordering, is appended.  Consider the following keys:
 
 <p><code>
 Segment0Key = MasterKey:0
-Segment1Key = MasterKey:0:1
-Segment2Key = MasterKey:1
-Segment3Key = MasterKey:1:1
+Segment2Key = MasterKey:0:1
+Segment1Key = MasterKey:1
 </code></p>
 
 The collation defined by the composite key defines the correct
@@ -114,7 +111,7 @@ disk or replicated to other nodes in the cluster).
 Transactions
 -------------
 
-MVCC: To be completed
+MVCC
 
 Excecutor Examples
 -------------------
