@@ -7,42 +7,18 @@ designed to be used as part of a larger, more complete data management
 system.  
 
 The motivation behind Catena extends to the larger system, so it makes
-sense to talk a bit about that here.  The vision is to create a data
-management system that can be easily extended and analyzed.  Pretty
-simple goals.
+sense to talk a bit about that here.  
 
-##### The Vision
+The vision is to build a data management system that is highly
+conducive to research and experimentation.  To accomplish this, we
+employ 2 simple ideas.  
 
-Most modern data management systems consist of 3 components: an
-interpreter or compiler, an optimizer, and a storage engine.  It is
-convenient to view these components as a stack.
+Firstly, provide a clear separation of concerns by defining simple,
+generalized interfaces among the compiler, optimizer and
+executor/storage engine compnents, so that these components can be
+composed, interchanged and injected together dynamically.
 
-At the bottom of the stack is the compiler.  It transforms data
-management requests into a objects for execution.  The next layer is
-the optimizer. It generates a new plan that is [hopefully] optimized.
-Finally, the optimized object is executed against the storage engine.
-
-Basically, the vision is to build a data management system that is
-highly conducive to research and experimentation.  To accomplish this,
-we employ 2 ideas.
-
-Firstly, we provide a clear separation of concerns by defining simple,
-generalized interfaces between the 3 major components, so that these
-components can be composed, interchanged and injected together at
-run-time.
-
-For example, image you want to create an optimizer that is composed of
-two existing optimizers and uses a decision engine to choose which
-optimizer to use.  We can think of fabulously innovative software
-compositions using kind of computing paradigm.
-
-Secondly, automated, performance analysis is burned into every layer
-of the system.  The idea is to provide a holistic view of micro and
-macro metrics across the system.  For example, suppose a developer
-tests a new algorthim in the optimizer.  The vision is to provide the
-developer with feedback, across a wide range of characteristic
-workloads, by incorporating automation that employs standard analysis
-at each layer and from the system as a whole.  
+Secondly, burn performance analysis into every layer of the system.
 
 ### Core Concepts
 
