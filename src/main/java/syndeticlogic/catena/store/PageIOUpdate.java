@@ -6,62 +6,13 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class PageIOHandler {
-    protected static final Log log = LogFactory.getLog(PageIOHandler.class);
-    private final PageManager pageManager;
-    private final List<Page> pages;
-    private final String id;
+import syndeticlogic.catena.predicate.Predicate;
 
-    private Page page;
-    private Page endPage;
-    private int pageOffset;
-    private int endPageOffset;
+public class PageIOUpdate extends PageIOState {
+    protected static final Log log = LogFactory.getLog(PageIOState.class);
 
-    private byte[] buffer;
-    private int bufferOffset;
-
-    private long logicalOffset;
-    private long endOffset;
-
-    private int length;
-    private int total;
-    private int remaining;
-    private int index;
-    private int endIndex;
-
-    PageIOHandler(PageManager pageManager, String id) {
-        this.pageManager = pageManager;
-        this.id = id;
-        this.pages = pageManager.getPageSequence(id);
-    }
-
-    public int scan(byte[] buf, int bufOffset, int length, long foffset) {
-        prepareScan(buf, bufOffset, length, foffset);
-
-        if (pageOffset == 0 && page.limit() == 0) {
-            return 0;
-        }
-
-        int iobytes = 0;
-        while (total < length) {
-            assert pageOffset < page.limit();
-            int size = remaining;
-            if (pageOffset + size > page.limit()) {
-                size = page.limit() - pageOffset;
-            }
-            iobytes = page.read(buffer, bufferOffset, pageOffset, size);
-            advance(iobytes);
-
-            if (total < length) {
-                index++;
-                pageOffset = 0;
-                assert index < pages.size();
-                page = pages.get(index);
-            }
-        }
-        int ret = total;
-        complete();
-        return ret;
+    PageIOUpdate(Predicate predicate, PageManager pageManager, String id) {
+        super(predicate, pageManager, id);
     }
 
     public void update(byte[] buf, int bufOffset, int oldLen, int newLen,
@@ -78,33 +29,7 @@ public class PageIOHandler {
         complete();
     }
 
-    public void append(byte[] buf, int bufOffset, int size) {
-        prepareAppend(buf, bufOffset, size);
-
-        if (page.size() == page.limit()) {
-            Page newPage = pageManager.page(id);
-            pages.add(newPage);
-            page = newPage;
-            pageOffset = 0;
-        }
-
-        int iobytes = 0;
-        while (total < length) {
-            iobytes = page.write(buffer, bufferOffset, pageOffset, remaining);
-            advance(iobytes);
-            page.setLimit(pageOffset);
-
-            if (total < length) {
-                index++;
-                pageOffset = 0;
-                page = pageManager.page(id);
-                pages.add(page);
-            }
-        }
-        complete();
-    }
-
-    private void overwrite() {
+    protected void overwrite() {
         int iobytes = 0;
         boolean done = false;
 
@@ -146,7 +71,7 @@ public class PageIOHandler {
         }
     }
 
-    private void truncate() {
+    protected void truncate() {
         if(log.isDebugEnabled()) {
             log.debug("endpage == page "+(endPage == page)
                     +" endoffset = "+endPageOffset+" pageoffset = "+pageOffset
@@ -279,123 +204,5 @@ public class PageIOHandler {
             page.setLimit(iobytes);
         }
         pages.addAll(index, newPages);
-    }
-    
-
-    private void prepare(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        this.page = null;
-        this.pageOffset = -1;
-        this.buffer = buffer;
-        this.bufferOffset = bufferOffset;
-        this.logicalOffset = loffset;
-        this.length = length;
-        this.remaining = length;
-        this.total = 0;
-        this.index = 0;
-    }
-
-
-    private void prepareAppend(byte[] buffer, int bufferOffset, int length) {
-        prepare(buffer, bufferOffset, length, -1);
-        page = pages.get(pages.size() - 1);
-        pageOffset = page.limit();
-    }
-
-    private void prepareScan(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        prepare(buffer, bufferOffset, length, loffset);
-        setIndexAndPageOffset();
-    }
-
-    private void prepareUpdate(byte[] buffer, int bOffset, int oldlen,
-            int newlen, long loffset) {
-        prepare(buffer, bOffset, newlen, loffset);
-        long cursor = setIndexAndPageOffset();
-
-        this.endPage = null;
-        this.endPageOffset = -1;
-        this.endIndex = -1;
-        this.endOffset = loffset + (long) oldlen;
-        endIndex = index;
-        Page pageIter = page;
-        while (endIndex < pages.size()) {
-            if (cursor + pageIter.limit() < endOffset) {
-                cursor += pageIter.limit();
-                endIndex++;
-            } else if (cursor + pageIter.limit() == endOffset) {
-                cursor += pageIter.limit();
-                break;
-            } else {
-                break;
-            }
-            pageIter = pages.get(endIndex);
-        }
-
-        endPage = pages.get(endIndex);
-        assert cursor <= endOffset;
-        if (cursor != endOffset) {
-            endPageOffset = (int) (endOffset - cursor);
-        } else {
-            endPageOffset = endPage.limit();
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("endindex = " + endIndex + " pages = " + pages.size()
-                    +" endPageOffset = "+endPageOffset
-                    +" enpage.limit() = "+endPage.limit());
-        }
-    }
-    
-    private void complete() {
-        this.page = null;
-        this.endPage = null;
-        this.pageOffset = -1;
-        this.endPageOffset = -1;
-        this.buffer = null;
-        this.bufferOffset = -1;
-        this.logicalOffset = -1;
-        this.endOffset = -1;
-        this.length = -1;
-        this.total = -1;
-        this.remaining = -1;
-        this.index = -1;
-        this.endIndex = -1;
-    }
-
-    private long setIndexAndPageOffset() {
-        long cursor = 0;
-
-        for (Page pageIter : pages) {
-            if (cursor + pageIter.limit() < logicalOffset) {
-                cursor += pageIter.limit();
-                index++;
-            } else if (cursor + pageIter.limit() == logicalOffset) {
-                cursor += pageIter.limit();
-                index++;
-                break;
-            } else {
-                break;
-            }
-        }
-
-        assert cursor <= logicalOffset;
-        pageOffset = (int) (logicalOffset - cursor);
-        page = pages.get(index);
-        
-        if (log.isDebugEnabled()) {
-            log.debug(" logicalOffset = " + logicalOffset + " cursor = " + cursor
-                    + "index = " + index + "pages = " + pages.size() + "pageoffset = "
-                    + pageOffset);
-        }
-        return cursor;
-    }
-
-    private void advance(int iobytes) {
-        assert pageOffset <= page.size();
-        total += iobytes;
-        bufferOffset += iobytes;
-        pageOffset += iobytes;
-        remaining -= iobytes;
     }
 }
