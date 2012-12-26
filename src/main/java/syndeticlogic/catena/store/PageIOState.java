@@ -51,58 +51,6 @@ public abstract class PageIOState {
         this.index = 0;
     }
 
-
-    protected void prepareAppend(byte[] buffer, int bufferOffset, int length) {
-        prepare(buffer, bufferOffset, length, -1);
-        page = pages.get(pages.size() - 1);
-        pageOffset = page.limit();
-    }
-
-    protected void prepareScan(byte[] buffer, int bufferOffset, int length,
-            long loffset) {
-        prepare(buffer, bufferOffset, length, loffset);
-        setIndexAndPageOffset();
-    }
-
-    protected void prepareUpdate(byte[] buffer, int bOffset, int oldlen,
-            int newlen, long loffset) {
-        prepare(buffer, bOffset, newlen, loffset);
-        long cursor = setIndexAndPageOffset();
-
-        this.endPage = null;
-        this.endPageOffset = -1;
-        this.endIndex = -1;
-        this.endOffset = loffset + (long) oldlen;
-        endIndex = index;
-        Page pageIter = page;
-        while (endIndex < pages.size()) {
-            if (cursor + pageIter.limit() < endOffset) {
-                cursor += pageIter.limit();
-                endIndex++;
-            } else if (cursor + pageIter.limit() == endOffset) {
-                cursor += pageIter.limit();
-                break;
-            } else {
-                break;
-            }
-            pageIter = pages.get(endIndex);
-        }
-
-        endPage = pages.get(endIndex);
-        assert cursor <= endOffset;
-        if (cursor != endOffset) {
-            endPageOffset = (int) (endOffset - cursor);
-        } else {
-            endPageOffset = endPage.limit();
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("endindex = " + endIndex + " pages = " + pages.size()
-                    +" endPageOffset = "+endPageOffset
-                    +" enpage.limit() = "+endPage.limit());
-        }
-    }
-
     protected void advance(int iobytes) {
         assert pageOffset <= page.size();
         total += iobytes;

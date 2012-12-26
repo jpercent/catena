@@ -40,4 +40,10 @@ public class PageIOScan extends PageIOState {
         complete();
         return ret;
     }
+    
+    protected void prepareScan(byte[] buffer, int bufferOffset, int length,
+            long loffset) {
+        prepare(buffer, bufferOffset, length, loffset);
+        setIndexAndPageOffset();
+    }
 }

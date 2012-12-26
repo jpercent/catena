@@ -37,4 +37,10 @@ public class PageIOAppend extends PageIOState {
         }
         complete();
     }
+    
+    protected void prepareAppend(byte[] buffer, int bufferOffset, int length) {
+        prepare(buffer, bufferOffset, length, -1);
+        page = pages.get(pages.size() - 1);
+        pageOffset = page.limit();
+    }
 }
