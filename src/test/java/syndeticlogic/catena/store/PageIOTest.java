@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageFactory;
-import syndeticlogic.catena.store.PageIOState;
 import syndeticlogic.catena.store.PageManager;
 
 public class PageIOTest {
@@ -57,7 +56,6 @@ public class PageIOTest {
         byte[] expected = new byte[pageSize];
         byte[] actual = new byte[pageSize];
         rand.setSeed(42);
-        PageIOScan pio = new PageIOScan(null, pm, name);
 
         for (int i = 0, offset = 0; i < pages; i++, offset += pageSize) {
             rand.nextBytes(expected);
