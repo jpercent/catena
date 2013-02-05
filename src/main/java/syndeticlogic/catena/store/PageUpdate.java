@@ -8,10 +8,10 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.predicate.Predicate;
 
-public class PageIOUpdate extends PageIOState {
-    protected static final Log log = LogFactory.getLog(PageIOState.class);
+public class PageUpdate extends PageState {
+    protected static final Log log = LogFactory.getLog(PageState.class);
 
-    PageIOUpdate(Predicate predicate, PageManager pageManager, String id) {
+    PageUpdate(Predicate predicate, PageManager pageManager, String id) {
         super(predicate, pageManager, id);
     }
 

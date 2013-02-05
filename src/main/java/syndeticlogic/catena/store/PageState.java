@@ -7,8 +7,8 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.predicate.Predicate;
 
-public abstract class PageIOState {
-    protected static final Log log = LogFactory.getLog(PageIOState.class);
+public abstract class PageState {
+    protected static final Log log = LogFactory.getLog(PageState.class);
     protected final Predicate predicate;
     protected final PageManager pageManager;
     protected final List<Page> pages;
@@ -31,7 +31,7 @@ public abstract class PageIOState {
     protected int index;
     protected int endIndex;
 
-    PageIOState(Predicate predicate, PageManager pageManager, String id) {
+    PageState(Predicate predicate, PageManager pageManager, String id) {
         this.predicate = predicate;
         this.pageManager = pageManager;
         this.id = id;

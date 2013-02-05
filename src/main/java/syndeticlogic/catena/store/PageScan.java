@@ -5,10 +5,10 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.predicate.Predicate;
 
-public class PageIOScan extends PageIOState {
-    protected static final Log log = LogFactory.getLog(PageIOScan.class);
+public class PageScan extends PageState {
+    protected static final Log log = LogFactory.getLog(PageScan.class);
  
-    public PageIOScan(Predicate predicate, PageManager pageManager, String id) {
+    public PageScan(Predicate predicate, PageManager pageManager, String id) {
         super(predicate, pageManager, id);
     }
 
