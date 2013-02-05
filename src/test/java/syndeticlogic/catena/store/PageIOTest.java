@@ -10,9 +10,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import syndeticlogic.catena.predicate.AtomicPredicate;
+import syndeticlogic.catena.predicate.BinaryConnector;
+import syndeticlogic.catena.predicate.CompoundPredicate;
+import syndeticlogic.catena.predicate.Operator;
 import syndeticlogic.catena.store.Page;
 import syndeticlogic.catena.store.PageFactory;
 import syndeticlogic.catena.store.PageManager;
+import syndeticlogic.catena.type.IntegerValue;
+import syndeticlogic.catena.utility.Codec;
 
 public class PageIOTest {
     String sep = System.getProperty("file.separator");
@@ -22,9 +28,9 @@ public class PageIOTest {
     Random rand;
     int pages;
     int pageSize;
-    PageIOScan pioS;
-    PageIOUpdate pioU;
-    PageIOAppend pioA;
+    PageScan pioS;
+    PageUpdate pioU;
+    PageAppend pioA;
     
     @After
     public void tearDown() throws Exception {
@@ -47,9 +53,9 @@ public class PageIOTest {
                 PageFactory.PageDescriptorType.Unsynchronized, retryLimit);
         pm = pf.createPageManager(null, pageSize, 3 * pages);
         pm.createPageSequence(name);
-        pioS = new PageIOScan(null, pm, name);
-        pioU = new PageIOUpdate(null, pm, name);
-        pioA = new PageIOAppend(null, pm, name);
+        pioS = new PageScan(null, pm, name);
+        pioU = new PageUpdate(null, pm, name);
+        pioA = new PageAppend(null, pm, name);
     }
 
     void doScan() {
@@ -85,12 +91,44 @@ public class PageIOTest {
         loadData();
         doScan();
     }
-
-    static class Update {
-        byte[] updateData;
-
+    
+    @Test
+    public void testPredicate() {
+        IntegerValue iv = new IntegerValue(37);
+        IntegerValue iv1 = new IntegerValue(34);
+        AtomicPredicate ap = new AtomicPredicate(Operator.LESS_THAN, iv);
+        AtomicPredicate ap1 = new AtomicPredicate(Operator.GREATER_THAN_EQUAL, iv1);
+        CompoundPredicate cp = new CompoundPredicate(BinaryConnector.Conjunction, ap, ap1);
+        
+        Page page = pm.page(name);
+        List<Page> ps = pm.getPageSequence(name);
+        ps.add(page);
+        
+        byte[] data = new byte[4*5];
+        Codec.getCodec().encode(37, data, 0);
+        Codec.getCodec().encode(36, data, 4);
+        Codec.getCodec().encode(35, data, 8);
+        Codec.getCodec().encode(34, data, 12);
+        Codec.getCodec().encode(33, data, 16);
+        pioA.append(data, 0, data.length);
+        pioS = new PageScan(cp, pm, name);
+        
+        byte[] actual = new byte[4*5];
+//      PageScan pioS = new PageScan(null, pm, name);
+        int amount = pioS.scan(actual, 0, 4*5, 0);
+        assertEquals(4*5, amount);
+        int actualDecoded = Codec.getCodec().decodeInteger(actual, 0);
+        assertEquals(37, actualDecoded);
+        actualDecoded = Codec.getCodec().decodeInteger(actual, 4);
+        assertEquals(36, actualDecoded);
+        actualDecoded = Codec.getCodec().decodeInteger(actual, 8);
+        assertEquals(35, actualDecoded);
+        actualDecoded = Codec.getCodec().decodeInteger(actual, 12);
+        assertEquals(34, actualDecoded);
+        actualDecoded = Codec.getCodec().decodeInteger(actual, 16);
+        assertEquals(33, actualDecoded);
     }
-
+    
     @Test
     public void testSinglePageFixedLengthUpdate() {
 
@@ -101,7 +139,7 @@ public class PageIOTest {
         Page page = pm.page(name);
         List<Page> ps = pm.getPageSequence(name);
         ps.add(page);
-//        PageIOAppend pioA = new PageIOAppend(null, pm, name);
+//        PageAppend pioA = new PageAppend(null, pm, name);
 
         int size = page.size() / 4;
         byte[] zero = new byte[size];
@@ -122,12 +160,12 @@ public class PageIOTest {
         assertEquals(page.size(), page.limit());
 
         randomData = new byte[size];
-//        PageIOUpdate pioUpdate = new PageIOUpdate(null, pm, name);
+//        PageUpdate pioUpdate = new PageUpdate(null, pm, name);
         pioU.update(randomData, 0, size, size, 0);
         pioU.update(randomData, 0, size, size, 3 * size);
 
         byte[] actual = new byte[size];
-//        PageIOScan pioS = new PageIOScan(null, pm, name);
+//        PageScan pioS = new PageScan(null, pm, name);
         int amount = pioS.scan(actual, 0, size, 0);
         assertEquals(size, amount);
         assertArrayEquals(randomData, actual);
@@ -150,7 +188,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-        //PageIOAppend pio = new PageIOAppend(null, pm, name);
+        //PageAppend pio = new PageAppend(null, pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -178,11 +216,11 @@ public class PageIOTest {
         assertEquals(page.size(), page.limit());
 
         randomData = new byte[newSize];
-        //PageIOUpdate pioU = new PageIOUpdate(null, pm, name);
+        //PageUpdate pioU = new PageUpdate(null, pm, name);
         pioU.update(randomData, 0, size, newSize, 0);
 
         byte[] actual = new byte[newSize];
-        //PageIOScan pioS = new PageIOScan(null, pm, name);
+        //PageScan pioS = new PageScan(null, pm, name);
         int amount = pioS.scan(actual, 0, newSize, 0);
         assertEquals(newSize, amount);
         assertArrayEquals(randomData, actual);
@@ -206,7 +244,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-//        PageIOAppend pioA = new PageIOAppend(null, pm, name);
+//        PageAppend pioA = new PageAppend(null, pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -231,13 +269,13 @@ public class PageIOTest {
         assertEquals(3 * page.size() / 4, page.limit());
 
         randomData = new byte[newSize];
-  //      PageIOUpdate pioU = new PageIOUpdate(null, pm, name);
+  //      PageUpdate pioU = new PageUpdate(null, pm, name);
         pioU.update(randomData, 0, size, newSize, 2 * size);
         
         // assertEquals(2*size+newSize, page.limit());
         
         byte[] actual = new byte[size];
-//        PageIOScan pioS = new PageIOScan(null, pm, name);
+//        PageScan pioS = new PageScan(null, pm, name);
         int amount = pioS.scan(actual, 0, size, 0);
         assertEquals(size, amount);
         assertArrayEquals(zero, actual);
@@ -257,7 +295,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-  //      PageIOAppend pioA = new PageIOAppend(null, pm, name);
+  //      PageAppend pioA = new PageAppend(null, pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -363,7 +401,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-//        pio = new PageIOState(pm, name);
+//        pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -419,7 +457,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-      //  pio = new PageIOState(pm, name);
+      //  pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -476,7 +514,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-    //    pio = new PageIOState(pm, name);
+    //    pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -530,7 +568,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-  //      pio = new PageIOState(pm, name);
+  //      pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -584,7 +622,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-//        pio = new PageIOState(pm, name);
+//        pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -638,7 +676,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-       // pio = new PageIOState(pm, name);
+       // pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -692,7 +730,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-     //   pio = new PageIOState(pm, name);
+     //   pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -746,7 +784,7 @@ public class PageIOTest {
 
         byte[] randomData = null;
 
-      //  pio = new PageIOState(pm, name);
+      //  pio = new PageState(pm, name);
         rand.setSeed(42);
 
         Page page = pm.page(name);
@@ -802,7 +840,7 @@ public class PageIOTest {
         List<Page> pageList = pm.getPageSequence(name);
         Page firstpage = pm.page(name);
         pageList.add(firstpage);
-        //pio = new PageIOState(pm, name);
+        //pio = new PageState(pm, name);
         for (int i = 0; i < pages; i++) {
             rand.nextBytes(data);
             pioA.append(data, 0, pageSize);
@@ -886,7 +924,7 @@ public class PageIOTest {
             int randThreshold, TestState state, int seed) {
         HashMap<Integer, byte[]> data = new HashMap<Integer, byte[]>();
 
-//        pio = new PageIOState(pm, name);
+//        pio = new PageState(pm, name);
         rand.setSeed(seed);
 
         Page page = pm.page(name);
