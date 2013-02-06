@@ -46,7 +46,8 @@ public class SegmentManager {
         if (f.exists()) {
             throw new RuntimeException("file exists");
         }
-        RandomAccessFile file = new RandomAccessFile(filename, "rw");
+        @SuppressWarnings("resource")
+		RandomAccessFile file = new RandomAccessFile(filename, "rw");
         SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
         header.load();
         SerializedObjectChannel channel = new SerializedObjectChannel(file.getChannel());
@@ -57,7 +58,8 @@ public class SegmentManager {
         return fm;
     }
 
-    public synchronized Segment lookup(String filename) {
+    @SuppressWarnings("resource")
+	public synchronized Segment lookup(String filename) {
         assert filename != null;
         Segment fm = null;
 

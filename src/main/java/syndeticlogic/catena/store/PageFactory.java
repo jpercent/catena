@@ -100,7 +100,8 @@ public class PageFactory {
                 assert false;
                 for (String file : files) {
 
-                    FileInputStream fileIn = new FileInputStream(new File(file));
+                    @SuppressWarnings("resource")
+					FileInputStream fileIn = new FileInputStream(new File(file));
                     long size = fileIn.getChannel().size();
                     assert (size / pageSize + 1) > 0
                             && (size / pageSize + 1) < Integer.MAX_VALUE;
@@ -112,7 +113,6 @@ public class PageFactory {
                         pageSequence.add(createPageDescriptor());
                     }
                     pageSequences.put(file, pageSequence);
-                    fileIn.close();
                 }
             }
 
