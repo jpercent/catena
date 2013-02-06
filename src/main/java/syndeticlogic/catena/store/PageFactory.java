@@ -112,6 +112,7 @@ public class PageFactory {
                         pageSequence.add(createPageDescriptor());
                     }
                     pageSequences.put(file, pageSequence);
+                    fileIn.close();
                 }
             }
 
@@ -148,6 +149,8 @@ public class PageFactory {
             break;
         case PinnableLru:
             ps = new PinnableLruStrategy(null, size, timeoutMillis);
+		default:
+			throw new RuntimeException("Unsupported cache policy"+cachePolicy);
         }
         return ps;
     }
