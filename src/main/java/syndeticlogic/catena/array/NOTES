@@ -2,7 +2,7 @@
 
 Some notes on the current design.
 
-Linearis is a column-oriented storage system.  It is composed of a
+Catena is a column-oriented storage system.  It is composed of a
 hierarchy of storage abstractions.  At the Highest level of abstraction
 are the arrays.  Arrays are comprised of 1 or more segments.
 
