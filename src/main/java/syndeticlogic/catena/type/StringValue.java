@@ -2,21 +2,19 @@ package syndeticlogic.catena.type;
 
 import syndeticlogic.catena.utility.Codec;
 
-
-public class StringValue extends Value {
-	private String data;
-    
+public class StringValue extends ScatterGatherValue {
 	public StringValue() {
+	    super();
 	}
 	
     public StringValue(byte[] data, int offset, int length) {
-        super(data, offset, length);
-        this.data = new String(data, offset, length);
+        super();
+        add(data, offset, length);
     }
     
     @Override
     public Object objectize() {
-        return data;
+        return new String(gather(), offset(), length());
     }
 
     @Override
@@ -28,13 +26,11 @@ public class StringValue extends Value {
     public int compareTo(byte[] rawBytes, int offset, int length) {
         assert rawBytes.length - offset >= length && length == 4;
         String value = Codec.getCodec().decodeString(rawBytes, offset);
-        assert data != null;
-        return data.compareTo(value);
+        return value.compareTo(new String(gather(), offset(), length()));
     }
     
     @Override
     public void reset(byte[] data, int offset, int length) {
         super.reset(data, offset, length);
-        this.data = new String(data, offset, length);
     }
 }
