@@ -46,6 +46,53 @@ public class ArrayDescriptor {
     private final int typeSize;
     private final ReentrantLock lock;
     
+    public class Sizes {
+        volatile int element = 0;
+        @ThreadSafe
+        public int lockAndGetSize() {
+            acquire();
+            try {
+                return getSize();
+            } finally {
+                release();
+            }
+        }
+        
+        @ThreadSafe
+        public int lockAndGetSizeAndIncrement() {
+            acquire();
+            try {
+                int size = getSize();
+                increment();
+                return size;
+            } finally {
+                release();
+            }
+        }
+        
+        public int getSize() {
+            return sizes.get(element).intValue();
+        }
+        
+        public int getSizeAndIncrement() {
+            int size = sizes.get(element).intValue();
+            increment();
+            return size;
+        }
+        
+        public void acquire() {
+            acquire();
+        }
+        
+        public void release() {
+            release();
+        }
+        
+        public void increment() {
+            element++;
+        }
+    }
+    
     public static class ValueDescriptor {
         public CompositeKey segmentId;
         public int segmentOffset;
@@ -437,5 +484,9 @@ public class ArrayDescriptor {
 	
     public synchronized Collection<Segment> segments() {
         return segments.values();
+    }
+    
+    public Sizes sizes() {
+        return new Sizes();
     }
 }
