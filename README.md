@@ -43,8 +43,8 @@ Each array resides in its own directory on the local filesystem.  Each
 array directory consists of an array descriptor and 0 or more segments
 files.  The array descriptor file, which is created at the time of
 array creation, represents the ondisk meta data for the array.  It
-consists of the array type, length and unique identifier.  n array is
-created a descriptor is also created.
+consists of the array type, length and unique identifier.  When an
+array is created a corresponding descriptor is also created.
 
 ##### Caching
 
