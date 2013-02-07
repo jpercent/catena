@@ -47,6 +47,8 @@ public class IntegerValue extends Value {
 	public void reset(byte[] data, int offset, int length) {
         assert data.length - offset >= Type.INTEGER.length() && length == Type.INTEGER.length();
 	    super.reset(data, offset, Type.INTEGER.length());
-	    this.decoded = Codec.getCodec().decodeInteger(data, offset);
+	    if(data != null) {
+	        this.decoded = Codec.getCodec().decodeInteger(data, offset);
+	    }
 	}
 }
