@@ -5,11 +5,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.predicate.Predicate;
-
 public abstract class PageState {
     protected static final Log log = LogFactory.getLog(PageState.class);
-    protected final Predicate predicate;
     protected final PageManager pageManager;
     protected final List<Page> pages;
     protected final String id;
@@ -31,8 +28,7 @@ public abstract class PageState {
     protected int index;
     protected int endIndex;
 
-    PageState(Predicate predicate, PageManager pageManager, String id) {
-        this.predicate = predicate;
+    PageState(PageManager pageManager, String id) {
         this.pageManager = pageManager;
         this.id = id;
         this.pages = pageManager.getPageSequence(id);

@@ -6,13 +6,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.predicate.Predicate;
-
 public class PageUpdate extends PageState {
     protected static final Log log = LogFactory.getLog(PageState.class);
 
-    PageUpdate(Predicate predicate, PageManager pageManager, String id) {
-        super(predicate, pageManager, id);
+    PageUpdate(PageManager pageManager, String id) {
+        super(pageManager, id);
     }
 
     public void update(byte[] buf, int bufOffset, int oldLen, int newLen,
