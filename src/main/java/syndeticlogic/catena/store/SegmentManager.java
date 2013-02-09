@@ -102,34 +102,4 @@ public class SegmentManager {
         assert files.containsKey(segment.getQualifiedFileName());
         segment.unpin();
     }
-    /*
-    public Compressor createCompressor(PageManager pageManager,
-            int compressionSize) {
-        Compressor c = null;
-        switch (compressionType) {
-        case Snappy:
-            c = new SnappyCompressor(pageManager, compressionSize);
-            break;
-        case Null:
-            c = new NullCompressor(pageManager, compressionSize);
-            break;
-        }
-        return c;
-    }
-
-    public Decompressor createDecompressor(Page source,
-            ByteBuffer target) {
-        Decompressor d = null;
-        switch (compressionType) {
-        case Snappy:
-            d = new SnappyDecompressor(source, target, pageManager.pageSize());
-            break;
-        case Null:
-            d = new NullDecompressor(source, target);
-            break;
-        }
-        return d;
-    }
-    */
-    
 }
