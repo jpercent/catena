@@ -3,13 +3,11 @@ package syndeticlogic.catena.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.predicate.Predicate;
-
 public class PageScan extends PageState {
     protected static final Log log = LogFactory.getLog(PageScan.class);
  
-    public PageScan(Predicate predicate, PageManager pageManager, String id) {
-        super(predicate, pageManager, id);
+    public PageScan(PageManager pageManager, String id) {
+        super(pageManager, id);
     }
 
     public int scan(byte[] buf, int bufOffset, int length, long foffset) {

@@ -45,27 +45,7 @@ public class ArrayDescriptor {
     private final Type type;
     private final int typeSize;
     private final ReentrantLock lock;
-    
-    public static class ValueDescriptor {
-        public CompositeKey segmentId;
-        public int segmentOffset;
-        public long byteOffset;
-        public int index;
-        public int valueSize;
 
-        public ValueDescriptor() {
-        }
-
-        public ValueDescriptor(CompositeKey segmentId, int segmentOffset, long byteOffset, 
-                int index, int size) {
-            this.segmentId = segmentId;
-            this.segmentOffset = segmentOffset;
-            this.byteOffset = byteOffset;
-            this.index = index;
-            this.valueSize = size;
-        }
-    }
-    
     public static byte[] encode(ArrayDescriptor arrayDesc) {
         CodeHelper coder = Codec.getCodec().coder();
         byte[] header = null;
@@ -438,4 +418,113 @@ public class ArrayDescriptor {
     public synchronized Collection<Segment> segments() {
         return segments.values();
     }
+    
+    public Sizes sizes() {
+        Sizes s=null;
+        if(isFixedLength()) {
+            s = new Sizes();
+        } else {
+            s = new VariableLengthSizes();
+        }
+        return s;
+    }
+    
+    public static class ValueDescriptor {
+        public CompositeKey segmentId;
+        public int segmentOffset;
+        public long byteOffset;
+        public int index;
+        public int valueSize;
+
+        public ValueDescriptor() {
+        }
+
+        public ValueDescriptor(CompositeKey segmentId, int segmentOffset, long byteOffset, 
+                int index, int size) {
+            this.segmentId = segmentId;
+            this.segmentOffset = segmentOffset;
+            this.byteOffset = byteOffset;
+            this.index = index;
+            this.valueSize = size;
+        }
+    }
+    
+    public class Sizes {
+        volatile int element;
+        @ThreadSafe
+        public int lockAndGetSize() {
+            return typeSize;
+        }
+        
+        @ThreadSafe
+        public int lockAndGetSizeAndIncrement() {
+            return typeSize;
+        }
+        
+        public int getSize() {
+            return typeSize;
+        }
+        
+        public int getSizeAndIncrement() {
+            return typeSize;
+        }
+        
+        public void acquire() {
+        }
+        
+        public void release() {
+        }
+        
+        public void increment() {
+            element++;
+        }
+    }
+    
+    public class VariableLengthSizes extends Sizes {
+        @ThreadSafe
+        @Override
+        public int lockAndGetSize() {
+            acquire();
+            try {
+                return getSize();
+            } finally {
+                release();
+            }
+        }
+        
+        @ThreadSafe
+        @Override
+        public int lockAndGetSizeAndIncrement() {
+            acquire();
+            try {
+                int size = getSize();
+                increment();
+                return size;
+            } finally {
+                release();
+            }
+        }
+        
+        @Override
+        public int getSize() {
+            return sizes.get(element).intValue();
+        }
+        
+        @Override
+        public int getSizeAndIncrement() {
+            int size = sizes.get(element).intValue();
+            increment();
+            return size;
+        }
+        
+        @Override
+        public void acquire() {
+            acquire();
+        }
+        
+        @Override
+        public void release() {
+            release();
+        }
+    }    
 }

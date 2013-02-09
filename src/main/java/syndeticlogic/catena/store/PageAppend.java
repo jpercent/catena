@@ -3,13 +3,11 @@ package syndeticlogic.catena.store;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.predicate.Predicate;
-
 public class PageAppend extends PageState {
     protected static final Log log = LogFactory.getLog(PageState.class);
     
-    PageAppend(Predicate predicate, PageManager pageManager, String id) {
-        super(predicate, pageManager, id);
+    PageAppend(PageManager pageManager, String id) {
+        super(pageManager, id);
     }
 
     public void append(byte[] buf, int bufOffset, int size) {

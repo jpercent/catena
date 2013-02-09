@@ -94,8 +94,8 @@ public class Segment implements Pinnable {
         int total = 0;
         rwlock.readLock().lock();
         try {
-            PageScan pageIO = new PageScan(null, pageManager, fileName);
-            total = pageIO.scan(buffer, bufferOffset, length, fileOffset);
+            ObjectScan scanner = new ObjectScan(null, pageManager, fileName);
+            total = scanner.scan(buffer, bufferOffset, fileOffset, length);
         } finally {
             rwlock.readLock().unlock();
         }
@@ -106,9 +106,8 @@ public class Segment implements Pinnable {
             int oldLen, int newLen) {
         rwlock.writeLock().lock();
         try {
-            PageUpdate pageIO = new PageUpdate(null, pageManager, fileName);
-            pageIO.update(buffer, bufferOffset, oldLen, newLen,
-                    fileOffset);
+            ObjectUpdate updater = new ObjectUpdate(null, pageManager, fileName);
+            updater.update(buffer, bufferOffset, fileOffset, oldLen, newLen);
             size -= oldLen;
             size += newLen;
         } finally {
@@ -119,7 +118,7 @@ public class Segment implements Pinnable {
     public void append(byte[] buffer, int bufferOffset, int size) {
         rwlock.writeLock().lock();
         try {
-            PageAppend pageIO = new PageAppend(null, pageManager, fileName);
+            PageAppend pageIO = new PageAppend(pageManager, fileName);
             pageIO.append(buffer, bufferOffset, size);
             this.size += size;
         } finally {

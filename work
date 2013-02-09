@@ -1,0 +1,58 @@
+
+Catena: http://github.com/jpercent/catena.  Java.  2011 - 2012
+----------------------------------------------------------------------
+Catena is a column-oriented storage engine, designed to optimize
+execution of workloads that scan a large number of rows from small
+number of columns.
+
+Facebook Ads Campaign Manager: proprietary. Javascript/Rails. 2012
+-----------------------------------------------------------------------
+Built an application for managing advertising campaigns on Facebook
+using the Facebook Ads API and Ruby on Rails.  App provides a metrics
+dashboard, basic campaign/spend managment, key word targeting
+primitives and multi-file upload.
+
+Federated Service Discovery: proprietary.  Java/Avro/Hazelcast.  2012
+----------------------------------------------------------------------
+Designed and implemented a federated service discovery system for a
+500+ node cluster spanning 3 data centers (US East, US West and EU).
+The system uses Apache Avro for messaging and the Hazelcast data grid
+for consistency.
+
+Slideshow App: http://cio.com/slideshows.  Javascript/Java.  2011
+----------------------------------------------------------------------
+Created a slideshow app for playing multimedia slideshows.  Designed
+the backend data model and integrated an open source jquery slider
+plugin for the front end.
+
+Auto-Builder: http://github.com/jpercent/auto-builder.  Python.  2011
+----------------------------------------------------------------------
+The auto builder is a Python program that introspects OSGi manifest
+files and generates Ant-based build artifacts.  It's declarative,
+provides transivitive closure over dependencies, and generates
+artifacts include targets for compiling, testing and packaging the
+source bundles of the project.
+
+Query-Rewrite: proprietary.  C++.  2010
+----------------------------------------------------------------------
+Developed a specialized SQL parser for renaming columns and tables and
+removing joins from queries based on proprietary table clustering
+rewrite rules.  Query-rewrite consists of a hook that is compiled into
+a mysqld and a library that links to it.
+
+SCache: proprietary.  C (Linux kernel).  2009
+----------------------------------------------------------------------
+SCache is a distributed, coherent block-level caching system. The idea
+is to extend the storage array onto the server by making use of
+server-side flash devices.  Co-designed distributed caching protocols
+and cache directory design, and implemented caching system in the
+device-mapper layer of the Linux kernel.
+
+Service Management Framework: proprietary.  Python.  2008
+----------------------------------------------------------------------
+Led the development of the Service Management Framework. The framework
+consists of a collection of reusable interfaces and underlying
+software layers, which provides the infrastructure necessary to
+seamlessly access, control, simulate and test low-level C based
+abstractions from a Python interface.
+

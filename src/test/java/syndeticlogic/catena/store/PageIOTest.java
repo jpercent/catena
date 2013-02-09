@@ -53,9 +53,9 @@ public class PageIOTest {
                 PageFactory.PageDescriptorType.Unsynchronized, retryLimit);
         pm = pf.createPageManager(null, pageSize, 3 * pages);
         pm.createPageSequence(name);
-        pioS = new PageScan(null, pm, name);
-        pioU = new PageUpdate(null, pm, name);
-        pioA = new PageAppend(null, pm, name);
+        pioS = new PageScan(pm, name);
+        pioU = new PageUpdate(pm, name);
+        pioA = new PageAppend(pm, name);
     }
 
     void doScan() {
@@ -111,7 +111,7 @@ public class PageIOTest {
         Codec.getCodec().encode(34, data, 12);
         Codec.getCodec().encode(33, data, 16);
         pioA.append(data, 0, data.length);
-        pioS = new PageScan(cp, pm, name);
+        pioS = new PageScan(pm, name);
         
         byte[] actual = new byte[4*5];
 //      PageScan pioS = new PageScan(null, pm, name);
