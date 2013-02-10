@@ -38,9 +38,11 @@ public abstract class ScatterGatherValue extends Value {
     
     @Override
     public void reset(byte[] data, int offset, int length) {
-        values.clear();
         length = 0;
-        add(data, offset, length);
+        if(values != null) {
+    		values.clear();
+            add(data, offset, length);
+    	}
     }
     
     @Override
