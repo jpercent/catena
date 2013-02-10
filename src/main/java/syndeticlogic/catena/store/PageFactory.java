@@ -149,8 +149,9 @@ public class PageFactory {
             break;
         case PinnableLru:
             ps = new PinnableLruStrategy(null, size, timeoutMillis);
+            break;
 		default:
-			throw new RuntimeException("Unsupported cache policy"+cachePolicy);
+			throw new RuntimeException("Unsupported cache policy "+cachePolicy);
         }
         return ps;
     }
