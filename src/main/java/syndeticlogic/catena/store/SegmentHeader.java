@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.type.Type;
+import syndeticlogic.catena.utility.BufferPool;
 import syndeticlogic.catena.utility.CodeHelper;
 import syndeticlogic.catena.utility.Codec;
 
@@ -19,14 +20,16 @@ public class SegmentHeader {
     
     private FileChannel channel;
     private PageManager pageManager;
+    private BufferPool<ByteBuffer> bufferPool;
     private int pages;
     private Type type;
     private long dataSize;
     
-    public SegmentHeader(FileChannel channel, PageManager pageManager) {
+    public SegmentHeader(FileChannel channel, PageManager pageManager, BufferPool<ByteBuffer> pool) {
         this.channel = channel;
         this.dataSize = 0L;
         this.pageManager = pageManager;
+        this.bufferPool = pool;
     }
 
     public void load() {
@@ -38,7 +41,7 @@ public class SegmentHeader {
             throw new RuntimeException(e1);
         }
         
-        ByteBuffer buff = pageManager.byteBuffer();
+        ByteBuffer buff = bufferPool.buffer();
         try {
             CodeHelper coder = Codec.getCodec().coder();
             buff.limit(HEADER_SIZE);
@@ -73,7 +76,7 @@ public class SegmentHeader {
             assert crcvalue == crc;
             
         } finally {
-            pageManager.releaseByteBuffer(buff);
+            bufferPool.release(buff);
         }
     }
 

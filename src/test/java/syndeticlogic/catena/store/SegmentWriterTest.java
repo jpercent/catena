@@ -58,7 +58,7 @@ public class SegmentWriterTest {
         SegmentManager.configureSegmentManager(SegmentManager.CompressionType.Null,
                 pageFactory.createPageManager(null, pageSize, pages));
 
-        header = new SegmentHeader(fileChannel, pageManager);
+        header = new SegmentHeader(fileChannel, pageManager, bufferPool);
         header.type(Type.BINARY);
         header.pages(50);
         //header.store();
@@ -107,7 +107,7 @@ public class SegmentWriterTest {
         writer.write();
         
         channel.position(0L);
-        header = new SegmentHeader(fileChannel, pageManager);
+        header = new SegmentHeader(fileChannel, pageManager, bufferPool);
         header.load();
         assertEquals(pageValues.size(), header.pages());
         assertEquals(Type.BINARY, header.type());

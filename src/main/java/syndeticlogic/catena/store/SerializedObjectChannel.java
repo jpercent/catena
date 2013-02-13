@@ -87,7 +87,7 @@ public class SerializedObjectChannel {
             log.error(e);
             throw new RuntimeException(e);
         }
-        SegmentHeader header = new SegmentHeader(channel, pageManager);
+        SegmentHeader header = new SegmentHeader(channel, pageManager, bufferPool);
         header.load();
         header.dataSize(dataSize);
         header.pages(pages);
