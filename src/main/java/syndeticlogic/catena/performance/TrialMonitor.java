@@ -8,12 +8,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class MultiMonitorDecorator extends AbstractMonitor implements MemoryMonitor, IOMonitor {
+public class TrialMonitor extends AbstractMonitor implements MemoryMonitor, IOMonitor {
 	private Log log = LogFactory.getLog(AbstractMonitor.class);	
 	private MemoryMonitor memoryMonitor;
 	private IOMonitor ioMonitor;
 	
-	public MultiMonitorDecorator(MemoryMonitor memoryMonitor, IOMonitor ioMonitor) {
+	public TrialMonitor(MemoryMonitor memoryMonitor, IOMonitor ioMonitor) {
 	    super();
 	    this.memoryMonitor = memoryMonitor;
 	    this.ioMonitor = ioMonitor;
