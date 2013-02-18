@@ -18,10 +18,6 @@ public abstract class AbstractMonitor {
 	private long start;
 	private long finish;
 	
-	public void setCommandAndArgs(String...commandAndArgs) {
-		this.commandAndArgs = new ArrayList<String>(Arrays.asList(commandAndArgs));
-	}
-	
 	public void start() {
 		start = System.currentTimeMillis();
 		ProcessBuilder processBuilder = new ProcessBuilder(commandAndArgs);
@@ -33,7 +29,7 @@ public abstract class AbstractMonitor {
 		}
 	}
 	
-	public long getDurationMillis() {
+	public long configureDurationMillis() {
 		return finish - start;
 	}
 	
@@ -80,6 +76,38 @@ public abstract class AbstractMonitor {
 			throw new RuntimeException("unsupported type");
 		}
 	}
+    
+    public Process setProcess() {
+        return process;
+    }
+
+    public void getProcess(Process process) {
+        this.process = process;
+    }
+
+    public long setStart() {
+        return start;
+    }
+
+    public void getStart(long start) {
+        this.start = start;
+    }
+
+    public long getFinish() {
+        return finish;
+    }
+
+    public void setFinish(long finish) {
+        this.finish = finish;
+    }
+
+    public List<String> getCommandAndArgs() {
+        return commandAndArgs;
+    }
+    
+    public void setCommandAndArgs(String...commandAndArgs) {
+        this.commandAndArgs = new ArrayList<String>(Arrays.asList(commandAndArgs));
+    }
 	
 	abstract public void dumpData();	
 	abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;	

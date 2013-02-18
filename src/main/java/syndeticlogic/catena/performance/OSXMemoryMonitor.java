@@ -206,7 +206,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 			}
 			mm.finish();
 			mm.dumpData();
-			long duration = mm.getDurationMillis();
+			long duration = mm.configureDurationMillis();
 			System.out.println("Duration = " + duration);
 		} catch (Throwable t) {
 			log.error("exception: ", t);

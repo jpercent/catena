@@ -69,62 +69,62 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	
 	// IOMonitor
 	@Override
-	public double averageKilobytesPerTransfer() {
+	public double getAverageKilobytesPerTransfer() {
 		return computeAverage(kbt);
 	}
 	
 	@Override
-	public List<Double> rawKiloBytesPerTranferMeasurements() {
+	public List<Double> getRawKiloBytesPerTranferMeasurements() {
 		return kbt;
 	}
 	
 	@Override
-	public double averageTransfersPerSecond() {
+	public double getAverageTransfersPerSecond() {
 		return computeAverage(tps);
 	}
 	
 	@Override
-	public List<Double> rawTransfersPerSecond()  {
+	public List<Double> getRawTransfersPerSecond()  {
 		return tps;
 	}
 	
 	@Override
-	public double averageMegabytesPerSecond() {
+	public double getAverageMegabytesPerSecond() {
 		return computeAverage(mbs);
 	}
 	
 	@Override
-	public List<Double> rawMegabytesPerSecond()  {
+	public List<Double> getRawMegabytesPerSecond()  {
 		return mbs;
 	}
 	
 	@Override
-	public double averageUserModeTime() {
+	public double getAverageUserModeTime() {
 		return computeAverage(user);
 	}
 	
 	@Override
-	public List<Long> rawUserModeTime(){
+	public List<Long> getRawUserModeTime(){
 		return user;
 	}
 	
 	@Override
-	public double averageSystemModeTime()  {
+	public double getAverageSystemModeTime()  {
 		return computeAverage(system);
 	}
 	
 	@Override
-	public List<Long> rawSystemModeTime(){
+	public List<Long> getRawSystemModeTime(){
 		return system;
 	}
 	
 	@Override
-	public double averageIdleModeTime()  {
+	public double getAverageIdleModeTime()  {
 		return computeAverage(idle);
 	}
 	
 	@Override
-	public List<Long> rawIdleModeTime() {
+	public List<Long> getRawIdleModeTime() {
 		return idle;
 	}
 	
@@ -174,7 +174,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			}
 			iom.finish();
 			iom.dumpData();
-			long duration = iom.getDurationMillis();
+			long duration = iom.configureDurationMillis();
 			System.out.println("Duration = " + duration);
 		} catch (Throwable t) {
 			log.error("exception: ", t);

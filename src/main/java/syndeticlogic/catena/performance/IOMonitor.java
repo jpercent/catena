@@ -3,17 +3,17 @@ package syndeticlogic.catena.performance;
 import java.util.List;
 
 public interface IOMonitor {
-	double averageKilobytesPerTransfer();
-	List<Double> rawKiloBytesPerTranferMeasurements();
-	double averageTransfersPerSecond();
-	List<Double> rawTransfersPerSecond();
-	double averageMegabytesPerSecond();
-	List<Double> rawMegabytesPerSecond();
+	double getAverageKilobytesPerTransfer();
+	List<Double> getRawKiloBytesPerTranferMeasurements();
+	double getAverageTransfersPerSecond();
+	List<Double> getRawTransfersPerSecond();
+	double getAverageMegabytesPerSecond();
+	List<Double> getRawMegabytesPerSecond();
 	
-	double averageUserModeTime();
-	List<Long> rawUserModeTime();
-	double averageSystemModeTime();
-	List<Long> rawSystemModeTime();
-	double averageIdleModeTime();
-	List<Long> rawIdleModeTime();
+	double getAverageUserModeTime();
+	List<Long> getRawUserModeTime();
+	double getAverageSystemModeTime();
+	List<Long> getRawSystemModeTime();
+	double getAverageIdleModeTime();
+	List<Long> getRawIdleModeTime();
 }
