@@ -11,7 +11,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public abstract class AbstractMonitor {
+public abstract class AbstractMonitor implements Monitor {
 	private Log log = LogFactory.getLog(AbstractMonitor.class);
 	private List<String> commandAndArgs;
 	private Process process;
@@ -19,7 +19,7 @@ public abstract class AbstractMonitor {
 	private long finish;
 	
 	public void start() {
-		start = System.currentTimeMillis();
+		recordStart();
 		ProcessBuilder processBuilder = new ProcessBuilder(commandAndArgs);
 		try {
 			process = processBuilder.start();
@@ -29,7 +29,7 @@ public abstract class AbstractMonitor {
 		}
 	}
 	
-	public long configureDurationMillis() {
+	public long getDurationMillis() {
 		return finish - start;
 	}
 	
@@ -48,7 +48,7 @@ public abstract class AbstractMonitor {
 	
 	public void finish() {
 		try {
-			finish = System.currentTimeMillis();
+		    recordFinish();
 			BufferedReader reader = configureMonitorOutputReader();
 			processMonitorOutput(reader);
 		} catch(IOException e) {
@@ -77,28 +77,20 @@ public abstract class AbstractMonitor {
 		}
 	}
     
-    public Process setProcess() {
-        return process;
-    }
-
-    public void getProcess(Process process) {
-        this.process = process;
-    }
-
-    public long setStart() {
+    public long getStart() {
         return start;
     }
 
-    public void getStart(long start) {
-        this.start = start;
+    public void recordStart() {
+        this.start = System.currentTimeMillis();
     }
 
     public long getFinish() {
         return finish;
     }
 
-    public void setFinish(long finish) {
-        this.finish = finish;
+    public void recordFinish() {
+        this.finish = System.currentTimeMillis();
     }
 
     public List<String> getCommandAndArgs() {
@@ -108,7 +100,4 @@ public abstract class AbstractMonitor {
     public void setCommandAndArgs(String...commandAndArgs) {
         this.commandAndArgs = new ArrayList<String>(Arrays.asList(commandAndArgs));
     }
-	
-	abstract public void dumpData();	
-	abstract protected void processMonitorOutput(BufferedReader reader) throws IOException;	
 }

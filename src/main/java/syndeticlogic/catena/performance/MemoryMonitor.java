@@ -2,7 +2,7 @@ package syndeticlogic.catena.performance;
 
 import java.util.LinkedList;
 
-public interface MemoryMonitor {
+public interface MemoryMonitor extends Monitor {
 	
 	// Pages free: the total number of free pages in the system
 	public double getAverageFreePages();	

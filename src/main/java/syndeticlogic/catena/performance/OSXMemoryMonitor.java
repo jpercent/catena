@@ -3,6 +3,7 @@ package syndeticlogic.catena.performance;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +38,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 	
 	// AbstractMonitor
 	@Override
-	protected void processMonitorOutput(BufferedReader reader) throws IOException {
+	public void processMonitorOutput(BufferedReader reader) throws IOException {
 		reader.readLine();
 		reader.readLine();
 		reader.readLine();
@@ -206,7 +207,7 @@ public class OSXMemoryMonitor extends AbstractMonitor implements MemoryMonitor {
 			}
 			mm.finish();
 			mm.dumpData();
-			long duration = mm.configureDurationMillis();
+			long duration = mm.getDurationMillis();
 			System.out.println("Duration = " + duration);
 		} catch (Throwable t) {
 			log.error("exception: ", t);

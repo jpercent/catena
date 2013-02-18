@@ -2,7 +2,7 @@ package syndeticlogic.catena.performance;
 
 import java.util.List;
 
-public interface IOMonitor {
+public interface IOMonitor extends Monitor {
 	double getAverageKilobytesPerTransfer();
 	List<Double> getRawKiloBytesPerTranferMeasurements();
 	double getAverageTransfersPerSecond();

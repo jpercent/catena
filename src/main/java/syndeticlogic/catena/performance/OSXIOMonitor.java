@@ -34,7 +34,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 	
 	// AbstractMonitor
 	@Override
-	protected void processMonitorOutput(BufferedReader reader) throws IOException {
+	public void processMonitorOutput(BufferedReader reader) throws IOException {
 		reader.readLine();
 		reader.readLine();
 		reader.readLine();
@@ -174,7 +174,7 @@ public class OSXIOMonitor extends AbstractMonitor implements IOMonitor {
 			}
 			iom.finish();
 			iom.dumpData();
-			long duration = iom.configureDurationMillis();
+			long duration = iom.getDurationMillis();
 			System.out.println("Duration = " + duration);
 		} catch (Throwable t) {
 			log.error("exception: ", t);
