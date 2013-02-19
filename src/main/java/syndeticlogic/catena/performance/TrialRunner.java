@@ -1,7 +1,5 @@
 package syndeticlogic.catena.performance;
 
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,24 +31,25 @@ public class TrialRunner {
                 try {
                     final long start = System.currentTimeMillis();
                     int count = 0;
-                    IODescriptor[] iodescriptors = new IODescriptor[1024];
+                    IORecord[] iodescriptors = new IORecord[1024];
                     while (controller.notDone()) {
-                        iodescriptors[count] = controller.getNextIODescriptor();
-                        iodescriptors[count].performIO();
+                        IOExecutor ioexe = controller.getNextIOExecutor();
+                        ioexe.performIO();
+                        iodescriptors[count] = ioexe.getIORecord();
                         count++;
                         if (count == 1024) {
-                            results.addIODescriptors(controller, iodescriptors);
+                            results.addIORecords(controller.getId(), iodescriptors);
                             count = 0;
                         }
                     }
                     final long end = System.currentTimeMillis();
                     long duration = end - start;
                     if(count != 0) {
-                        IODescriptor[] truncated = new IODescriptor[count];
+                        IORecord[] truncated = new IORecord[count];
                         System.arraycopy(iodescriptors, 0, truncated, 0, count);
-                        results.addIODescriptors(controller, truncated);
+                        results.addIORecords(controller.getId(), truncated);
                     }                    
-                    results.completeTrial(controller, duration);
+                    results.completeTrial(controller.getId(), duration);
                 } catch (Throwable t) {
                     log.error("Exception in TrialRunnder: ", t);
                     throw new RuntimeException(t);

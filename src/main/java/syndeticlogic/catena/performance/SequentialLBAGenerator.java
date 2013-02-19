@@ -1,7 +1,5 @@
 package syndeticlogic.catena.performance;
 
-import java.util.Random;
-
 public class SequentialLBAGenerator implements LBAGenerator {
     protected int blockSize;
     protected long cursor;

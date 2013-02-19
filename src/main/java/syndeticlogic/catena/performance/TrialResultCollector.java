@@ -1,59 +1,93 @@
 package syndeticlogic.catena.performance;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TrialResultCollector {
-    ConcurrentMap<IOController, TrialDescriptor> trials;
-    
+    final HashMap<Long, IOControllerResultDescriptor> trials;
+    final Thread serializer;
+    final ReentrantLock lock;
+    final Condition condition;
+    boolean done;
+
     public TrialResultCollector() {
-        trials = new ConcurrentHashMap<IOController, TrialDescriptor>();
+        trials = new HashMap<Long, IOControllerResultDescriptor>();
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
+        done = false;
+        serializer = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                lock.lock();
+                try {
+                    while (!done) {
+                        try {
+                            condition.await();
+
+                        } catch (InterruptedException e) {
+
+                            e.printStackTrace();
+                        }
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
     }
-    
-    public void addIODescriptor(IOController controller, IODescriptor ioDescriptor) {
-        if(trials.containsKey(controller)) {
-            trials.get(controller).ios.add(ioDescriptor);
-        } else {
-            TrialDescriptor desc = new TrialDescriptor(controller);
-            desc.ios.add(ioDescriptor);
-            trials.put(controller, desc);
-        }        
+    public void createIOControllerResultDescriptor(Long controllerId, )
+    public void addIORecord(IORecord ioDescriptor) {
+        lock.lock();
+        try {
+            if (trials.containsKey(ioDescriptor.getControllerId())) {
+                trials.get(ioDescriptor.getControllerId()).ios.add(ioDescriptor);
+            } else {
+                IOControllerResultDescriptor desc = new IOControllerResultDescriptor();
+                desc.ios.add(ioDescriptor);
+                trials.put(ioDescriptor.getControllerId(), desc);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
-    
-    public void addIODescriptors(IOController controller, IODescriptor...ioDescriptor) {
-        if(trials.containsKey(controller)) {
-            trials.get(controller).ios.addAll(Arrays.asList(ioDescriptor));
-        } else {
-            TrialDescriptor desc = new TrialDescriptor(controller);
-            desc.ios.addAll(Arrays.asList(ioDescriptor));
-            trials.put(controller, desc);
-        }        
+
+    public void addIORecords(Long id, IORecord... ioDescriptor) {
+        lock.lock();
+        try {
+            if (trials.containsKey(id)) {
+                trials.get(id).ios.addAll(Arrays.asList(ioDescriptor));
+            } else {
+                IOControllerResultDescriptor desc = new IOControllerResultDescriptor();
+                desc.ios.addAll(Arrays.asList(ioDescriptor));
+                trials.put(id, desc);
+            }
+        } finally {
+            lock.unlock();
+        }
     }
-    
-    public void completeTrial(IOController controller, long duration) {
-        if(trials.containsKey(controller)) {
-            trials.get(controller).duration = duration;
-        } else {
-            throw new RuntimeException("attempted to complete a trial that didn't create any records");
-        }        
+
+    public void completeTrial(Long controllerId, long duration) {
+        lock.lock();
+        try {
+            if (trials.containsKey(controllerId)) {
+                trials.get(controllerId).duration = duration;
+            } else {
+                throw new RuntimeException("attempted to complete a trial that didn't create any records");
+            }
+        } finally {
+            lock.unlock();
+        }
     }
-    
-    public Map<IOController, TrialDescriptor> getTrials() {
-        return trials;
-    }
-    
-    public class TrialDescriptor {
-        IOController controller;
-        List<IODescriptor> ios;
+
+    public class IOControllerResultDescriptor {
+        List<IORecord> ios;
         long duration;
-        
-        public TrialDescriptor(IOController controller) {
-            this.controller = controller;
-            this.ios = new LinkedList<IODescriptor>();
+        public IOControllerResultDescriptor() {
+            this.ios = new LinkedList<IORecord>();
         }
     }
 }
