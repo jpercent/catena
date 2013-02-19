@@ -31,7 +31,7 @@ level of abstraction are arrays.  Arrays are comprised of 1 or more
 segments.
 
 A segment is in turn comprised of pages, the lowest level abstraction.
-Pages contain binary data that is read and written to and from
+Pages contain binary data that gets read and written to and from
 segments by arrays.
 
 Pages are completely transient structures that are encapsulated by
@@ -75,7 +75,7 @@ the first component and the next natural number as the second
 component.
 
 The array's descriptor also maintains an update-split threshold such
-that updates to variable length types will never cause the array's
+that updates to variable length typ:qes will never cause the array's
 size to become unmanageable.  
 
 Composite keys are hierarchically collated.  When an update-split
