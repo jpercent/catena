@@ -61,7 +61,7 @@ public class SegmentWriterTest {
         header = new SegmentHeader(fileChannel, pageManager);
         header.type(Type.BINARY);
         header.pages(50);
-        //header.store();
+        header.store();
         
         pageOffsets = new HashMap<Integer, Long>(header.pages());
         long offset = header.headerSize();
