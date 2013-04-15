@@ -317,6 +317,7 @@ public class CodeHelper {
 			case CODEABLE:
 				size += ((Codeable)components.get(index)).size();  
 				break;
+			default:
 			}
 			index++;
 		}
