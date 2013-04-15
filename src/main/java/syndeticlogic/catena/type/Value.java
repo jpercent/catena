@@ -12,7 +12,9 @@ public abstract class Value {
     }
     
     public Value(byte[] data, int offset, int length) {
-        reset(data, offset, length);
+        if(data != null) {
+            reset(data, offset, length);
+        }
     }
     
     public void reset(byte[] data, int offset, int length) {
