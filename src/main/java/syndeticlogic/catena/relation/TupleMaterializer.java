@@ -1,11 +1,11 @@
 package syndeticlogic.catena.relation;
 
 public class TupleMaterializer {
-	private RelationDescriptor relationDescriptor;
-	private BufferPool buffers;
+//private RelationDescriptor relationDescriptor;
+	//private BufferPool buffers;
 	
-	public TupleMaterializer(RelationDescriptor relationDescriptor) {
-		this.relationDescriptor = relationDescriptor;
+	public TupleMaterializer(/*RelationDescriptor relationDescriptor*/) {
+		//this.relationDescriptor = relationDescriptor;
 	}
 	
 	/**
@@ -13,7 +13,7 @@ public class TupleMaterializer {
 	 * @return
 	 */
 	public boolean getRows() {
-		
+		return true;
 	}
 	
 	// scan up to a mb at a time and send it back
