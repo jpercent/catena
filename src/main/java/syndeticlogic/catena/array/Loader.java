@@ -62,7 +62,7 @@ public class Loader extends DirectoryWalker {
                 log.error("empty array descriptor; skipping directory: "+baseDir);
                 current.push(null);
             }
-
+            fi.close();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

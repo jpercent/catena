@@ -1,5 +1,5 @@
 /*
- *   Copyright 2010 - 2012 James Percent
+ *   Copyright 2010 - 2013 James Percent
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import syndeticlogic.catena.utility.Transaction;
 import syndeticlogic.catena.array.SegmentCursor;
 
 /**
- * @author <a href="mailto:james@empty-set.net">James Percent</a>
+ * @author <a href="mailto:james@syndeticlogic.net">James Percent</a>
  */
 public class BinaryArray {
 
