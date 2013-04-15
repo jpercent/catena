@@ -46,8 +46,14 @@ public class SegmentManager {
         if (f.exists()) {
             throw new RuntimeException("file exists");
         }
+
         RandomAccessFile file = new RandomAccessFile(filename, "rw");
         SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
+
+    //    @SuppressWarnings("resource")
+	//	RandomAccessFile file = new RandomAccessFile(filename, "rw");
+     //   SegmentHeader header = null;//new SegmentHeader(file.getChannel(), pageManager);
+
         header.load();
         SerializedObjectChannel channel = new SerializedObjectChannel(file.getChannel());
         Segment fm = new Segment(type, header, channel,
@@ -56,14 +62,14 @@ public class SegmentManager {
         fm.pin();
         return fm;
     }
-
+    
+    @SuppressWarnings("resource")
     public synchronized Segment lookup(String filename) {
         assert filename != null;
-        Segment fm = null;
+        Segment segment = null;
 
-        fm = files.get(filename);
-
-        if (fm == null) {
+        segment = files.get(filename);
+        if (segment == null) {
             File f = new File(filename);
             if (!f.exists()) {
                 throw new RuntimeException("file does not exist");
@@ -77,8 +83,7 @@ public class SegmentManager {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
-            SegmentHeader header = new SegmentHeader(file.getChannel(),
-                    pageManager);
+            SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
             SerializedObjectChannel channel;
             if (compressionType == CompressionType.Snappy) {
                 channel = new SnappyDecorator(file.getChannel(),
@@ -86,48 +91,18 @@ public class SegmentManager {
             } else {
                 channel = new SerializedObjectChannel(file.getChannel());
             }
-            fm = new Segment(new ReentrantReadWriteLock(), header, channel,
+            segment = new Segment(new ReentrantReadWriteLock(), header, channel,
                     pageManager, filename);
-            files.put(filename, fm);
+            files.put(filename, segment);
         } else {
-            assert filename.equals(fm.getQualifiedFileName());
+            assert filename.equals(segment.getQualifiedFileName());
         }
-        fm.pin();
-        return fm;
+        segment.pin();
+        return segment;
     }
 
     public synchronized void release(Segment segment) {
         assert files.containsKey(segment.getQualifiedFileName());
         segment.unpin();
     }
-    /*
-    public Compressor createCompressor(PageManager pageManager,
-            int compressionSize) {
-        Compressor c = null;
-        switch (compressionType) {
-        case Snappy:
-            c = new SnappyCompressor(pageManager, compressionSize);
-            break;
-        case Null:
-            c = new NullCompressor(pageManager, compressionSize);
-            break;
-        }
-        return c;
-    }
-
-    public Decompressor createDecompressor(Page source,
-            ByteBuffer target) {
-        Decompressor d = null;
-        switch (compressionType) {
-        case Snappy:
-            d = new SnappyDecompressor(source, target, pageManager.pageSize());
-            break;
-        case Null:
-            d = new NullDecompressor(source, target);
-            break;
-        }
-        return d;
-    }
-    */
-    
 }
