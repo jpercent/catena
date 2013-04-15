@@ -6,8 +6,7 @@ import syndeticlogic.catena.utility.Codec;
 public class IntegerValue extends Value {
 	private int decoded;
 
-	public IntegerValue() {
-	    
+	public IntegerValue() {	    
 	}
 	
 	public IntegerValue(int data) {
