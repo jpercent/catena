@@ -101,6 +101,7 @@ public class SegmentController {
             segment.acquireWriteLock();
             break;
         }
+        segment.pin();
     }
 
     private void unlockSegment(Segment segment, LockType lockType) {
@@ -116,5 +117,6 @@ public class SegmentController {
             segment.releaseWriteLock();
             break;
         }
+        segment.unpin();
     }
 }
