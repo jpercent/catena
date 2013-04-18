@@ -16,17 +16,16 @@ public class OperandTest {
         
         test[0] = 0x0;
         BinaryValue bin = new BinaryValue(test, 0, 1);
-        assertEquals(test, bin.data());
+        assertArrayEquals(test, bin.data());
         assertEquals(0, bin.offset());
         assertEquals(1, bin.length());
         assertEquals(Type.BINARY, bin.type());
-        bin.reset(test1, 1, 1);
         
-        assertEquals(test1, bin.data());
-        assertEquals(1, bin.offset());
+        bin.reset(test1, 1, 1);
+        assertEquals(test1[1], bin.data()[0]);
+        assertEquals(1, bin.data().length);
+        assertEquals(0, bin.offset());
         assertEquals(1, bin.length());
         assertEquals(Type.BINARY, bin.type());
-        bin.reset(test1, 1, 1);
     }
-
 }
