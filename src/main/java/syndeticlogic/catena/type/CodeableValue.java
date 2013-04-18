@@ -1,38 +1,66 @@
 package syndeticlogic.catena.type;
 
-import syndeticlogic.catena.utility.CodeHelper;
-import syndeticlogic.catena.utility.Codec;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.catena.type.Type;
 
-public class CodeableValue extends ScatterGatherValue {
+public class CodeableValue extends Value {
+    private static final Log log = LogFactory.getLog(CodeableValue.class);
+	private Codeable decoded;
 
-    public CodeableValue(Codeable value) {
-        super();
-        CodeHelper coder = Codec.getCodec().coder();
-        coder.append(value);
-        byte[] rawvalue = coder.encodeByteArray();
-        add(rawvalue, 0, rawvalue.length);
-    }	
+	public CodeableValue() {	    
+	}
 	
-    CodeableValue() {
-        super();
-    }
-    
-    @Override
+	public CodeableValue(Codeable value) {
+	    super(null, 0, 0);
+	    reset(value);
+	}
+	
+	public int compareTo(Codeable c) {
+	    return decoded.compareTo(c);
+	}
+	
+	public void reset(Codeable value) {
+        length = value.size();
+        data = new byte[value.size()];
+        System.out.println(data+" "+length);
+        length = value.encode(data, 0);
+        offset = 0;
+        decoded = value;	    
+	}
+
+	@Override
     public Object objectize() {
-        throw new RuntimeException("Unsupprted");
+        return decoded;
     }
 
     @Override
     public Type type() {
         return Type.CODEABLE;
     }
-
+	
     @Override
     public int compareTo(byte[] rawBytes, int offset, int length) {
-        assert rawBytes.length - offset >= length && length == 4;
-        Codeable value = Codec.getCodec().decodeCodeable(rawBytes, offset);
-        Codeable decodedValue = Codec.getCodec().decodeCodeable(gather(), offset());
-        return value.compareTo(decodedValue);
+        Codeable o = createCodeable(rawBytes, offset);
+        return decoded.compareTo(o);
+    }
+
+    @Override
+    public void reset(byte[] data, int offset, int length) {
+        decoded = createCodeable(data, offset);
+        decoded.decode(data, offset);
+        reset(decoded);
+    }
+
+    private Codeable createCodeable(byte[] rawBytes, int offset) {
+        try {
+            Codeable value = decoded.getClass().newInstance();
+            value.decode(data, offset);
+            return value;
+        } catch (Exception e) {
+            log.error("Could not reset CodeableValue: " + e, e);
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -3,7 +3,6 @@ package syndeticlogic.catena.type;
 import syndeticlogic.catena.type.Type;
 
 public abstract class Value {
-    
     protected byte[] data;
     protected int offset;
     protected int length;
@@ -27,16 +26,15 @@ public abstract class Value {
         return data;
     }
     
-    int offset() {
+    public int offset() {
         return offset;
     }
     
-    int length() {
+    public int length() {
         return length;
     }
     
     public abstract Object objectize();    
     public abstract Type type();
-    public abstract int compareTo(byte[] rawBytes, int offset, int length);
-    
+    public abstract int compareTo(byte[] rawBytes, int offset, int length);  
 }

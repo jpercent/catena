@@ -49,12 +49,12 @@ public abstract class ScatterGatherValue extends Value {
     }
     
     @Override
-    int offset() {
+    public int offset() {
         return 0;
     }
     
     @Override
-    int length() {
+    public int length() {
         return length;
     }
 
