@@ -99,9 +99,10 @@ public class PageFactory {
             if (files != null) {
                 assert false;
                 for (String file : files) {
-
                     FileInputStream fileIn = new FileInputStream(new File(file));
                     long size = fileIn.getChannel().size();
+                    fileIn.close();
+                    fileIn = null;
                     assert (size / pageSize + 1) > 0
                             && (size / pageSize + 1) < Integer.MAX_VALUE;
 
