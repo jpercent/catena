@@ -47,6 +47,7 @@ public class SegmentManager {
             throw new RuntimeException("file exists");
         }
 
+        @SuppressWarnings("resource")
         RandomAccessFile file = new RandomAccessFile(filename, "rw");
         SegmentHeader header = new SegmentHeader(file.getChannel(), pageManager);
 
@@ -59,7 +60,7 @@ public class SegmentManager {
         Segment fm = new Segment(type, header, channel,
                 new ReentrantReadWriteLock(), pageManager, filename);
         files.put(filename, fm);
-        fm.pin();
+        //fm.pin();
         return fm;
     }
     
@@ -97,7 +98,7 @@ public class SegmentManager {
         } else {
             assert filename.equals(segment.getQualifiedFileName());
         }
-        segment.pin();
+        //segment.pin();
         return segment;
     }
 
