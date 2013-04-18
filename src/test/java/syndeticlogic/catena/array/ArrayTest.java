@@ -1,7 +1,7 @@
 /*
- *   Author == James Percent (james@empty-set.net)
- *   Copyright 2010, 2011 James Percent
- *
+ *   Copyright 2010 - 2013 James Percent
+ *   catena@syndeticlogic.net
+ *   
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
