@@ -42,6 +42,7 @@ public class SegmentWriterTest {
         return ret;
     }
     
+    @SuppressWarnings("resource")
     @Before
     public void setUp() throws Exception {
         fileChannel = new RandomAccessFile(fileName, "rw").getChannel();
