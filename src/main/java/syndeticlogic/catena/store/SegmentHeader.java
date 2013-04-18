@@ -21,11 +21,11 @@ public class SegmentHeader {
     private PageManager pageManager;
     private int pages;
     private Type type;
-    private long dataSize;
+    private int dataSize;
     
     public SegmentHeader(FileChannel channel, PageManager pageManager) {
         this.channel = channel;
-        this.dataSize = 0L;
+        this.dataSize = 0;
         this.pageManager = pageManager;
     }
 
@@ -55,7 +55,7 @@ public class SegmentHeader {
 
             type = (Type) meta.get(0);
             pages = ((Integer) meta.get(1)).intValue();
-            dataSize = ((Long) meta.get(2)).longValue();
+            dataSize = ((Integer) meta.get(2)).intValue();
             long crc = ((Long) meta.get(3)).longValue();
             coder.reset();
             coder.append(type);
@@ -122,11 +122,11 @@ public class SegmentHeader {
         this.pages = pages;
     }
     
-    public long dataSize() {
+    public int dataSize() {
         return dataSize;
     }
 
-    public void dataSize(long dataSize) {
+    public void dataSize(int dataSize) {
        this.dataSize = dataSize; 
     }
     

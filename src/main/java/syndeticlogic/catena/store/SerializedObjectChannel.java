@@ -80,7 +80,7 @@ public class SerializedObjectChannel {
         }
     }
 
-    public void writeHeader(PageManager pageManager, long dataSize, int pages) {
+    public void writeHeader(PageManager pageManager, int dataSize, int pages) {
         try {
             channel.position(0L);
         } catch (IOException e) {
