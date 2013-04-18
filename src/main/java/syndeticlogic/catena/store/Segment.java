@@ -167,13 +167,6 @@ public class Segment implements Pinnable {
         return size;
     }
     
-    public Segment split(long offset) {
-        rwlock.writeLock().lock();
-        // do something
-        rwlock.writeLock().unlock();
-        return null;
-    }
-    
     public synchronized Type getType() {
         return type;
     }

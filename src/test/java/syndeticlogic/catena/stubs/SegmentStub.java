@@ -105,13 +105,6 @@ public class SegmentStub extends Segment {
     }
 
     @Override
-    public Segment split(long offset) {
-        split = true;
-        splitOffset = offset;
-        return null;
-    }
-
-    @Override
     public void commit() {
         
     }
