@@ -15,7 +15,7 @@ import syndeticlogic.catena.utility.Codec;
 
 public class SegmentHeader {
     private static final Log log = LogFactory.getLog(SegmentHeader.class);
-    private static final int HEADER_SIZE = 23;
+    private static final int HEADER_SIZE = 19;
     
     private FileChannel channel;
     private PageManager pageManager;
