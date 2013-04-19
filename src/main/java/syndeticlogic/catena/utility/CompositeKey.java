@@ -93,14 +93,13 @@ public class CompositeKey implements Comparable<CompositeKey> {
 
         Format.packShort(ret, offset, (short)k.components.size());
         offset += NUM_ELEMENTS_SIZE;
-        
         int element_index = 0;
         int meta_index = offset;
         int encode_index = offset;
         int meta_shift = 0;
 
         for (; element_index < k.components.size(); element_index++) {
-            if (element_index % 4 == 0) {
+            if (element_index != 0 && element_index % 4 == 0) {
                 meta_shift = 0;
                 meta_index = encode_index;
                 encode_index++;
