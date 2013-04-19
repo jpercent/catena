@@ -24,7 +24,6 @@ public class CodeableValue extends Value {
 	public void reset(Codeable value) {
         length = value.size();
         data = new byte[value.size()];
-        System.out.println(data+" "+length);
         length = value.encode(data, 0);
         offset = 0;
         decoded = value;	    
