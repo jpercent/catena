@@ -69,12 +69,13 @@ public class Config {
 			log.fatal("could not load catena.properties"+e, e);
 			throw new RuntimeException(e);
 		}
-        compressionType = CompressionType.valueOf((String) properties.get("compression_type"));
-        memoryType = BufferPoolMemoryType.valueOf((String) properties.get("memory_type"));
-        cachingPolicy = CachingPolicy.valueOf((String) properties.get("caching_policy"));
-        pageType = PageDescriptorType.valueOf((String) properties.get("page_type"));
-        prefix = (String) properties.get("prefix");
-        memoryPercentage = Double.parseDouble((String) properties.get("physical_memory_percentage"));
+        System.out.println(properties.get("compression_type").getClass());
+        compressionType = CompressionType.valueOf(((String) properties.get("compression_type")).trim());
+        memoryType = BufferPoolMemoryType.valueOf(((String) properties.get("memory_type")).trim());
+        cachingPolicy = CachingPolicy.valueOf(((String) properties.get("caching_policy")).trim());
+        pageType = PageDescriptorType.valueOf(((String) properties.get("page_type")).trim());
+        prefix = ((String) properties.get("prefix")).trim();
+        memoryPercentage = Double.parseDouble(((String) properties.get("physical_memory_percentage")).trim());
         assert memoryPercentage < 1;
         
         retryLimit = Integer.parseInt((String)properties.get("retry_limit"));
@@ -106,7 +107,8 @@ public class Config {
     		String fatalMessage = "Catena must have read/write permissions on "+prefixFile.getAbsolutePath();
     		log.fatal(fatalMessage);
     		throw new RuntimeException(fatalMessage);
-    	}            		    	
+    	}
+    	this.prefix = prefixFile.getAbsolutePath();
     }
     
     private void configureCodec() {
