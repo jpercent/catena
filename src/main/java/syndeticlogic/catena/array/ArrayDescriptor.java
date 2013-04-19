@@ -190,13 +190,12 @@ public class ArrayDescriptor {
         this.lock = new ReentrantLock();
 
         try {
-            String sep = System.getProperty("file.separator");
-            String path = master.toString()+sep;
+            String path = master.toString();
             File f = new File(path);
             if(!f.exists()) {
                 FileUtils.forceMkdir(f);
             } else if(!f.isDirectory()) {
-                FileUtils.forceDelete(f);
+            	  FileUtils.forceDelete(f);
                 FileUtils.forceMkdir(f);
             }
             
