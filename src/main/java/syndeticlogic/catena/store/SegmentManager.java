@@ -44,7 +44,7 @@ public class SegmentManager {
         assert filename != null;
         File f = new File(filename);
         if (f.exists()) {
-            throw new RuntimeException("file exists");
+            throw new RuntimeException("file "+filename +" exists ");
         }
 
         @SuppressWarnings("resource")
