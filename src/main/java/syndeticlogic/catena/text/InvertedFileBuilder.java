@@ -53,7 +53,7 @@ public class InvertedFileBuilder {
 	}
 
 	public void completeBlock(String block) {
-		String blockFileName = prefix+File.separator+blockToId.get(block);
+		String blockFileName = prefix+File.separator+new File(block).getName()+"-"+blockToId.get(block)+".corpus";
 		fileWriter.writeFile(blockFileName, postings, wordToOffset);
 	}
 
