@@ -61,7 +61,31 @@ public class InvertedFileBuilder {
         System.out.println("Merge blocks called");
     } 
     
-    public static void main(String[] args) {
+    public HashMap<Integer, String> getIdToDoc() {
+		return idToDoc;
+	}
+
+	public HashMap<Integer, String> getIdToWord() {
+		return idToWord;
+	}
+
+	public TreeMap<String, InvertedList> getPostings() {
+		return postings;
+	}
+
+	public HashMap<Integer, Long> getWordToOffset() {
+		return wordToOffset;
+	}
+
+	public HashMap<String, Integer> getBlockToId() {
+		return blockToId;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public static void main(String[] args) {
         System.out.println("Start allocating... ");
         InvertedFileBuilder indexBuilder = new InvertedFileBuilder("target/InvertedFileBuilderTest", new RawInvertedFileWriter());
         System.out.println("Done Allocating ");
