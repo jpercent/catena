@@ -16,7 +16,7 @@
   (:use [syndeticlogic.catena.text.tokenize])
   (:use [syndeticlogic.catena.text.injest])
   (:import (java.util LinkedList HashMap)
-           (syndeticlogic.catena.text InvertedFileGenerator)
+           (syndeticlogic.catena.text InvertedFileBuilder)
            (java.io StringReader FileReader File)
            (org.apache.lucene.analysis Analyzer TokenStream)
            (org.apache.lucene.analysis.standard StandardAnalyzer)
@@ -27,7 +27,8 @@
            (java.util HashSet)))
 
 (defn add-token [key file catena-index]
-  (.addWords catena-index key (get-file-name file) (tokenize-file file)))
+  (tokenize-file file))
+  ;;(.addWords catena-index key (get-file-name file) (tokenize-file file)))
 
 (defn generate-block-index [key files catena-index]
   (loop [index 0] 
@@ -39,7 +40,7 @@
   (let [top-entry (first directory-map)]
     (if top-entry
       (do (generate-block-index (.getKey top-entry) (.getValue top-entry) catena-index)
-        (.storeBlock catena-index)
+       ;; (.storeBlock catena-index)
       (recur (rest directory-map) catena-index))
       catena-index)))
 
@@ -47,9 +48,9 @@
   "Generates a Catena index." 
   [directory]
   (try (let [directory-map (map-directory-tree directory)
-        catena-index (new InvertedFileGenerator)]
-    (generate-block-indexes directory-map catena-index)
-    (.mergeBlocks catena-index))
+        catena-index true]
+    (generate-block-indexes directory-map catena-index))
+    ;(.mergeBlocks catena-index))
     (catch Throwable t (.printStackTrace t))))
 
-(defn test-index [] (index "/Users/jamespercent/PA1/data/0"))
+(defn test-index [] (index "PA1/data/0"))

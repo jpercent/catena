@@ -49,8 +49,8 @@
     (finally (.close tokenStream))))
 
 (defn tokenize [reader]
-  (let [ts (newTokenStream reader)]
-    (tokenizeStream ts (newOffsetAttribute ts) (newCharTermAttribute ts) (new HashSet))))
+  (let [ts (newTokenStream reader) ret (tokenizeStream ts (newOffsetAttribute ts) (newCharTermAttribute ts) (new HashSet))]
+  (.close reader) ret))
 
 (defn tokenize-file [file] (tokenize (createFileReader file)))
 

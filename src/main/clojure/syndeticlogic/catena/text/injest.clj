@@ -39,8 +39,11 @@
 (defn map-directory-tree [dir] 
   (let [directories (try (map-file-by-dir (get-files dir) (new HashMap))
     (catch Throwable t (do (.printStackTrace t) (throw t))))]
+    (println "Mapping files is complete")
   directories))
 
+;;(defn walk-files [files fn-map]
+;;  (
 
 ;;(defn doubleprintln [arg] (println "\n------\n") (map get-file-name arg))
 ;;(defn test-map [dir] (map-directory-tree dir))
