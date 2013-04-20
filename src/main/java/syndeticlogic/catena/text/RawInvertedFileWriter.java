@@ -36,7 +36,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
 			int count = 0;
 			long start = System.currentTimeMillis();
 	        for(InvertedList list : postings.values()) {
-	        	int length = Type.CODEABLE.length() + list.size();
+	        	int length = /* Type.CODEABLE.length() + */ list.size();
 	        	if(offset+length >= PAGE_SIZE) {
 	        		direct.put(jvm, 0, offset);
 	        		direct.rewind();
@@ -47,7 +47,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
 	        		offset = 0;
 	        	}
 	        	wordToOffset.put(list.getWordId(), fileOffset);
-	        	int written = Codec.getCodec().encode(list, jvm, offset);
+	        	int written = list.encode(jvm, offset);//Codec.getCodec().encode(list, jvm, offset);
 	        	assert written == length;
 	        	offset += length;
 	        	fileOffset += length;
