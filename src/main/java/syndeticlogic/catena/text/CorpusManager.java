@@ -17,7 +17,7 @@ public class CorpusManager extends DirectoryWalker {
     
     public CorpusManager(String prefix, Tokenizer tokenizer, InvertedFileBuilder indexBuilder, InvertedFileWriter fileWriter) {
         super();
-        this.indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
+        this.indexBuilder = indexBuilder;
         this.tokenizer = tokenizer;
     }
 
