@@ -1,6 +1,7 @@
 package syndeticlogic.catena.text;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
@@ -91,6 +92,9 @@ public class InvertedList implements Codeable {
             if(i == slotCursor) {
                 length = pageCursor;
             }
+            /*System.out.println("offset "+offset);
+            System.out.println("Lenght "+length);
+            System.out.println("dest length "+dest.length); */
             ByteBuffer transferBuff = ByteBuffer.wrap(dest, offset+copied, length*Type.INTEGER.length());
             transferBuff.asIntBuffer().put(documentIds[i], 0, length);
             copied += length*Type.INTEGER.length();
@@ -155,14 +159,13 @@ public class InvertedList implements Codeable {
         return (/* filled up pages + last, partial page */ Type.INTEGER.length() * slotCursor * PAGE_SIZE) 
         + (Type.INTEGER.length() * pageCursor);
     }
-    
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + documentFrequency;
-        result = prime * result + wordId;
-        return result;
+    	final int prime = 31;
+    	int result = 1;
+    	result = prime * result + documentFrequency;
+    	result = prime * result + wordId;
+    	return result;
     }
 
     @Override
@@ -181,11 +184,45 @@ public class InvertedList implements Codeable {
         return true;
     }
     
+	public boolean deepCompare(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InvertedList other = (InvertedList) obj;
+		if (documentFrequency != other.documentFrequency)
+			return false;
+		if (!Arrays.deepEquals(documentIds, other.documentIds))
+			return false;
+		if (pageCursor != other.pageCursor)
+			return false;
+		if (pageIterator != other.pageIterator)
+			return false;
+		if (slotCursor != other.slotCursor)
+			return false;
+		if (slotIterator != other.slotIterator)
+			return false;
+		if (slots != other.slots)
+			return false;
+		if (word == null) {
+			if (other.word != null)
+				return false;
+		} else if (!word.equals(other.word))
+			return false;
+		if (wordId != other.wordId)
+			return false;
+		return true;
+	}
+
+
+    
     public void resetIterator() {
         slotIterator = 0;
         pageIterator = 0;
     }
-    
+
     public boolean hasNext() {
         if(slotIterator <= slotCursor) {
             return true;
