@@ -7,6 +7,7 @@ import java.util.Collection;
 import org.apache.commons.io.DirectoryWalker;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.plexus.util.FileUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CorpusManager extends DirectoryWalker {
@@ -14,9 +15,9 @@ public class CorpusManager extends DirectoryWalker {
     private InvertedFileBuilder indexBuilder;
     private Tokenizer tokenizer;
     
-    public CorpusManager(Tokenizer tokenizer) {
+    public CorpusManager(String prefix, Tokenizer tokenizer, InvertedFileBuilder indexBuilder, InvertedFileWriter fileWriter) {
         super();
-        this.indexBuilder = new InvertedFileBuilder();
+        this.indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
         this.tokenizer = tokenizer;
     }
 
@@ -55,12 +56,21 @@ public class CorpusManager extends DirectoryWalker {
     	tokenizer.tokenize(indexBuilder, file, document);
     	//System.out.println(file.getAbsolutePath());
     }
+    
     public static void main(String[] args) {
-    	CorpusManager corpusManager = new CorpusManager(new BasicTokenizer());
-    	//CorpusManager corpusManager = new CorpusManager(new LuceneStandardTokenizer());
+    	long start = System.currentTimeMillis();
+    	String prefix = "target"+File.separator+"corpus-manager"+File.separator;
+    	FileUtils.mkdir(prefix);
+    	//InvertedFileWriter fileWriter = new CatenaInvertedFileWriter();
+    	InvertedFileWriter fileWriter = new RawInvertedFileWriter();
+    	Tokenizer tokenizer = new BasicTokenizer();
+    	//Tokenizer tokenizer = new LuceneStandardTokenizer();
+    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, fileWriter), fileWriter);
     	try {
     		corpusManager.index("/home/james/catena/PA1/data");
-    	} catch(Exception e) {}	
+    	} catch(Throwable e) {e.printStackTrace();}
+    	System.out.println("Total time = "+(System.currentTimeMillis() - start));
     	System.out.println(corpusManager.indexBuilder.postings.keySet().size());
+    	
     }
 }
