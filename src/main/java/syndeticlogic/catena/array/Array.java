@@ -86,4 +86,8 @@ public class Array<T extends Value> {
 		key.append(master);
 		return key;
 	}
+
+	public void appendBulk(byte[] jvm, int offset, int i) {
+	    array.append(jvm, offset, i);
+	}
 }
