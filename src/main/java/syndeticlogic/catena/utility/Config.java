@@ -23,7 +23,6 @@ import syndeticlogic.catena.type.ValueFactory;
 public class Config {
    
     private final Log log = LogFactory.getLog(Array.class);
-    private final static int DEFAULT_CHUNK_SIZE = 1048576;
     private Properties properties;
     private CompressionType compressionType;
     private BufferPoolMemoryType memoryType;
@@ -38,6 +37,7 @@ public class Config {
     private String prefix;
     private double memoryPercentage;
     private long physicalMemorySize;
+    private int segmentSize;
     private int retryLimit;
     private int pageSize;
     private boolean truncate;
@@ -77,12 +77,12 @@ public class Config {
         prefix = ((String) properties.get("prefix")).trim();
         memoryPercentage = Double.parseDouble(((String) properties.get("physical_memory_percentage")).trim());
         assert memoryPercentage < 1;
-        
-        retryLimit = Integer.parseInt((String)properties.get("retry_limit"));
-        pageSize = Integer.parseInt((String)properties.get("page_size"));
-        truncate = Boolean.parseBoolean((String)properties.get("truncate"));
+        segmentSize = Integer.parseInt(((String)properties.get("segment_size")).trim());
+        retryLimit = Integer.parseInt(((String)properties.get("retry_limit")).trim());
+        pageSize = Integer.parseInt(((String)properties.get("page_size")).trim());
+        truncate = Boolean.parseBoolean(((String)properties.get("truncate")).trim());
         properties.setProperty(PropertiesUtility.CONFIG_BASE_DIRECTORY, prefix);
-        properties.setProperty(PropertiesUtility.SPLIT_THRESHOLD, Integer.toString(DEFAULT_CHUNK_SIZE));
+        properties.setProperty(PropertiesUtility.SPLIT_THRESHOLD, Integer.toString(segmentSize));
     }
    
     private void configurePrefix(String prefix, boolean truncate) {
