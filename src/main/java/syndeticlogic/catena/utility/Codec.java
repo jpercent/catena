@@ -410,14 +410,12 @@ public class Codec {
     }
 
     public int encode(Codeable c, byte[] dest, int offset) {
-        int size = c.size();
-        assert size <= 65536;
-        String type = c.oridinal();
-        encode(type, dest, offset);
-        int typeSize = Type.STRING.length()+type.length(); 
-        offset += typeSize; 
+    	int headerSize = Type.INTEGER.length();
+    	int size = c.size();
+        encode(size, dest, offset);
+        offset += headerSize;
         c.encode(dest, offset);
-        return typeSize + size;
+        return  headerSize + size;
     }
 
     public int encode(Type t, ByteBuffer dest) {
