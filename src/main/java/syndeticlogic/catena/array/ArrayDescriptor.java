@@ -222,7 +222,7 @@ public class ArrayDescriptor {
         }
 	}
 	
-	public synchronized boolean checkIntegrity() {
+	public boolean checkIntegrity() {
         boolean ret = true;
         long size = 0;
         ValueDescriptor valueDescriptor = null;
@@ -252,7 +252,7 @@ public class ArrayDescriptor {
 	    return ret;
 	}
 	
-	public synchronized int convertIndexToOffset(int index) {
+	public int convertIndexToOffset(int index) {
 		if (index > length) {
 			throw new RuntimeException("index out of range");
 		}
@@ -272,7 +272,7 @@ public class ArrayDescriptor {
         return ret;
 	}
 	
-    public synchronized void addSegment(CompositeKey key, Segment s) {
+    public void addSegment(CompositeKey key, Segment s) {
         segments.put(key, s);
         if(lastKey == null || key.compareTo(lastKey) > 0) {
             lastSegment = s;
@@ -280,7 +280,7 @@ public class ArrayDescriptor {
         }
     }
 
-    public synchronized ValueDescriptor find(int index) {
+    public ValueDescriptor find(int index) {
         if(index >= length) {
             return null;
         }
@@ -343,7 +343,7 @@ public class ArrayDescriptor {
         return v;
     }
     
-    public synchronized int update(int index, int size) {
+    public int update(int index, int size) {
         int ret = typeSize;
         if(typeSize == -1) {
             arraySize -= sizes.get(index).intValue();
@@ -354,7 +354,7 @@ public class ArrayDescriptor {
 
     }
 
-    public synchronized void append(int size) {
+    public void append(int size) {
         assert lastSegment != null;
         if(lastSegment.size() + size > splitThreshold) {
             ArrayDescriptor.createSegment(this);
@@ -369,7 +369,7 @@ public class ArrayDescriptor {
         length++;
     }
 
-    public synchronized int delete(int index) {
+    public int delete(int index) {
         length--;
         int ret = typeSize;
         if(typeSize == -1) {
@@ -379,7 +379,7 @@ public class ArrayDescriptor {
         return ret;
     }
     
-    public synchronized void persist() {
+    public void persist() {
         byte[] serialized = ArrayDescriptor.encode(this);
         try {
             commitChannel.position(0);
@@ -402,11 +402,11 @@ public class ArrayDescriptor {
         lock.unlock();
     }
     
-	public synchronized CompositeKey id() {
+	public CompositeKey id() {
 		return master;
 	}
 
-	public synchronized CompositeKey nextId() {
+	public CompositeKey nextId() {
 	    CompositeKey key = new CompositeKey();
         key.append(master);
         key.append(nextKey);
@@ -414,27 +414,27 @@ public class ArrayDescriptor {
 	    return key;
 	}
 	
-	public synchronized boolean isFixedLength() {
+	public boolean isFixedLength() {
 	    return type.isFixedLength();
 	}
 	
-	public synchronized int typeSize() {
+	public int typeSize() {
 	    return typeSize;
 	}
 	
-	public synchronized Type type() {
+	public Type type() {
 		return type;
 	}
 	
-	public synchronized int length() {
+	public int length() {
 		return length;
 	}
 	
-	public synchronized long size() {
+	public long size() {
 	    return arraySize;
 	}
 	
-    public synchronized Collection<Segment> segments() {
+    public Collection<Segment> segments() {
         return segments.values();
     }
 }
