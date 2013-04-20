@@ -191,7 +191,7 @@ public enum Type {
     CODEABLE() {
         @Override 
         public int length() {
-            return BYTE_BYTES;
+            return INTEGER_BYTES;
         }
         
         @Override
