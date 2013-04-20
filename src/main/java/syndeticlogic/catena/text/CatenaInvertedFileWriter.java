@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 
 import org.apache.commons.logging.Log;
@@ -17,10 +19,20 @@ import syndeticlogic.catena.utility.Codec;
 
 public class CatenaInvertedFileWriter implements InvertedFileWriter {
 	private static final Log log = LogFactory.getLog(RawInvertedFileWriter.class);
-	public long writeFile(String name, SortedMap<String, InvertedList> postings, Map<Integer, Long> wordToOffset) {
+    @Override
+    public void open(String fileName) {
+    }
+
+    @Override
+    public void close() {
+    }
+   
+    @Override
+	public long write(SortedMap<String, InvertedList> postings, LinkedList<InvertedListDescriptor> wordToOffset) {
 		long fileOffset=0;
+		String fileName="NAME";
 		try {
-	        Array<CodeableValue> index = (Array<CodeableValue>) Array.create(name, Type.CODEABLE);
+	        Array<CodeableValue> index = (Array<CodeableValue>) Array.create(fileName, Type.CODEABLE);
 	        CodeableValue value = new CodeableValue();
 	        System.out.println("Appending... "+postings.values().size());
 	        int count = 0;

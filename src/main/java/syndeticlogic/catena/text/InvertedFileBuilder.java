@@ -3,6 +3,7 @@ package syndeticlogic.catena.text;
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -14,20 +15,22 @@ public class InvertedFileBuilder {
     private final HashMap<Integer, String> idToDoc;
     private final HashMap<Integer, String> idToWord;
     final TreeMap<String, InvertedList> postings;
-    private final HashMap<Integer, Long> wordToOffset;
+    private final HashMap<String, LinkedList<InvertedListDescriptor>> blockToInvertedListDescriptor;
     private final HashMap<String, Integer> blockToId;
     private final String prefix;
+    private final String corpusName;
     private int blockId;
     private int docId;
     private int wordId;
-
-    public InvertedFileBuilder(String prefix, InvertedFileWriter fileWriter) {
+    
+    public InvertedFileBuilder(String prefix, String corpusName, InvertedFileWriter fileWriter) {
         this.fileWriter = fileWriter;
         this.prefix = prefix;
+        this.corpusName = prefix+File.separator+corpusName;
         idToDoc = new HashMap<Integer, String>();
         idToWord = new HashMap<Integer, String>();
         postings = new TreeMap<String, InvertedList>();
-        wordToOffset = new HashMap<Integer, Long>();
+        blockToInvertedListDescriptor = new HashMap<String, LinkedList<InvertedListDescriptor>>();
         blockToId = new HashMap<String, Integer>();
     }
         
@@ -51,10 +54,15 @@ public class InvertedFileBuilder {
     public void startBlock(String block) {
     	blockToId.put(block, blockId++);
 	}
-
+   
 	public void completeBlock(String block) {
 		String blockFileName = prefix+File.separator+new File(block).getName()+"-"+blockToId.get(block)+".corpus";
-		fileWriter.writeFile(blockFileName, postings, wordToOffset);
+		fileWriter.open(blockFileName);
+		LinkedList<InvertedListDescriptor> invertedListDescriptors = new LinkedList<InvertedListDescriptor>();   
+		fileWriter.write(postings, invertedListDescriptors);
+        fileWriter.close();
+        this.blockToInvertedListDescriptor.put(block, invertedListDescriptors);
+
 	}
 
     public void mergeBlocks() {
@@ -73,8 +81,8 @@ public class InvertedFileBuilder {
 		return postings;
 	}
 
-	public HashMap<Integer, Long> getWordToOffset() {
-		return wordToOffset;
+	public LinkedList<InvertedListDescriptor> getInvertedListDescriptors() {
+		return blockToInvertedListDescriptor.get(corpusName);
 	}
 
 	public HashMap<String, Integer> getBlockToId() {
@@ -87,7 +95,7 @@ public class InvertedFileBuilder {
 
 	public static void main(String[] args) {
         System.out.println("Start allocating... ");
-        InvertedFileBuilder indexBuilder = new InvertedFileBuilder("target/InvertedFileBuilderTest", new RawInvertedFileWriter());
+        InvertedFileBuilder indexBuilder = new InvertedFileBuilder("target/InvertedFileBuilderTest", "index.corpus", new RawInvertedFileWriter());
         System.out.println("Done Allocating ");
     }
 }

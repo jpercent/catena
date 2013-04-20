@@ -65,7 +65,7 @@ public class CorpusManager extends DirectoryWalker {
     	InvertedFileWriter fileWriter = new RawInvertedFileWriter();
     	Tokenizer tokenizer = new BasicTokenizer();
     	//Tokenizer tokenizer = new LuceneStandardTokenizer();
-    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, fileWriter), fileWriter);
+    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, "corpus.index", fileWriter), fileWriter);
     	try {
     		corpusManager.index("/home/james/catena/PA1/data");
     	} catch(Throwable e) {e.printStackTrace();}

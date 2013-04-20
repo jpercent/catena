@@ -7,6 +7,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -52,28 +53,45 @@ public class RawInvertedFileReader {
 	public void setOffset(long offset) {
 	}
 	
-	public void scan(HashMap<Integer, String> idToWord,
-			TreeMap<String, InvertedList> postings) throws IOException {
-		int blockSize = (int) Math.min((long) BLOCK_SIZE, channel.size());
-		byte[] block = new byte[blockSize];
+	public void scan(HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) throws IOException {
+        int blockSize = (int) Math.min((long) BLOCK_SIZE, channel.size());
+        byte[] block = new byte[blockSize];
 
-		while (buffer.hasRemaining()) {
-			if (blockSize != Math.min(buffer.remaining(), blockSize)) {
-				blockSize = Math.min(buffer.remaining(), blockSize);
-				block = new byte[blockSize];
-			}
-			// XXX - if the invertedList for an object is > BLOCK_SIZE we will never read it.
-			System.out.println("Reading a block... position "+buffer.position());
-			buffer.get(block, 0, blockSize);
-			System.out.println("after read... position " + buffer.position());
-			int offset = decodePostings(block, blockSize, postings, idToWord);
-			buffer.position((buffer.position() - (buffer.position() - offset)));
-			System.out.println("aftrer decode... position " + buffer.position());
-		}
+        while (buffer.hasRemaining()) {
+            if (blockSize != Math.min(buffer.remaining(), blockSize)) {
+                blockSize = Math.min(buffer.remaining(), blockSize);
+                block = new byte[blockSize];
+            }
+            // XXX - if the invertedList for an object is > BLOCK_SIZE we will never read it.
+            buffer.get(block, 0, blockSize);
+            int offset = decodePostings(block, blockSize, postings, idToWord);
+            buffer.position((buffer.position() - (buffer.position() - offset)));
+        }
 	}
 
-	public int scanBlock(byte[] block, int blockSize) {
-		return 0;
+	public int scan(int start, List<InvertedListDescriptor> descriptors, HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) {
+	    InvertedListDescriptor cursor = descriptors.get(start);
+	    assert buffer.remaining() > cursor.getLength();
+        int blockSize = (int) Math.min((long) BLOCK_SIZE, buffer.remaining());
+        blockSize = (int)Math.max(blockSize, cursor.getLength());
+        byte[] block = new byte[blockSize];
+
+        int sizeCursor = blockSize;
+        assert sizeCursor >= cursor.getLength();
+        while(true) {
+            sizeCursor -= cursor.getLength();
+            if(sizeCursor > 0) {
+                start++;
+                cursor = descriptors.get(start);
+            } else {
+                break;
+            }
+        }
+        // XXX - if the invertedList for an object is > BLOCK_SIZE we will never read it.
+        buffer.get(block, 0, blockSize);
+        int offset = decodePostings(block, blockSize, postings, idToWord);
+        buffer.position((buffer.position() - (buffer.position() - offset)));
+        return start;
 	}
 	
 	public Map.Entry<String, InvertedList> scanEntry(HashMap<Integer, String> idToWord, HashMap<Integer, Long> idToOffset) {
@@ -102,7 +120,7 @@ public class RawInvertedFileReader {
 	    		success = false;
 	    	}
 	    	if(count < 1) {
-	    		throw new RuntimeException("Postingslist is larger than "+BLOCK_SIZE
+	    		throw new RuntimeException("Attempted to scan an inverted list that larger than "+BLOCK_SIZE
 	    				+"; this program does not support that at this time");
 	    	}
 	    } while(success);
@@ -110,4 +128,12 @@ public class RawInvertedFileReader {
 
 		return offset;
 	}
+	
+    public int getBlockSize() {
+        return BLOCK_SIZE;
+    }
+    
+    public void setBlockSize(int pageSize) {
+        BLOCK_SIZE = pageSize;
+    }
 }

@@ -3,22 +3,13 @@ package syndeticlogic.catena.text;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.utility.Codec;
-
-public class RawInvertedWriterTest {
+public class RawInvertedFileReaderAndWriterTest {
 	Tokenizer tokenizer;
 	InvertedFileWriter fileWriter;
 	RawInvertedFileReader fileReader;
@@ -35,7 +26,7 @@ public class RawInvertedWriterTest {
     	//fileWriter = new CatenaInvertedFileWriter();
     	fileWriter = new RawInvertedFileWriter();
     	tokenizer = new BasicTokenizer();
-    	indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
+    	indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
     	fileReader = new RawInvertedFileReader();
     	//tokenizer = new LuceneStandardTokenizer();
     	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder, fileWriter);
