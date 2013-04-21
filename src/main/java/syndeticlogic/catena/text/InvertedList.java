@@ -2,6 +2,9 @@ package syndeticlogic.catena.text;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
@@ -75,6 +78,51 @@ public class InvertedList implements Codeable {
         while(list.hasNext()) {
             addDocumentId(list.advanceIterator());
         }
+    }
+    
+    TreeSet<Integer> getDocumentIds() {
+        TreeSet<Integer> docIds = new TreeSet<Integer>();
+        resetIterator();
+        while(hasNext()) {
+            docIds.add(advanceIterator());
+        }
+        return docIds;
+    }
+    
+    public TreeSet<Integer> intersect(TreeSet<Integer> docIds) {
+        resetIterator();
+        Iterator<Integer> iter = docIds.iterator();
+        if(!hasNext() || !iter.hasNext()) {
+            return new TreeSet<Integer>();
+        }
+        
+        int nextPosting = advanceIterator();
+        int nextDocId = iter.next();        
+        TreeSet<Integer> matches = new TreeSet<Integer>();
+        while(true) {
+            if (nextPosting > nextDocId) {
+                if(iter.hasNext()) {
+                    nextDocId = iter.next();
+                } else { 
+                    break;
+                }
+            } else if (nextPosting < nextDocId) {
+                if(hasNext()) {
+                    nextPosting = advanceIterator();
+                } else { 
+                    break;
+                }
+            } else {
+                matches.add(nextDocId);
+                if (hasNext() && iter.hasNext()) {
+                    nextPosting = advanceIterator();
+                    nextDocId = iter.next();
+                } else {
+                    break;
+                }
+            }
+        }
+        return matches;
     }
     
     @Override
