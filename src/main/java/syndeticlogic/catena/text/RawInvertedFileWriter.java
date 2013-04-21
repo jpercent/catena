@@ -74,7 +74,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
                 }
                 int written = list.encode(jvm, offset);
                 assert written == length;
-                invertedListDescriptors.add(new InvertedListDescriptor(list.getWordId(), fileOffset, length, list.getDocumentFrequency()));
+                invertedListDescriptors.add(new InvertedListDescriptor(list.getWord(), fileOffset, length, list.getDocumentFrequency()));
                 offset += length;
                 fileOffset += length;
             }
