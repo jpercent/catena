@@ -8,20 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.jfree.util.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 import syndeticlogic.catena.utility.Config;
 
 public class BlockMerger {
+    private static final Log log = LogFactory.getLog(BlockMerger.class);
     private static int BLOCK_SIZE=10*1048576;
     private static double MEMORY_PERCENTAGE=0.3;
-    //private LinkedHashMap<String, List<InvertedListDescriptor>> blockDescritpors;
-    Map.Entry<String, List<InvertedListDescriptor>> id;// = bditerator.next();
     private HashMap<Integer, String> idToWord;
     private String prefix;
-    private byte[] writeBlock;
-    private int blockSize;
-    //private InvertedListDescriptor descriptor;
     
     public BlockMerger(String prefix, HashMap<Integer, String> idToWord) {
         this.prefix = prefix;
@@ -56,7 +53,6 @@ public class BlockMerger {
             
             for(; i < readBlocks; i++) {
                 Map.Entry<String, List<InvertedListDescriptor>> id = bditerator.next();
-                //System.out.println("BVlok =- "+id.getKey());
                 descriptors[i] = id.getValue();
                 readers[i] = new InvertedFileReader();
                 readers[i].setBlockSize(BLOCK_SIZE);
@@ -80,11 +76,10 @@ public class BlockMerger {
         }
         assert totalMergeFiles == blockDescriptors.size();
         for(int i = 0; i < totalMergeFiles; i++) {
-         /*   String name = intermediateMerge+Integer.toString(totalMergeFiles);
+            String name = intermediateMerge+Integer.toString(totalMergeFiles);
             if(!(new File(name).delete())) {
-                Log.warn("failed to delete "+name);
+                log.warn("failed to delete "+name);
             }
-            */
         }
         return mergedDescriptors;
     }
@@ -95,7 +90,7 @@ public class BlockMerger {
         TreeMap<String, InvertedList> ret=null;
         int[] positions = new int[readers.length];
         
-        for(int i = 0; i < readers.length; i++) { //InvertedFileReader reader : readers) {
+        for(int i = 0; i < readers.length; i++) {
             TreeMap<String, InvertedList> newPostings = new TreeMap<String, InvertedList>();
             positions[i] = readers[i].scanBlock(positions[i], descriptors[i], idToWord, newPostings);
             if(ret == null) {
@@ -106,8 +101,6 @@ public class BlockMerger {
                     if(retList == null) {
                         ret.put(list.getWord(), list);
                     } else {
-                        //retList.dumpDocs();
-                        //list.dumpDocs();
                         retList.merge(list);
                     }
                 }
