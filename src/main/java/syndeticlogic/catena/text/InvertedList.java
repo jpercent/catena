@@ -48,10 +48,7 @@ public class InvertedList implements Codeable {
     public void addDocumentId(int docId) {
         if(pageCursor == PAGE_SIZE) {
             addPage();
-        }
-//        if(word.equals("&"))
-  //          System.out.println("DOC ID = "+docId);
-        
+        }   
         documentIds[slotCursor][pageCursor] = docId;
         documentFrequency++;
         pageCursor++;
@@ -72,7 +69,14 @@ public class InvertedList implements Codeable {
         slots += PAGE_SIZE;
         documentIds = newDocs;
     }
-            
+
+    public void merge(InvertedList list) {
+        assert getLastDocId() < list.getLastDocId();
+        while(list.hasNext()) {
+            addDocumentId(list.advanceIterator());
+        }
+    }
+    
     @Override
     public int encode(byte[] dest, int offset) {
         int copied = 0;
@@ -99,9 +103,6 @@ public class InvertedList implements Codeable {
             if(i == slotCursor) {
                 length = pageCursor;
             }
-            /*System.out.println("offset "+offset);
-            System.out.println("Lenght "+length);
-            System.out.println("dest length "+dest.length); */
             ByteBuffer transferBuff = ByteBuffer.wrap(dest, offset+copied, length*Type.INTEGER.length());
             transferBuff.asIntBuffer().put(documentIds[i], 0, length);
             copied += length*Type.INTEGER.length();
@@ -254,7 +255,15 @@ public class InvertedList implements Codeable {
         }
         return ret;
     }
-
+    
+    public void dumpDocs() {
+        resetIterator();
+        while(hasNext()) {
+            System.err.println(advanceIterator());
+        }
+        resetIterator();
+    }
+    
     public int getDocumentFrequency() {
         return documentFrequency;
     }
@@ -272,7 +281,6 @@ public class InvertedList implements Codeable {
     }
     
     public int getLastDocId() {
-        //System.out.println("SlotCursor = "+slotCursor+" page cursor = "+pageCursor+" word = "+word);
         return documentIds[slotCursor][pageCursor-1];
     }
     
@@ -281,89 +289,11 @@ public class InvertedList implements Codeable {
         throw new RuntimeException("ordinal is unsupported");
     }
 
-    public void merge(InvertedList list) {
-        assert getLastDocId() < list.getLastDocId();
-        while(list.hasNext()) {
-            addDocumentId(list.advanceIterator());
-        }
-    }
-   
-/*
- *         InvertedList newList = new InvertedList();
- 
-        if(l.getLastDocId() > l1.getLastDocId()) {
-            addRun()
-        } else if(l.getLastDocId() < l1.getLastDocId()) {
-            
-        }
-        l.resetIterator();
-        l1.resetIterator();
-        boolean done = false;
-        while(!done) {
-            boolean ldone=false;
-            boolean l1done=false;
-            int lnext=-1;
-            int l1next=-1;
-            
-            if(l.hasNext()) {
-                lnext = l.peek();
-            } else {
-                ldone = true;
-            }
-            
-            if(l1.hasNext()) {
-                l1next = l1.peek();
-            } else {
-                l1done = true; 
-            }
-            
-            if(ldone && !l1done) {
-                
-            } else if(!ldone && l1done) {
-                
-            } else if (ldone && l1done) {
-                
-            } else {
-                if(lnext < l1next) {
-                    addRun(newList, l, l1next, lnext);
-                } else if (lnext > l1next) {
-                    addRun(newList, l1, lnext, l1next);
-                } else {
-                    assert 
-                    newList.addDocumentId(lnext);
-                    l.advanceIterator();
-                    l1.advanceIterator();
-                }                
-            }
-        }
-        *
-    }
-    
-    private static void addRun(InvertedList newList, InvertedList oldList, int barrier, int next) {
-        boolean done = false;
-        while(barrier > next && !done) {
-            newList.addDocumentId(next);
-            oldList.advanceIterator();
-            done = oldList.hasNext();
-            if(!done) {
-                next = oldList.advanceIterator();
-            } 
-        }
-    }*/
-    
     public static int getPageSize() {
         return PAGE_SIZE;
     }
     
     public static void setPageSize(int pageSize) {
         InvertedList.PAGE_SIZE = pageSize;
-    }
-
-    public void dumpDocs() {
-        resetIterator();
-        while(hasNext()) {
-            System.out.println(advanceIterator());
-        }
-        resetIterator();
     }
 }
