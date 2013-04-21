@@ -15,14 +15,13 @@ import org.apache.commons.logging.LogFactory;
 
 public class InvertedFileBuilder {
 	private static final Log log = LogFactory.getLog(InvertedFileBuilder.class);
-	private final InvertedFileWriter fileWriter;
+    private final LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blocksAndDescriptors;
+    private final InvertedFileWriter fileWriter;
     private final HashMap<Integer, String> idToDoc;
     private final HashMap<Integer, String> idToWord;
     private final HashMap<String, Integer> wordToId;
-    private final LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blocksAndDescriptors;
     private final HashMap<String, Integer> blockToId;
     private final String prefix;
-    private final String corpusName;
     private TreeMap<String, InvertedList> postings;
     private int blockId;
     private int docId;
@@ -31,10 +30,6 @@ public class InvertedFileBuilder {
     public InvertedFileBuilder(String prefix, String corpusName, InvertedFileWriter fileWriter) {
         this.fileWriter = fileWriter;
         this.prefix = prefix;
-        this.corpusName = prefix+File.separator+corpusName;
-        this.blockId = 0;
-        this.docId = 0;
-        this.wordId = 0;
         idToDoc = new HashMap<Integer, String>();
         idToWord = new HashMap<Integer, String>();
         postings = new TreeMap<String, InvertedList>();
@@ -47,7 +42,6 @@ public class InvertedFileBuilder {
         InvertedList invertedList = postings.get(word);
         if (invertedList == null) {
             if(wordToId.get(word) == null) {
-//                System.out.println("Adding a new word "+word + " word Id "+ wordId);
                 wordToId.put(word, wordId);
                 idToWord.put(wordId, word);
                 wordId++;
@@ -70,7 +64,6 @@ public class InvertedFileBuilder {
    
 	public void completeBlock(String block) {
 	    File blockFile = new File(block);
-	    System.out.println("Complete block "+block);
 		String blockFileName = prefix+File.separator+blockFile.getName()+"-"+blockToId.get(block)+".corpus";
 		fileWriter.open(blockFileName);
 		LinkedList<InvertedListDescriptor> invertedListDescriptors = new LinkedList<InvertedListDescriptor>();   
@@ -80,15 +73,12 @@ public class InvertedFileBuilder {
         postings = new TreeMap<String, InvertedList>();
 	}
 
-    @SuppressWarnings("unchecked")
     public void mergeBlocks() {
-        System.out.println("Merge blocks called"+blocksAndDescriptors.size());
         List<InvertedListDescriptor> finalList;
         if(blocksAndDescriptors.size() > 1) {
             BlockMerger merger = new BlockMerger(prefix, idToWord);
             finalList = merger.mergeBlocks("final.index", blocksAndDescriptors);
         } else {
-            System.out.println("NO MERGE NECESSARY, JUST COPY THE FILE OVER TO THE FINAL NAME ");
             finalList = (List<InvertedListDescriptor>) blocksAndDescriptors.get(0).getValue();
         }
         writeMeta(finalList, idToDoc);
@@ -131,10 +121,4 @@ public class InvertedFileBuilder {
 	public String getPrefix() {
 		return prefix;
 	}
-
-	public static void main(String[] args) {
-        System.out.println("Start allocating... ");
-        InvertedFileBuilder indexBuilder = new InvertedFileBuilder("target/InvertedFileBuilderTest", "index.corpus", new RawInvertedFileWriter());
-        System.out.println("Done Allocating ");
-    }
 }
