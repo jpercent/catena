@@ -3,7 +3,6 @@ package syndeticlogic.catena.text;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -22,10 +21,8 @@ public class BasicTokenizer implements Tokenizer {
 			inputStream = new FileInputStream(file);
 			channel = inputStream.getChannel();
 			MappedByteBuffer buffer = channel.map(MapMode.READ_ONLY, 0L, channel.size());
-			//buffer.load();
 			int blockSize = (int)Math.min(8192L, channel.size());
 			byte[] block = new byte[blockSize];
-			//CharBuffer cbuffer = buffer.asCharBuffer();
 			
 			while(buffer.hasRemaining()) {
 				if(blockSize != Math.min(buffer.remaining(), blockSize)) {
@@ -34,12 +31,7 @@ public class BasicTokenizer implements Tokenizer {
 				}
 			    buffer.get(block, 0, blockSize); 
 			    String str = new String(block, "UTF-8");
-			    //System.out.println(str);
-			    //System.out.println("str size = "+str.length()*2+" file length "+channel.size());
-			    
 			    String[] words = str.split(" ");
-			    //System.out.println("Size of words array "+words.length);
-			    
 			    for(String word : words) {
 			    	if(!document.contains(word)) {
 			    		document.add(word);
@@ -55,8 +47,5 @@ public class BasicTokenizer implements Tokenizer {
 				channel.close();
 			} catch(Exception e) {}
 		}
-	}
-	public static void main(String[] args) {
-		System.out.println(Math.round(3f/2f));
 	}
 }
