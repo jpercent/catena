@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.HashSet;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -23,9 +22,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
 	
     @Override
 	public void open(String fileName) {
-		System.out.println("Creating file "+fileName+" block size = "+BLOCK_SIZE);
 		try {
-			//File indexFile = new File("/home/james/catena/corpus.index");
 			indexFile = new File(fileName);
 			indexFile.delete();
 			assert indexFile.createNewFile();
@@ -61,11 +58,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
     @Override
     public long writeFile(SortedMap<String, InvertedList> postings, List<InvertedListDescriptor> invertedListDescriptors) {
         long fileOffset = 0;
-        long start = System.currentTimeMillis();
-        int count = 0;
-    //    HashSet<Integer> i = new HashSet<Integer>();
         try {
-            System.out.println("Looping through list");
             byte[] jvm = new byte[BLOCK_SIZE];
             int offset = 0;
             for (InvertedList list : postings.values()) {
@@ -81,20 +74,11 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
                 }
                 int written = list.encode(jvm, offset);
                 assert written == length;
-//                assert i.contains
-                //System.out.println("Workd = "+list.getWord() + " id = "+list.getWordId());
-     /*           if(i.contains(list.getWordId())) {
-                    throw new RuntimeException("fucked e: "+list.getWord());
-                }
-                */
-  //              i.add(list.getWordId());
                 invertedListDescriptors.add(new InvertedListDescriptor(list.getWordId(), fileOffset, length, list.getDocumentFrequency()));
                 offset += length;
                 fileOffset += length;
-                count++;
             }
             direct.put(jvm, 0, offset);
-            System.out.println("BLOCK DONE333333333333333333333333333333");
             direct.rewind();
             direct.limit(offset);
             channel.write(direct);
@@ -104,8 +88,6 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
             log.fatal("exception writing index file " + t, t);
             throw new RuntimeException(t);
         }
-        System.out.println("Records " + count + " elapsed seconds = " + (System.currentTimeMillis() - start));
-        System.out.println("Done totalData = " + fileOffset);
         return fileOffset;
     }
     
