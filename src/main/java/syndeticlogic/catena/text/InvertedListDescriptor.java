@@ -1,14 +1,18 @@
 package syndeticlogic.catena.text;
 
-public class InvertedListDescriptor {
+import java.io.Serializable;
+
+public class InvertedListDescriptor implements Serializable {
     private final int wordId;
     private final long offset;
     private final int length;
+    private final int documentFrequency;
 
-    public InvertedListDescriptor(int wordId, long offset, int length) {
+    public InvertedListDescriptor(int wordId, long offset, int length, int documentFrequency) {
         this.wordId = wordId;
         this.offset = offset;
         this.length = length;
+        this.documentFrequency = documentFrequency;
     }
 
     @Override
@@ -49,5 +53,9 @@ public class InvertedListDescriptor {
 
     public int getLength() {
         return length;
+    }
+    
+    public int getDocumentFrequency() {
+        return documentFrequency;
     }
 }

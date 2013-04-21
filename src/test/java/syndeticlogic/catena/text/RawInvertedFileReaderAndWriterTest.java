@@ -12,7 +12,7 @@ import org.junit.Test;
 public class RawInvertedFileReaderAndWriterTest {
 	Tokenizer tokenizer;
 	InvertedFileWriter fileWriter;
-	RawInvertedFileReader fileReader;
+	InvertedFileReader fileReader;
 	InvertedFileBuilder indexBuilder;
 	CorpusManager corpusManager;
 	String prefix;
@@ -27,9 +27,9 @@ public class RawInvertedFileReaderAndWriterTest {
     	fileWriter = new RawInvertedFileWriter();
     	tokenizer = new BasicTokenizer();
     	indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
-    	fileReader = new RawInvertedFileReader();
+    	fileReader = new InvertedFileReader();
     	//tokenizer = new LuceneStandardTokenizer();
-    	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder, fileWriter);
+    	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
 	}
 	
 	@Test
@@ -43,7 +43,7 @@ public class RawInvertedFileReaderAndWriterTest {
 	   	} catch(Throwable t) { t.printStackTrace(); }
 	   	TreeMap<String, InvertedList> postings = new TreeMap<String, InvertedList>();
 	   	fileReader.open("target/corpus-manager/depth1-0.corpus");
-    	fileReader.scan(indexBuilder.getIdToWord(), postings);
+    	fileReader.scanFile(indexBuilder.getIdToWord(), postings);
     	assertEquals(indexBuilder.getPostings().size(), postings.size());
     	for(String key : indexBuilder.getPostings().keySet()) {
     		assertTrue(postings.containsKey(key));

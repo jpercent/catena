@@ -15,9 +15,9 @@ public class InvertedList implements Codeable {
     private int[][] documentIds;
     private int slots;
     private int slotCursor;
-    private int pageCursor = 0;
-    private int slotIterator = 0;
-    private int pageIterator = 0;
+    private int pageCursor;
+    private int slotIterator;
+    private int pageIterator;
     
     public InvertedList() {
         this.wordId = -1;
@@ -27,6 +27,8 @@ public class InvertedList implements Codeable {
         slots = PAGE_SIZE;
         slotCursor = 0;
         pageCursor = 0;
+        slotIterator = 0;
+        pageIterator = 0;
         word = null;
     }
     
@@ -38,6 +40,8 @@ public class InvertedList implements Codeable {
         slots = PAGE_SIZE;
         slotCursor = 0;
         pageCursor = 0;
+        slotIterator = 0;
+        pageIterator = 0;
         word = null;
     }
     
@@ -45,6 +49,9 @@ public class InvertedList implements Codeable {
         if(pageCursor == PAGE_SIZE) {
             addPage();
         }
+//        if(word.equals("&"))
+  //          System.out.println("DOC ID = "+docId);
+        
         documentIds[slotCursor][pageCursor] = docId;
         documentFrequency++;
         pageCursor++;
@@ -216,15 +223,18 @@ public class InvertedList implements Codeable {
 		return true;
 	}
 
+    @Override
+    public String toString() {
+        return "InvertedList [wordId=" + wordId + ", word=" + word + ", documentFrequency=" + documentFrequency + ", slots=" + slots + ", slotCursor=" + slotCursor + ", pageCursor=" + pageCursor + ", slotIterator=" + slotIterator + ", pageIterator=" + pageIterator + "]";
+    }
 
-    
     public void resetIterator() {
         slotIterator = 0;
         pageIterator = 0;
     }
-
+    
     public boolean hasNext() {
-        if(slotIterator <= slotCursor) {
+        if(slotIterator < slotCursor) {
             return true;
         } else if(pageIterator < pageCursor) {
             return true;
@@ -232,6 +242,10 @@ public class InvertedList implements Codeable {
         return false;
     }
     
+    public int peek() {
+        return documentIds[slotIterator][pageIterator];
+    }
+
     public int advanceIterator() {
         int ret = documentIds[slotIterator][pageIterator++];
         if(pageIterator == PAGE_SIZE) {
@@ -239,6 +253,10 @@ public class InvertedList implements Codeable {
             pageIterator=0;         
         }
         return ret;
+    }
+
+    public int getDocumentFrequency() {
+        return documentFrequency;
     }
     
     public int getWordId() {
@@ -253,10 +271,85 @@ public class InvertedList implements Codeable {
         return word;
     }
     
+    public int getLastDocId() {
+        //System.out.println("SlotCursor = "+slotCursor+" page cursor = "+pageCursor+" word = "+word);
+        return documentIds[slotCursor][pageCursor-1];
+    }
+    
     @Override
     public String oridinal() {
         throw new RuntimeException("ordinal is unsupported");
     }
+
+    public void merge(InvertedList list) {
+        assert getLastDocId() < list.getLastDocId();
+        while(list.hasNext()) {
+            addDocumentId(list.advanceIterator());
+        }
+    }
+   
+/*
+ *         InvertedList newList = new InvertedList();
+ 
+        if(l.getLastDocId() > l1.getLastDocId()) {
+            addRun()
+        } else if(l.getLastDocId() < l1.getLastDocId()) {
+            
+        }
+        l.resetIterator();
+        l1.resetIterator();
+        boolean done = false;
+        while(!done) {
+            boolean ldone=false;
+            boolean l1done=false;
+            int lnext=-1;
+            int l1next=-1;
+            
+            if(l.hasNext()) {
+                lnext = l.peek();
+            } else {
+                ldone = true;
+            }
+            
+            if(l1.hasNext()) {
+                l1next = l1.peek();
+            } else {
+                l1done = true; 
+            }
+            
+            if(ldone && !l1done) {
+                
+            } else if(!ldone && l1done) {
+                
+            } else if (ldone && l1done) {
+                
+            } else {
+                if(lnext < l1next) {
+                    addRun(newList, l, l1next, lnext);
+                } else if (lnext > l1next) {
+                    addRun(newList, l1, lnext, l1next);
+                } else {
+                    assert 
+                    newList.addDocumentId(lnext);
+                    l.advanceIterator();
+                    l1.advanceIterator();
+                }                
+            }
+        }
+        *
+    }
+    
+    private static void addRun(InvertedList newList, InvertedList oldList, int barrier, int next) {
+        boolean done = false;
+        while(barrier > next && !done) {
+            newList.addDocumentId(next);
+            oldList.advanceIterator();
+            done = oldList.hasNext();
+            if(!done) {
+                next = oldList.advanceIterator();
+            } 
+        }
+    }*/
     
     public static int getPageSize() {
         return PAGE_SIZE;
@@ -264,5 +357,13 @@ public class InvertedList implements Codeable {
     
     public static void setPageSize(int pageSize) {
         InvertedList.PAGE_SIZE = pageSize;
+    }
+
+    public void dumpDocs() {
+        resetIterator();
+        while(hasNext()) {
+            System.out.println(advanceIterator());
+        }
+        resetIterator();
     }
 }

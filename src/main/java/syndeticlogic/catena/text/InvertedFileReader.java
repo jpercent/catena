@@ -16,13 +16,14 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.type.Type;
 
-public class RawInvertedFileReader {
-	private final static Log log = LogFactory.getLog(RawInvertedFileReader.class);
+public class InvertedFileReader {
+	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
 	private static int BLOCK_SIZE=1048576;
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;
 	private MappedByteBuffer buffer;
+	private boolean closed = true;
 	
 	public void open(String fileName) {
 		file = new File(fileName);
@@ -31,13 +32,15 @@ public class RawInvertedFileReader {
 			inputStream = new FileInputStream(file);
 			channel = inputStream.getChannel();
 			buffer = channel.map(MapMode.READ_ONLY, 0L, channel.size());
+			closed = false;
 		} catch(IOException e) {
-			System.out.println("Could not tokenize "+file.getAbsolutePath()+": "+e);
+			log.fatal("Could not tokenize "+file.getAbsolutePath()+": "+e);
 			throw new RuntimeException(e);
-		}
+		} 
 	}
 	
 	public void close() {
+	    if (closed) return;
 		try {
 			inputStream.close();
 			channel.close();
@@ -45,15 +48,18 @@ public class RawInvertedFileReader {
 			channel = null;
 			file = null;
 			buffer = null;
+			
 		} catch(Exception e) {
 			log.warn("failed to clean up"+e, e);
+		} finally {
+		    closed = true;
 		}
 	}
 	
 	public void setOffset(long offset) {
 	}
 	
-	public void scan(HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) throws IOException {
+	public void scanFile(HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) throws IOException {
         int blockSize = (int) Math.min((long) BLOCK_SIZE, channel.size());
         byte[] block = new byte[blockSize];
 
@@ -69,7 +75,7 @@ public class RawInvertedFileReader {
         }
 	}
 
-	public int scan(int start, List<InvertedListDescriptor> descriptors, HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) {
+	public int scanBlock(int start, List<InvertedListDescriptor> descriptors, HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) {
 	    InvertedListDescriptor cursor = descriptors.get(start);
 	    assert buffer.remaining() > cursor.getLength();
         int blockSize = (int) Math.min((long) BLOCK_SIZE, buffer.remaining());
@@ -112,6 +118,8 @@ public class RawInvertedFileReader {
 	    		list.decode(block, offset);
 	    		offset += list.size();
 	    		list.setWord(idToWord.get(list.getWordId()));
+	    		//System.out.println("word = "+list.getWord());
+	    		//System.out.println("wordId "+list.getWordId());
 	    		assert !postings.containsKey(list.getWord());
 	    		postings.put(list.getWord(), list);
 	    		count++;

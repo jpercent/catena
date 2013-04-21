@@ -15,7 +15,7 @@ public class CorpusManager extends DirectoryWalker {
     private InvertedFileBuilder indexBuilder;
     private Tokenizer tokenizer;
     
-    public CorpusManager(String prefix, Tokenizer tokenizer, InvertedFileBuilder indexBuilder, InvertedFileWriter fileWriter) {
+    public CorpusManager(String prefix, Tokenizer tokenizer, InvertedFileBuilder indexBuilder) {
         super();
         this.indexBuilder = indexBuilder;
         this.tokenizer = tokenizer;
@@ -37,7 +37,7 @@ public class CorpusManager extends DirectoryWalker {
     protected void handleDirectoryStart(File directory, int depth, Collection wrapper) {
     	System.out.println("Depth = "+depth);
     	if(depth == 1) {
-    		System.out.println("Depth = "+depth+ " " +directory.getAbsolutePath());
+    		log.info("Depth = "+depth+ " " +directory.getAbsolutePath());
     		indexBuilder.startBlock(directory.getAbsolutePath());
     	}
     }
@@ -46,7 +46,7 @@ public class CorpusManager extends DirectoryWalker {
     protected void handleDirectoryEnd(File directory, int depth, Collection wrapper) {
     	if(depth == 1) {
     		indexBuilder.completeBlock(directory.getAbsolutePath());
-        	throw new RuntimeException("Stop");
+        	//throw new RuntimeException("Stop");
         }
     }
     
@@ -54,7 +54,7 @@ public class CorpusManager extends DirectoryWalker {
     protected void handleFile(File file, int depth, Collection wrapper) {
     	int document = indexBuilder.addDocument(file.getAbsolutePath());
     	tokenizer.tokenize(indexBuilder, file, document);
-    	//System.out.println(file.getAbsolutePath());
+    	log.info(file.getAbsolutePath()+":"+document);
     }
     
     public static void main(String[] args) {
@@ -65,12 +65,12 @@ public class CorpusManager extends DirectoryWalker {
     	InvertedFileWriter fileWriter = new RawInvertedFileWriter();
     	Tokenizer tokenizer = new BasicTokenizer();
     	//Tokenizer tokenizer = new LuceneStandardTokenizer();
-    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, "corpus.index", fileWriter), fileWriter);
+    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, "corpus.index", fileWriter));
     	try {
     		corpusManager.index("/home/james/catena/PA1/data");
     	} catch(Throwable e) {e.printStackTrace();}
     	System.out.println("Total time = "+(System.currentTimeMillis() - start));
-    	System.out.println(corpusManager.indexBuilder.postings.keySet().size());
+    	System.out.println(corpusManager.indexBuilder.getPostings().keySet().size());
     	
     }
 }

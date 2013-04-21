@@ -36,7 +36,6 @@ public class Config {
     private ArrayRegistry arrayRegistry;
     private String prefix;
     private double memoryPercentage;
-    private long physicalMemorySize;
     private int segmentSize;
     private int retryLimit;
     private int pageSize;
@@ -51,11 +50,7 @@ public class Config {
     }
    
     private void configureArraySystem() {
-        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
-                java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-        this.physicalMemorySize = os.getTotalPhysicalMemorySize();
-        this.pages = (int)(physicalMemorySize * memoryPercentage)/pageSize;
-        
+        this.pages = (int)(getPhysicalMemorySize() * memoryPercentage)/pageSize;
         pageFactory = new PageFactory(memoryType, cachingPolicy, pageType, retryLimit);
         pageManager = pageFactory.createPageManager(null, pageSize, pages);
         SegmentManager.configureSegmentManager(compressionType, pageManager);        
@@ -160,8 +155,10 @@ public class Config {
 	public double getMemoryPercentage() {
 		return memoryPercentage;
 	}
-
-	public long getPhysicalMemorySize() {
-		return physicalMemorySize;
+	
+	public static long getPhysicalMemorySize() {
+	     com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+	                java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+	        return os.getTotalPhysicalMemorySize();
 	}
 }

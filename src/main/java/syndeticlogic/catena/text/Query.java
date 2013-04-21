@@ -5,22 +5,18 @@ import java.io.File;
 import org.codehaus.plexus.util.FileUtils;
 
 public class Query {
-    Tokenizer tokenizer;
-    InvertedFileWriter fileWriter;
-    InvertedFileReader fileReader;
-    InvertedFileBuilder indexBuilder;
-    CorpusManager corpusManager;
-    String prefix;
+    private Tokenizer tokenizer;
+    private InvertedFileWriter fileWriter;
+    private InvertedFileReader fileReader;
+    private InvertedFileBuilder indexBuilder;
+    private CorpusManager corpusManager;
+    private String prefix;
+    private String[] terms;
     
-    public Query(String prefix) throws Exception {
+    public Query(String prefix, String[] terms) throws Exception {
         this.prefix = prefix;
-        FileUtils.deleteDirectory(prefix);
-        FileUtils.mkdir(prefix);
-        fileWriter = new RawInvertedFileWriter();
-        tokenizer = new BasicTokenizer();
-        indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
         fileReader = new InvertedFileReader();
-        
+        fileReader.open(prefix);
     }
     
     public void main(String[] args) throws Exception {

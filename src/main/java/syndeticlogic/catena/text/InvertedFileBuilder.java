@@ -1,8 +1,12 @@
 package syndeticlogic.catena.text;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,11 +18,12 @@ public class InvertedFileBuilder {
 	private final InvertedFileWriter fileWriter;
     private final HashMap<Integer, String> idToDoc;
     private final HashMap<Integer, String> idToWord;
-    final TreeMap<String, InvertedList> postings;
-    private final HashMap<String, LinkedList<InvertedListDescriptor>> blockToInvertedListDescriptor;
+    private final HashMap<String, Integer> wordToId;
+    private final LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blocksAndDescriptors;
     private final HashMap<String, Integer> blockToId;
     private final String prefix;
     private final String corpusName;
+    private TreeMap<String, InvertedList> postings;
     private int blockId;
     private int docId;
     private int wordId;
@@ -27,23 +32,31 @@ public class InvertedFileBuilder {
         this.fileWriter = fileWriter;
         this.prefix = prefix;
         this.corpusName = prefix+File.separator+corpusName;
+        this.blockId = 0;
+        this.docId = 0;
+        this.wordId = 0;
         idToDoc = new HashMap<Integer, String>();
         idToWord = new HashMap<Integer, String>();
         postings = new TreeMap<String, InvertedList>();
-        blockToInvertedListDescriptor = new HashMap<String, LinkedList<InvertedListDescriptor>>();
+        blocksAndDescriptors = new LinkedList<Map.Entry<String, List<InvertedListDescriptor>>>();
         blockToId = new HashMap<String, Integer>();
+        wordToId = new HashMap<String, Integer>();
     }
         
     public void addWord(int document, String word) {
-        InvertedList il = postings.get(word);
-        if (il == null) {
-            il = new InvertedList(wordId);
-            il.setWord(word);
-            postings.put(word, il);
-            idToWord.put(wordId, word);
-            wordId++;
+        InvertedList invertedList = postings.get(word);
+        if (invertedList == null) {
+            if(wordToId.get(word) == null) {
+//                System.out.println("Adding a new word "+word + " word Id "+ wordId);
+                wordToId.put(word, wordId);
+                idToWord.put(wordId, word);
+                wordId++;
+            }            
+            invertedList = new InvertedList(wordToId.get(word));
+            invertedList.setWord(word);
+            postings.put(word, invertedList);
         }
-        il.addDocumentId(document);
+        invertedList.addDocumentId(document);
     }
 
     public int addDocument(final String document) {
@@ -56,18 +69,44 @@ public class InvertedFileBuilder {
 	}
    
 	public void completeBlock(String block) {
-		String blockFileName = prefix+File.separator+new File(block).getName()+"-"+blockToId.get(block)+".corpus";
+	    File blockFile = new File(block);
+	    System.out.println("Complete block "+block);
+		String blockFileName = prefix+File.separator+blockFile.getName()+"-"+blockToId.get(block)+".corpus";
 		fileWriter.open(blockFileName);
 		LinkedList<InvertedListDescriptor> invertedListDescriptors = new LinkedList<InvertedListDescriptor>();   
-		fileWriter.write(postings, invertedListDescriptors);
+		fileWriter.writeFile(postings, invertedListDescriptors);
         fileWriter.close();
-        this.blockToInvertedListDescriptor.put(block, invertedListDescriptors);
-
+        this.blocksAndDescriptors.add(new AbstractMap.SimpleEntry<String, List<InvertedListDescriptor>>(blockFileName, invertedListDescriptors));
+        postings = new TreeMap<String, InvertedList>();
 	}
 
+    @SuppressWarnings("unchecked")
     public void mergeBlocks() {
-        System.out.println("Merge blocks called");
-    } 
+        System.out.println("Merge blocks called"+blocksAndDescriptors.size());
+        List<InvertedListDescriptor> finalList;
+        if(blocksAndDescriptors.size() > 1) {
+            BlockMerger merger = new BlockMerger(prefix, idToWord);
+            finalList = merger.mergeBlocks("final.index", blocksAndDescriptors);
+        } else {
+            System.out.println("NO MERGE NECESSARY, JUST COPY THE FILE OVER TO THE FINAL NAME ");
+            finalList = (List<InvertedListDescriptor>) blocksAndDescriptors.get(0).getValue();
+        }
+        writeMeta(finalList, idToDoc);
+    }
+    
+    public void writeMeta(Object... objects) {
+        File file = new File(prefix+File.separator+".meta");
+        ObjectOutputStream oos;
+        try {
+            oos = new ObjectOutputStream(new FileOutputStream(file));
+            oos.writeObject(objects);
+            oos.close();
+        } catch (Exception e) {
+            log.fatal("Could not write meta "+file.getAbsolutePath()+": "+e, e);
+            throw new RuntimeException(e);
+        }
+        
+    }
     
     public HashMap<Integer, String> getIdToDoc() {
 		return idToDoc;
@@ -82,7 +121,7 @@ public class InvertedFileBuilder {
 	}
 
 	public LinkedList<InvertedListDescriptor> getInvertedListDescriptors() {
-		return blockToInvertedListDescriptor.get(corpusName);
+		return null;//blockToInvertedListDescriptor.get(corpusName);
 	}
 
 	public HashMap<String, Integer> getBlockToId() {

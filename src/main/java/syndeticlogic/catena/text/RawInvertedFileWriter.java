@@ -5,7 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.LinkedList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.SortedMap;
 
 import org.apache.commons.logging.Log;
@@ -18,10 +19,11 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
 	FileChannel channel=null;
 	File indexFile;
 	ByteBuffer direct;
+	boolean closed=true;
 	
     @Override
 	public void open(String fileName) {
-		System.out.println("Creating file"+BLOCK_SIZE);
+		System.out.println("Creating file "+fileName+" block size = "+BLOCK_SIZE);
 		try {
 			//File indexFile = new File("/home/james/catena/corpus.index");
 			indexFile = new File(fileName);
@@ -30,6 +32,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
 			outputStream = new FileOutputStream(indexFile);
 			channel = outputStream.getChannel();
 			direct = ByteBuffer.allocateDirect(BLOCK_SIZE);
+			closed = false;
 		} catch(Throwable e) {
 			log.fatal("could not open index file "+fileName+" for writing "+e, e);
 			throw new RuntimeException(e);
@@ -38,6 +41,8 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
     
     @Override
 	public void close() {
+        if(closed)
+            return;
 		try {
     		channel.force(true);
     		channel.close();
@@ -48,17 +53,19 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
     		indexFile = null;
 		} catch (IOException e) {
 			log.fatal("exception cleaning up"+e, e);
+		}finally {
+		    closed = true;
 		}
 	}
 	
     @Override
-    public long write(SortedMap<String, InvertedList> postings, LinkedList<InvertedListDescriptor> invertedListDescriptors) {
-        
+    public long writeFile(SortedMap<String, InvertedList> postings, List<InvertedListDescriptor> invertedListDescriptors) {
         long fileOffset = 0;
         long start = System.currentTimeMillis();
         int count = 0;
+    //    HashSet<Integer> i = new HashSet<Integer>();
         try {
-//            System.out.println("Looping through list");
+            System.out.println("Looping through list");
             byte[] jvm = new byte[BLOCK_SIZE];
             int offset = 0;
             for (InvertedList list : postings.values()) {
@@ -74,13 +81,20 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
                 }
                 int written = list.encode(jvm, offset);
                 assert written == length;
-                invertedListDescriptors.add(new InvertedListDescriptor(list.getWordId(), fileOffset, length));
+//                assert i.contains
+                //System.out.println("Workd = "+list.getWord() + " id = "+list.getWordId());
+     /*           if(i.contains(list.getWordId())) {
+                    throw new RuntimeException("fucked e: "+list.getWord());
+                }
+                */
+  //              i.add(list.getWordId());
+                invertedListDescriptors.add(new InvertedListDescriptor(list.getWordId(), fileOffset, length, list.getDocumentFrequency()));
                 offset += length;
                 fileOffset += length;
                 count++;
             }
             direct.put(jvm, 0, offset);
-
+            System.out.println("BLOCK DONE333333333333333333333333333333");
             direct.rewind();
             direct.limit(offset);
             channel.write(direct);
@@ -92,15 +106,16 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
         }
         System.out.println("Records " + count + " elapsed seconds = " + (System.currentTimeMillis() - start));
         System.out.println("Done totalData = " + fileOffset);
-
         return fileOffset;
     }
     
+    @Override
     public int getBlockSize() {
         return BLOCK_SIZE;
     }
     
-    public void setBlockSize(int pageSize) {
-        BLOCK_SIZE = pageSize;
+    @Override
+    public void setBlockSize(int blockSize) {
+        BLOCK_SIZE = blockSize;
     }
 }

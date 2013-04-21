@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -17,8 +16,8 @@ import syndeticlogic.catena.type.CodeableValue;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
-public class CatenaInvertedFileWriter implements InvertedFileWriter {
-	private static final Log log = LogFactory.getLog(RawInvertedFileWriter.class);
+public class CatenaInvertedFileWriter { //implements InvertedFileWriter {
+/*	private static final Log log = LogFactory.getLog(RawInvertedFileWriter.class);
     @Override
     public void open(String fileName) {
     }
@@ -28,7 +27,7 @@ public class CatenaInvertedFileWriter implements InvertedFileWriter {
     }
    
     @Override
-	public long write(SortedMap<String, InvertedList> postings, LinkedList<InvertedListDescriptor> wordToOffset) {
+	public long writeFile(SortedMap<String, InvertedList> postings, List<InvertedListDescriptor> wordToOffset) {
 		long fileOffset=0;
 		String fileName="NAME";
 		try {
@@ -73,4 +72,5 @@ public class CatenaInvertedFileWriter implements InvertedFileWriter {
 		}
 		return fileOffset;
 	}
+	*/
 }

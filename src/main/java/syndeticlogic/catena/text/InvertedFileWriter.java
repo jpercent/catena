@@ -1,10 +1,12 @@
 package syndeticlogic.catena.text;
 
-import java.util.LinkedList;
+import java.util.List;
 import java.util.SortedMap;
 
 public interface InvertedFileWriter {
     void open(String fileName);
     void close();
-    long write(SortedMap<String, InvertedList> postings, LinkedList<InvertedListDescriptor> invertedListDescriptor);
+    long writeFile(SortedMap<String, InvertedList> postings, List<InvertedListDescriptor> invertedListDescriptor);
+    void setBlockSize(int blockSize);
+    int getBlockSize();
 }
