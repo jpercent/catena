@@ -8,7 +8,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -26,7 +25,7 @@ public class InvertedFileReader {
 	private boolean closed = true;
 	
 	public void open(String fileName) {
-		file = new File(fileName);
+	    file = new File(fileName);
 		assert file.exists();
 		try {
 			inputStream = new FileInputStream(file);
@@ -53,9 +52,6 @@ public class InvertedFileReader {
 		} finally {
 		    closed = true;
 		}
-	}
-	
-	public void setOffset(long offset) {
 	}
 	
 	public void scanFile(HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) throws IOException {
@@ -99,9 +95,15 @@ public class InvertedFileReader {
         return start;
 	}
 	
-	public Map.Entry<String, InvertedList> scanEntry(HashMap<Integer, String> idToWord, HashMap<Integer, Long> idToOffset) {
-		return null;
-	}
+    public InvertedList scanEntry(InvertedListDescriptor desc) throws IOException {
+        buffer = channel.map(MapMode.READ_ONLY, desc.getOffset(), desc.getLength());
+        byte[] copy = new byte[desc.getLength()];
+        buffer.get(copy);
+        InvertedList ret = new InvertedList(-1);
+        ret.decode(copy, 0);
+        ret.setWord(desc.getWord());
+        return ret;
+    }
 	
 	public int decodePostings(byte[] block, int blockSize, TreeMap<String, InvertedList> postings, HashMap<Integer, String> idToWord) {
 	    boolean success = true;
