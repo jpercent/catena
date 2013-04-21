@@ -48,7 +48,6 @@ public class InvertedFileReader {
 			channel = null;
 			file = null;
 			buffer = null;
-			
 		} catch(Exception e) {
 			log.warn("failed to clean up"+e, e);
 		} finally {
@@ -118,8 +117,6 @@ public class InvertedFileReader {
 	    		list.decode(block, offset);
 	    		offset += list.size();
 	    		list.setWord(idToWord.get(list.getWordId()));
-	    		//System.out.println("word = "+list.getWord());
-	    		//System.out.println("wordId "+list.getWordId());
 	    		assert !postings.containsKey(list.getWord());
 	    		postings.put(list.getWord(), list);
 	    		count++;
@@ -132,8 +129,6 @@ public class InvertedFileReader {
 	    				+"; this program does not support that at this time");
 	    	}
 	    } while(success);
-	    
-
 		return offset;
 	}
 	

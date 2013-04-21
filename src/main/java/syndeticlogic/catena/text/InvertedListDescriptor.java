@@ -2,6 +2,7 @@ package syndeticlogic.catena.text;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class InvertedListDescriptor implements Serializable {
     private final int wordId;
     private final long offset;
