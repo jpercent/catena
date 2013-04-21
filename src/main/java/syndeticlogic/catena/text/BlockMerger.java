@@ -39,6 +39,7 @@ public class BlockMerger {
         while(sources > 0) {
             assert sources >= readBlocks;
             InvertedFileReader[] readers = new InvertedFileReader[readBlocks];
+            @SuppressWarnings("unchecked")
             List<InvertedListDescriptor>[] descriptors = new List[readBlocks];
             Iterator<Map.Entry<String, List<InvertedListDescriptor>>> bditerator = blockDescriptors.iterator();
             int i=0;
