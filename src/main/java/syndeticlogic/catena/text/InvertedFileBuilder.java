@@ -81,15 +81,16 @@ public class InvertedFileBuilder {
         } else {
             finalList = (List<InvertedListDescriptor>) blocksAndDescriptors.get(0).getValue();
         }
-        writeMeta(finalList, idToDoc);
+        writeMeta(finalList);
     }
     
-    public void writeMeta(Object... objects) {
+    public void writeMeta(List<InvertedListDescriptor> finalList) {
         File file = new File(prefix+File.separator+".meta");
         ObjectOutputStream oos;
         try {
             oos = new ObjectOutputStream(new FileOutputStream(file));
-            oos.writeObject(objects);
+            oos.writeObject(finalList);
+            oos.writeObject(idToDoc);
             oos.close();
         } catch (Exception e) {
             log.fatal("Could not write meta "+file.getAbsolutePath()+": "+e, e);
