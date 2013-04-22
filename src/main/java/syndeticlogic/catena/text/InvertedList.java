@@ -15,88 +15,51 @@ public class InvertedList implements Codeable {
     private int wordId;
     private String word;
     private int documentFrequency;
-    private int[][] documentIds;
-    private int slots;
-    private int slotCursor;
-    private int pageCursor;
-    private int slotIterator;
-    private int pageIterator;
+    private DocumentIdTable table;
     
     public InvertedList() {
         this.wordId = -1;
         this.documentFrequency = 0;
-        documentIds = new int[PAGE_SIZE][];
-        documentIds[0] = new int[PAGE_SIZE];
-        slots = PAGE_SIZE;
-        slotCursor = 0;
-        pageCursor = 0;
-        slotIterator = 0;
-        pageIterator = 0;
+        table = new DocumentIdTable();
         word = null;
     }
     
     public InvertedList(int wordId) {
         this.wordId = wordId;
         this.documentFrequency = 0;
-        documentIds = new int[PAGE_SIZE][];
-        documentIds[0] = new int[PAGE_SIZE];
-        slots = PAGE_SIZE;
-        slotCursor = 0;
-        pageCursor = 0;
-        slotIterator = 0;
-        pageIterator = 0;
+        table = new DocumentIdTable();
         word = null;
     }
     
     public void addDocumentId(int docId) {
-        if(pageCursor == PAGE_SIZE) {
-            addPage();
-        }   
-        documentIds[slotCursor][pageCursor] = docId;
         documentFrequency++;
-        pageCursor++;
+        table.addId(docId);
     }
 
-    private void addPage() {
-        if(slotCursor + 1 == slots) {
-            expand();
-        }
-        slotCursor++;
-        pageCursor = 0;
-        documentIds[slotCursor] = new int[PAGE_SIZE];
-    }
-
-    private void expand() {
-        int[][] newDocs = new int[slots+PAGE_SIZE][];
-        System.arraycopy(documentIds, 0, newDocs, 0, slots);
-        slots += PAGE_SIZE;
-        documentIds = newDocs;
-    }
-
-    public void merge(InvertedList list) {
-        assert getLastDocId() < list.getLastDocId();
-        while(list.hasNext()) {
-            addDocumentId(list.advanceIterator());
+    public void merge(InvertedList list) {        
+        assert table.getLastDocId() < list.table.getLastDocId();
+        while(list.table.hasNext()) {
+            addDocumentId(list.table.advanceIterator());
         }
     }
     
-    TreeSet<Integer> getDocumentIds() {
+    public TreeSet<Integer> getDocumentIds() {
         TreeSet<Integer> docIds = new TreeSet<Integer>();
-        resetIterator();
-        while(hasNext()) {
-            docIds.add(advanceIterator());
+        table.resetIterator();
+        while(table.hasNext()) {
+            docIds.add(table.advanceIterator());
         }
         return docIds;
     }
-    
+
     public TreeSet<Integer> intersect(TreeSet<Integer> docIds) {
-        resetIterator();
+        table.resetIterator();
         Iterator<Integer> iter = docIds.iterator();
-        if(!hasNext() || !iter.hasNext()) {
+        if(!table.hasNext() || !iter.hasNext()) {
             return new TreeSet<Integer>();
         }
         
-        int nextPosting = advanceIterator();
+        int nextPosting = table.advanceIterator();
         int nextDocId = iter.next();        
         TreeSet<Integer> matches = new TreeSet<Integer>();
         while(true) {
@@ -107,15 +70,15 @@ public class InvertedList implements Codeable {
                     break;
                 }
             } else if (nextPosting < nextDocId) {
-                if(hasNext()) {
-                    nextPosting = advanceIterator();
+                if(table.hasNext()) {
+                    nextPosting = table.advanceIterator();
                 } else { 
                     break;
                 }
             } else {
                 matches.add(nextDocId);
-                if (hasNext() && iter.hasNext()) {
-                    nextPosting = advanceIterator();
+                if (table.hasNext() && iter.hasNext()) {
+                    nextPosting = table.advanceIterator();
                     nextDocId = iter.next();
                 } else {
                     break;
@@ -133,28 +96,8 @@ public class InvertedList implements Codeable {
         
         Codec.getCodec().encode(documentFrequency, dest, offset+copied);
         copied += Type.INTEGER.length();
-       
-        int docIdsSize = documentIdsSize();
-        Codec.getCodec().encode(docIdsSize, dest, offset+copied);
-        copied += Type.INTEGER.length();
-     
-        int computedDocSize = flattenTable(dest, offset+copied);
-        assert computedDocSize == docIdsSize;
-        copied += computedDocSize;
-        return copied;
-    }
-    
-    private int flattenTable(byte[] dest, int offset) {
-        int copied = 0;
-        for(int i = 0; i <= slotCursor; i++) {
-            int length = PAGE_SIZE;
-            if(i == slotCursor) {
-                length = pageCursor;
-            }
-            ByteBuffer transferBuff = ByteBuffer.wrap(dest, offset+copied, length*Type.INTEGER.length());
-            transferBuff.asIntBuffer().put(documentIds[i], 0, length);
-            copied += length*Type.INTEGER.length();
-        }
+
+        copied += table.encode(dest, offset+copied);
         return copied;
     }
     
@@ -167,31 +110,9 @@ public class InvertedList implements Codeable {
         documentFrequency = Codec.getCodec().decodeInteger(source, offset+copied);
         copied += Type.INTEGER.length();
         
-        int docSize = Codec.getCodec().decodeInteger(source, offset+copied);
-        copied += Type.INTEGER.length();
-        int tableSize = constructTable(source, offset+copied, docSize);
-        assert docSize == tableSize;
-        return copied+tableSize;
-    }
-
-    private int constructTable(byte[] source, int offset, int remaining) {
-        int accumulation = 0;
-        while (remaining > 0) {
-            int blockSize = PAGE_SIZE;
-            if(remaining/Type.INTEGER.length() < blockSize) {
-                blockSize = remaining/Type.INTEGER.length();
-            }
-            pageCursor = blockSize;
-            ByteBuffer transferBuf = ByteBuffer.wrap(source, offset+accumulation, remaining); 
-            transferBuf.asIntBuffer().get(documentIds[slotCursor], 0, blockSize);
-            if(pageCursor == PAGE_SIZE) {
-                addPage();
-            }
-            remaining -= blockSize*Type.INTEGER.length();
-            accumulation += blockSize*Type.INTEGER.length();
-        }
-        assert remaining == 0;
-        return accumulation;
+        copied += table.decode(source, offset+copied);
+        
+        return copied;
     }
     
     @Override
@@ -207,14 +128,10 @@ public class InvertedList implements Codeable {
     @Override
     public int size() {
         int size = 3*Type.INTEGER.length();
-        size += documentIdsSize();
+        size += table.size();
         return size;
     }
-    
-    private int documentIdsSize() {
-        return (/* filled up pages + last, partial page */ Type.INTEGER.length() * slotCursor * PAGE_SIZE) 
-        + (Type.INTEGER.length() * pageCursor);
-    }
+   
     @Override
     public int hashCode() {
     	final int prime = 31;
@@ -240,76 +157,45 @@ public class InvertedList implements Codeable {
         return true;
     }
     
-	public boolean deepCompare(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		InvertedList other = (InvertedList) obj;
-		if (documentFrequency != other.documentFrequency)
-			return false;
-		if (!Arrays.deepEquals(documentIds, other.documentIds))
-			return false;
-		if (pageCursor != other.pageCursor)
-			return false;
-		if (pageIterator != other.pageIterator)
-			return false;
-		if (slotCursor != other.slotCursor)
-			return false;
-		if (slotIterator != other.slotIterator)
-			return false;
-		if (slots != other.slots)
-			return false;
-		if (word == null) {
-			if (other.word != null)
-				return false;
-		} else if (!word.equals(other.word))
-			return false;
-		if (wordId != other.wordId)
-			return false;
-		return true;
-	}
-
-    @Override
-    public String toString() {
-        return "InvertedList [wordId=" + wordId + ", word=" + word + ", documentFrequency=" + documentFrequency + ", slots=" + slots + ", slotCursor=" + slotCursor + ", pageCursor=" + pageCursor + ", slotIterator=" + slotIterator + ", pageIterator=" + pageIterator + "]";
+    public boolean deepCompare(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        InvertedList other = (InvertedList) obj;
+        if (documentFrequency != other.documentFrequency)
+            return false;
+        if (table == null) {
+            if (other.table != null)
+                return false;
+        } else if (!table.equals(other.table))
+            return false;
+        if (word == null) {
+            if (other.word != null)
+                return false;
+        } else if (!word.equals(other.word))
+            return false;
+        if (wordId != other.wordId)
+            return false;
+        return true;
     }
-
+    
     public void resetIterator() {
-        slotIterator = 0;
-        pageIterator = 0;
+        table.resetIterator();
+    }
+    
+    public int advanceIterator() {
+        return table.advanceIterator();
     }
     
     public boolean hasNext() {
-        if(slotIterator < slotCursor) {
-            return true;
-        } else if(pageIterator < pageCursor) {
-            return true;
-        }
-        return false;
-    }
-    
-    public int peek() {
-        return documentIds[slotIterator][pageIterator];
-    }
-
-    public int advanceIterator() {
-        int ret = documentIds[slotIterator][pageIterator++];
-        if(pageIterator == PAGE_SIZE) {
-            slotIterator++;
-            pageIterator=0;         
-        }
-        return ret;
+        return table.hasNext();
     }
     
     public void dumpDocs() {
-        resetIterator();
-        while(hasNext()) {
-            System.err.println(advanceIterator());
-        }
-        resetIterator();
+        table.dumpDocs();
     }
     
     public int getDocumentFrequency() {
@@ -326,10 +212,6 @@ public class InvertedList implements Codeable {
     
     public String getWord() {
         return word;
-    }
-    
-    public int getLastDocId() {
-        return documentIds[slotCursor][pageCursor-1];
     }
     
     @Override
