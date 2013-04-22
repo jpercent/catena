@@ -46,7 +46,7 @@ public class InvertedFileBuilder {
                 idToWord.put(wordId, word);
                 wordId++;
             }            
-            invertedList = new InvertedList(wordToId.get(word));
+            invertedList = InvertedList.create(wordToId.get(word));
             invertedList.setWord(word);
             postings.put(word, invertedList);
         }

@@ -40,8 +40,8 @@ public class InvertedListTest {
     @Test
     public void testCompare() {
         
-        InvertedList posting = new InvertedList(12);
-        InvertedList posting1 = new InvertedList(12);
+        InvertedList posting = InvertedList.create(12);
+        InvertedList posting1 = InvertedList.create(12);
         boolean e = false;
         try {
             assertEquals(-1, posting.compareTo(posting1));
@@ -66,13 +66,13 @@ public class InvertedListTest {
         }
         assertFalse(e);
         
-        InvertedList posting2 = new InvertedList(12);
+        InvertedList posting2 = InvertedList.create(12);
         posting2.setWord("ya");
         
-        InvertedList posting3 = new InvertedList(12);
+        InvertedList posting3 = InvertedList.create(12);
         posting3.setWord("yg");
         
-        InvertedList posting4 = new InvertedList(12);
+        InvertedList posting4 = InvertedList.create(12);
         posting4.setWord("ygg");
         
         assertTrue(0 > posting.compareTo(posting1));
@@ -89,7 +89,7 @@ public class InvertedListTest {
     {
         Random rand = new Random(1337);
         InvertedList.setPageSize(postingsPageSize);
-        InvertedList posting = new InvertedList(12);
+        InvertedList posting = InvertedList.create(12);
         int size = InvertedList.getPageSize() * InvertedList.getPageSize() * postingsFactor;
         
         for(int i = 0; i < size; ++i) {
@@ -101,7 +101,7 @@ public class InvertedListTest {
             byte[] encoded = new byte[posting.size()+offset];
             posting.encode(encoded, offset);
             InvertedList.setPageSize(postings1PageSize);        
-            posting1 = new InvertedList(-1);
+            posting1 = InvertedList.create(-1);
             posting1.decode(encoded, offset);
         }
         

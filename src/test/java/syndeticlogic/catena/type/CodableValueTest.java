@@ -15,9 +15,7 @@ public class CodableValueTest {
     InvertedList list2;
     
     @Before
-    public void setup() {
-        
-        
+    public void setup() {   
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
                 java.lang.management.ManagementFactory.getOperatingSystemMXBean();
         long physicalMemorySize = os.getTotalPhysicalMemorySize();
@@ -28,11 +26,11 @@ public class CodableValueTest {
         
         Random rand = new Random(1337);
         InvertedList.setPageSize(128);
-        list = new InvertedList(0);
+        list = InvertedList.create(0);
         list.setWord("word is bond");
-        list1 = new InvertedList(0);
+        list1 = InvertedList.create(0);
         list1.setWord("word is bond");
-        list2 = new InvertedList(1);
+        list2 = InvertedList.create(1);
         list2.setWord("word is bondage");
         int size = InvertedList.getPageSize() * InvertedList.getPageSize() * 31;
         
@@ -74,5 +72,4 @@ public class CodableValueTest {
         assertTrue(0 < value.compareTo(list));
         assertTrue(0 < value.compareTo(list1));
     }
-
 }

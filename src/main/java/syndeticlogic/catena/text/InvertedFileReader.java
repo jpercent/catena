@@ -99,7 +99,7 @@ public class InvertedFileReader {
         buffer = channel.map(MapMode.READ_ONLY, desc.getOffset(), desc.getLength());
         byte[] copy = new byte[desc.getLength()];
         buffer.get(copy);
-        InvertedList ret = new InvertedList(-1);
+        InvertedList ret = InvertedList.create();
         ret.decode(copy, 0);
         ret.setWord(desc.getWord());
         return ret;
@@ -115,7 +115,7 @@ public class InvertedFileReader {
 	    		break;
 	    	}
 	    	try {
-	    		InvertedList list = new InvertedList();
+	    		InvertedList list = InvertedList.create();
 	    		list.decode(block, offset);
 	    		offset += list.size();
 	    		list.setWord(idToWord.get(list.getWordId()));

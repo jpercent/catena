@@ -1,33 +1,31 @@
 package syndeticlogic.catena.text;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
+import syndeticlogic.catena.text.DocumentIdTable.TableType;
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
 public class InvertedList implements Codeable {
-    private static int PAGE_SIZE = 8192;
+    private static DocumentIdTable.TableType tableType=TableType.Uncompressed;
     private int wordId;
     private String word;
     private int documentFrequency;
     private DocumentIdTable table;
     
-    public InvertedList() {
+    public InvertedList(DocumentIdTable table) {
         this.wordId = -1;
         this.documentFrequency = 0;
-        table = new DocumentIdTable();
+        this.table = table;
         word = null;
     }
     
-    public InvertedList(int wordId) {
+    public InvertedList(int wordId, DocumentIdTable table) {
         this.wordId = wordId;
         this.documentFrequency = 0;
-        table = new DocumentIdTable();
+        this.table = table;
         word = null;
     }
     
@@ -220,10 +218,32 @@ public class InvertedList implements Codeable {
     }
 
     public static int getPageSize() {
-        return PAGE_SIZE;
+        return DocumentIdTable.getPageSize();
     }
     
     public static void setPageSize(int pageSize) {
-        InvertedList.PAGE_SIZE = pageSize;
+        DocumentIdTable.setPageSize(pageSize);
+    }
+
+    public static void setTableType(DocumentIdTable.TableType type) {
+        tableType = type;
+    }
+    
+    public static InvertedList create() {
+        return create(-1);
+    }
+    
+    public static InvertedList create(Integer wordId) {
+        DocumentIdTable idTable=null;
+        switch(tableType) {
+        case Uncompressed:
+            idTable = new UncompressedDocumentIdTable();
+            break;
+        case VariableByteCode:
+            break;
+        default:
+            assert false;
+        }
+        return new InvertedList(wordId, idTable);
     }
 }
