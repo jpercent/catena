@@ -8,13 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-
 import syndeticlogic.catena.utility.Config;
 
 public class BlockMerger {
-    private static final Log log = LogFactory.getLog(BlockMerger.class);
     private static int BLOCK_SIZE=10*1048576;
     private static double MEMORY_PERCENTAGE=0.3;
     private HashMap<Integer, String> idToWord;
