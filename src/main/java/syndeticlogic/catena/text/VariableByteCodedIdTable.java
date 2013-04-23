@@ -7,7 +7,7 @@ import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 import syndeticlogic.catena.utility.VariableByteCode;
 
-public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
+public class VariableByteCodedIdTable extends IdTable {
     private VariableByteCode codec;
     private byte[][][] documentIds;
     private int slots;
@@ -16,8 +16,9 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
     private int slotIterator;
     private int pageIterator;
     private int lastIterator;
-    
-    public VariableByteCodedDocumentIdTable() {
+    private int lastDocId;
+
+    public VariableByteCodedIdTable() {
         codec = new VariableByteCode(0);
         documentIds = new byte[PAGE_SIZE][][];
         documentIds[0] = new byte[PAGE_SIZE][];
@@ -25,18 +26,24 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
     }
     
     public void addId(int docId) {
-        int last = getLastDocId();
-        assert last > docId;
-        addDistance(docId - last);
+        if(slotCursor == 0 && pageCursor == 0) {
+            addDistance(docId, docId);
+        } else {
+            int last = lastDocId;
+            assert last < docId;
+            addDistance(docId - last, docId);
+        }
     }
 
-    private int addDistance(int distance) {
+    private int addDistance(int distance, int docId) {
         if(pageCursor == PAGE_SIZE) {
             addPage();
         }   
         byte[] encodedDistance = codec.encode(distance);
-        documentIds[slotCursor][pageCursor] = codec.encode(distance);
+//      System.out.println("addDistance size = " +encodedDistance.length +" distance "+distance+" Doc id "+docId);
+        documentIds[slotCursor][pageCursor] = encodedDistance;
         pageCursor++;
+        lastDocId = docId;
         return encodedDistance.length;
     }
     
@@ -68,18 +75,33 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
             System.arraycopy(compressedDocId, 0, dest, offset+copied, compressedDocId.length);
             copied += compressedDocId.length;
         }
+        assert docIdsSize == copied;
+//        System.out.println("posting siz e "+copied);
         return copied;
     }
         
     @Override
     public int decode(byte[] source, int offset) {
         int remaining = Codec.getCodec().decodeInteger(source, offset);
+        int totalSize = remaining;
         int accumulation = Type.INTEGER.length();
+        remaining -= 4;
+        boolean first = true;
+        int docId;
         while (remaining > 0) {
-            int size = addDistance(codec.decode(source, offset));
-            remaining -= size;
+            int distance = codec.decode(source, offset+accumulation);
+            if(first) {
+                docId = distance; 
+                first = false;
+            } else {
+                 docId = lastDocId + distance;
+            }
+            int size = addDistance(distance, docId);
             accumulation += size;
+            remaining -= size;
         }
+//        System.out.println(" leaving remaining "+remaining + " accumulation "+accumulation+" total size "+totalSize);
+        assert totalSize == accumulation;
         assert remaining == 0;
         return accumulation;
     }
@@ -121,7 +143,7 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        VariableByteCodedDocumentIdTable other = (VariableByteCodedDocumentIdTable) obj;
+        VariableByteCodedIdTable other = (VariableByteCodedIdTable) obj;
         if (!Arrays.deepEquals(documentIds, other.documentIds))
             return false;
         if (pageCursor != other.pageCursor)
@@ -146,26 +168,26 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
     public boolean hasNext() {
         if(slotIterator < slotCursor) {
             return true;
-        } else if(pageIterator < pageCursor) {
+        } else if(slotIterator == slotCursor && pageIterator < pageCursor) {
             return true;
         }
         return false;
     }
     
     public int peek() {
-        byte[] id = (byte[])documentIds[slotIterator][pageIterator];
+        byte[] id = documentIds[slotIterator][pageIterator];
         return codec.decode(id, 0);
     }
 
     public int advanceIterator() {
-        int ret = codec.decode((byte[])documentIds[slotIterator][pageIterator++], 0);
-        ret = lastIterator + ret;
-        lastIterator = ret;
+        int distance = codec.decode(documentIds[slotIterator][pageIterator++], 0);
+        int value = lastIterator + distance; 
+        lastIterator = value;
         if(pageIterator == PAGE_SIZE) {
             slotIterator++;
             pageIterator=0;         
         }
-        return ret;
+        return value;
     }
     
     private byte[] compressedAdvanceIterator() {
@@ -178,7 +200,7 @@ public class VariableByteCodedDocumentIdTable extends DocumentIdTable {
     }
 
     public int getLastDocId() {
-        return codec.decode((byte[])documentIds[slotCursor][pageCursor-1], 0);
+        return lastDocId;
     }
     
     @Override

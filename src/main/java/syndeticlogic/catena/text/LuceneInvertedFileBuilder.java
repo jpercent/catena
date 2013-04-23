@@ -1,4 +1,5 @@
 package syndeticlogic.catena.text;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;

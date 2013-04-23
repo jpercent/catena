@@ -1,5 +1,6 @@
 package syndeticlogic.catena.text;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 
