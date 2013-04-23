@@ -18,6 +18,7 @@ public class VariableByteCodeTest {
             code.setValue(input);
             assertEquals(input, code.value());
         }
-        
+        code.setValue(0);
+        assertEquals(0, code.value());
     }
 }
