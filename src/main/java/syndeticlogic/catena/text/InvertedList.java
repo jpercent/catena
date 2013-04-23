@@ -3,26 +3,26 @@ package syndeticlogic.catena.text;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import syndeticlogic.catena.text.DocumentIdTable.TableType;
+import syndeticlogic.catena.text.IdTable.TableType;
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
 public class InvertedList implements Codeable {
-    private static DocumentIdTable.TableType tableType=TableType.Uncompressed;
+    private static IdTable.TableType tableType=TableType.Uncoded;
     private int wordId;
     private String word;
     private int documentFrequency;
-    private DocumentIdTable table;
+    private IdTable table;
     
-    public InvertedList(DocumentIdTable table) {
+    public InvertedList(IdTable table) {
         this.wordId = -1;
         this.documentFrequency = 0;
         this.table = table;
         word = null;
     }
     
-    public InvertedList(int wordId, DocumentIdTable table) {
+    public InvertedList(int wordId, IdTable table) {
         this.wordId = wordId;
         this.documentFrequency = 0;
         this.table = table;
@@ -35,12 +35,17 @@ public class InvertedList implements Codeable {
     }
 
     public void merge(InvertedList list) {        
-        assert table.getLastDocId() < list.table.getLastDocId();
-        while(list.table.hasNext()) {
-            addDocumentId(list.table.advanceIterator());
+        assert getLastDocId() < list.getLastDocId();
+        list.resetIterator();
+        while(list.hasNext()) {
+            addDocumentId(list.advanceIterator());
         }
     }
     
+    private int getLastDocId() {
+        return table.getLastDocId();
+    }
+
     public TreeSet<Integer> getDocumentIds() {
         TreeSet<Integer> docIds = new TreeSet<Integer>();
         table.resetIterator();
@@ -91,10 +96,8 @@ public class InvertedList implements Codeable {
         int copied = 0;
         Codec.getCodec().encode(wordId, dest, offset+copied);
         copied += Type.INTEGER.length();
-        
         Codec.getCodec().encode(documentFrequency, dest, offset+copied);
         copied += Type.INTEGER.length();
-
         copied += table.encode(dest, offset+copied);
         return copied;
     }
@@ -104,7 +107,7 @@ public class InvertedList implements Codeable {
         int copied = 0;
         wordId = Codec.getCodec().decodeInteger(source, offset+copied);
         copied += Type.INTEGER.length();
-        
+
         documentFrequency = Codec.getCodec().decodeInteger(source, offset+copied);
         copied += Type.INTEGER.length();
         
@@ -125,7 +128,7 @@ public class InvertedList implements Codeable {
     
     @Override
     public int size() {
-        int size = 3*Type.INTEGER.length();
+        int size = 2*Type.INTEGER.length();
         size += table.size();
         return size;
     }
@@ -218,15 +221,19 @@ public class InvertedList implements Codeable {
     }
 
     public static int getPageSize() {
-        return DocumentIdTable.getPageSize();
+        return IdTable.getPageSize();
     }
     
     public static void setPageSize(int pageSize) {
-        DocumentIdTable.setPageSize(pageSize);
+        IdTable.setPageSize(pageSize);
     }
 
-    public static void setTableType(DocumentIdTable.TableType type) {
+    public static void setTableType(IdTable.TableType type) {
         tableType = type;
+    }
+
+    public static TableType getTableType() {
+        return tableType;
     }
     
     public static InvertedList create() {
@@ -234,12 +241,13 @@ public class InvertedList implements Codeable {
     }
     
     public static InvertedList create(Integer wordId) {
-        DocumentIdTable idTable=null;
+        IdTable idTable=null;
         switch(tableType) {
-        case Uncompressed:
-            idTable = new UncompressedDocumentIdTable();
+        case Uncoded:
+            idTable = new UncodedIdTable();
             break;
-        case VariableByteCode:
+        case VariableByteCoded:
+            idTable = new VariableByteCodedIdTable();
             break;
         default:
             assert false;
