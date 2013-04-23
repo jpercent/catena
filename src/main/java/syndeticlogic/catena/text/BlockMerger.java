@@ -56,7 +56,7 @@ public class BlockMerger {
                 readers[i].open(id.getKey());
             }
 
-            boolean finalPass = (((sources - readBlocks) > 0) ?  false : true);
+            boolean finalPass = (((sources - readBlocks) > 0) ?  true : false);
             if(finalPass) {
                 fileName = intermediateMerge+Integer.toString(totalMergeFiles);
                 totalMergeFiles++;
@@ -71,12 +71,14 @@ public class BlockMerger {
             sources -= readBlocks;
             readBlocks = Math.min((int)(memory/BLOCK_SIZE), sources);
         }
+        /*
         for(int i = 0; i < totalMergeFiles-1; i++) {
             String name = intermediateMerge+Integer.toString(totalMergeFiles);
             if(!(new File(name).delete())) {
                 System.err.println("failed to delete "+name);
             }
         }
+        */
         return mergedDescriptors;
     }
 
