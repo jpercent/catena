@@ -17,7 +17,6 @@ public class Query {
     
     public Query(String prefix, String... terms) throws Exception {
         this.terms = terms;        
-        System.err.println(prefix+":"+terms);
         indexReader = new InvertedFileReader();
         indexReader.open(prefix+File.separator+"corpus.index");
         
