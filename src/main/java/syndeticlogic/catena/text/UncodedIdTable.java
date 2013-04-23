@@ -7,25 +7,25 @@ import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
-public class UncompressedDocumentIdTable extends DocumentIdTable {
-    private int[][] documentIds;
+public class UncodedIdTable extends IdTable {
+    private int[][] ids;
     private int slots;
     private int slotCursor;
     private int pageCursor;
     private int slotIterator;
     private int pageIterator;
     
-    public UncompressedDocumentIdTable() {
-        documentIds = new int[PAGE_SIZE][];
-        documentIds[0] = new int[PAGE_SIZE];
+    public UncodedIdTable() {
+        ids = new int[PAGE_SIZE][];
+        ids[0] = new int[PAGE_SIZE];
         slots = PAGE_SIZE;        
     }
     
-    public void addId(int docId) {
+    public void addId(int id) {
         if(pageCursor == PAGE_SIZE) {
             addPage();
         }   
-        documentIds[slotCursor][pageCursor] = docId;
+        ids[slotCursor][pageCursor] = id;
         pageCursor++;
     }
 
@@ -35,21 +35,21 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
         }
         slotCursor++;
         pageCursor = 0;
-        documentIds[slotCursor] = new int[PAGE_SIZE];
+        ids[slotCursor] = new int[PAGE_SIZE];
     }
 
     private void expand() {
-        int[][] newDocs = new int[slots+PAGE_SIZE][];
-        System.arraycopy(documentIds, 0, newDocs, 0, slots);
+        int[][] newIds = new int[slots+PAGE_SIZE][];
+        System.arraycopy(ids, 0, newIds, 0, slots);
         slots += PAGE_SIZE;
-        documentIds = newDocs;
+        ids = newIds;
     }
     
    
     @Override
     public int encode(byte[] dest, int offset) {
-        int docIdsSize = size();
-        Codec.getCodec().encode(docIdsSize, dest, offset);
+        int idsSize = size();
+        Codec.getCodec().encode(idsSize, dest, offset);
         int copied = Type.INTEGER.length();
         
         for(int i = 0; i <= slotCursor; i++) {
@@ -58,7 +58,7 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
                 length = pageCursor;
             }
             ByteBuffer transferBuff = ByteBuffer.wrap(dest, offset+copied, length*Type.INTEGER.length());
-            transferBuff.asIntBuffer().put(documentIds[i], 0, length);
+            transferBuff.asIntBuffer().put(ids[i], 0, length);
             copied += length*Type.INTEGER.length();
         }
         return copied;
@@ -67,6 +67,7 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
     @Override
     public int decode(byte[] source, int offset) {
         int remaining = Codec.getCodec().decodeInteger(source, offset);
+        remaining -= Type.INTEGER.length();
         int accumulation = Type.INTEGER.length();
         while (remaining > 0) {
             int blockSize = PAGE_SIZE;
@@ -75,7 +76,7 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
             }
             pageCursor = blockSize;
             ByteBuffer transferBuf = ByteBuffer.wrap(source, offset+accumulation, remaining); 
-            transferBuf.asIntBuffer().get(documentIds[slotCursor], 0, blockSize);
+            transferBuf.asIntBuffer().get(ids[slotCursor], 0, blockSize);
             if(pageCursor == PAGE_SIZE) {
                 addPage();
             }
@@ -94,14 +95,14 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
     @Override
     public int size() {
         return (/* filled up pages + last, partial page */ Type.INTEGER.length() * slotCursor * PAGE_SIZE) 
-        + (Type.INTEGER.length() * pageCursor);
+        + (Type.INTEGER.length() * pageCursor)+Type.INTEGER.length();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(documentIds);
+        result = prime * result + Arrays.hashCode(ids);
         result = prime * result + pageCursor;
         result = prime * result + pageIterator;
         result = prime * result + slotCursor;
@@ -118,8 +119,8 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        UncompressedDocumentIdTable other = (UncompressedDocumentIdTable) obj;
-        if (!Arrays.deepEquals(documentIds, other.documentIds))
+        UncodedIdTable other = (UncodedIdTable) obj;
+        if (!Arrays.deepEquals(ids, other.ids))
             return false;
         if (pageCursor != other.pageCursor)
             return false;
@@ -142,18 +143,18 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
     public boolean hasNext() {
         if(slotIterator < slotCursor) {
             return true;
-        } else if(pageIterator < pageCursor) {
+        } else if(slotIterator == slotCursor && pageIterator < pageCursor) {
             return true;
         }
         return false;
     }
     
     public int peek() {
-        return documentIds[slotIterator][pageIterator];
+        return ids[slotIterator][pageIterator];
     }
 
     public int advanceIterator() {
-        int ret = documentIds[slotIterator][pageIterator++];
+        int ret = ids[slotIterator][pageIterator++];
         if(pageIterator == PAGE_SIZE) {
             slotIterator++;
             pageIterator=0;         
@@ -162,7 +163,7 @@ public class UncompressedDocumentIdTable extends DocumentIdTable {
     }
          
     public int getLastDocId() {
-        return documentIds[slotCursor][pageCursor-1];
+        return ids[slotCursor][pageCursor-1];
     }
     
     @Override
