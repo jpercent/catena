@@ -5,9 +5,9 @@ import java.util.TreeSet;
 
 import syndeticlogic.catena.type.Codeable;
 
-public abstract class DocumentIdTable implements Codeable {
+public abstract class IdTable implements Codeable {
     protected static int PAGE_SIZE = 8192;
-    protected enum TableType { Uncompressed, VariableByteCode };
+    protected enum TableType { Uncoded, VariableByteCoded };
     abstract void addId(int docId);
     abstract void resetIterator();
     abstract boolean hasNext();    
@@ -74,6 +74,6 @@ public abstract class DocumentIdTable implements Codeable {
     }
     
     public static void setPageSize(int pageSize) {
-        DocumentIdTable.PAGE_SIZE = pageSize;
+        IdTable.PAGE_SIZE = pageSize;
     }
 }
