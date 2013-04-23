@@ -14,14 +14,14 @@ public class VariableByteCode implements Codeable {
     @Override
     public int encode(byte[] dest, int offset) {
         System.arraycopy(encodedValue, 0, dest, offset, encodedValue.length);
-        return 0;
+        return encodedValue.length;
     }
     
     public void setValue(int value) {
         encodedValue = encode(value);
     }
     
-    private byte[] encode(int value) {
+    public byte[] encode(int value) {
         byte[] ret = null;
         long newValue = 0;
         long carry = 0;
@@ -75,8 +75,8 @@ public class VariableByteCode implements Codeable {
         int iteration = 0;
         while (iteration < 4) {
             if((code[offset] & carryBit) != 0) {
-                code[offset] = (byte)(code[offset] & ((~(1 << 7)) & 0xff)); // clear the carry bit
-                ret |= (code[offset] >>> iteration) << iteration*8; // set the data for this byte
+                byte codeword  = (byte)(code[offset] & ((~(1 << 7)) & 0xff)); // clear the carry bit
+                ret |= (codeword >>> iteration) << iteration*8; // set the data for this byte
                 ret |= ((code[offset+1] & carryMask) << carryShift); // bring over the carried bit
             } else {
                 ret |= (code[offset] >>> iteration) << iteration*8; // set the data for this byte
@@ -89,7 +89,7 @@ public class VariableByteCode implements Codeable {
         }
         return ret;
     }
-    
+        
     public int value() {
         return decode(encodedValue, 0);
     }
