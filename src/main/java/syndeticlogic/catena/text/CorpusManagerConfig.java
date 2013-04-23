@@ -14,8 +14,8 @@ import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.text.IdTable.TableType;
 
-public class Config {
-    private static final Log log = LogFactory.getLog(Config.class);
+public class CorpusManagerConfig {
+    private static final Log log = LogFactory.getLog(CorpusManagerConfig.class);
     private final Options options = new Options();
     private final CommandLineParser parser;
     private final String usage;
@@ -24,9 +24,9 @@ public class Config {
     private String outputPrefix;
     private String inputPrefix;
     private IdTable.TableType tableType;
-    private boolean remove;
+    private boolean removeOutputDir;
 
-    public Config(String[] args) throws Exception {
+    public CorpusManagerConfig(String[] args) throws Exception {
         this.args = args;
         usage = "index.sh -corpus <corpus-directory> -output <output-perfix> [-posting <strategy> -rm...";
         header = "Generate an index for the corpus" + System.getProperty("line.separator") + System.getProperty("line.separator") + "Options:";
@@ -72,7 +72,7 @@ public class Config {
             }
             
             if(line.hasOption("remove")) {
-                remove = true;
+                removeOutputDir = true;
             }
             
             tableType = TableType.Uncoded;
@@ -119,7 +119,7 @@ public class Config {
         return tableType;
     } 
     
-    public boolean remove() {
-        return remove;
+    public boolean removeOutputPrefix() {
+        return removeOutputDir;
     }
 }
