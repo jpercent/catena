@@ -26,7 +26,7 @@ public class RawInvertedFileReaderAndWriterTest {
     	//fileWriter = new CatenaInvertedFileWriter();
     	fileWriter = new RawInvertedFileWriter();
     	tokenizer = new BasicTokenizer();
-    	indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
+    	indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
     	fileReader = new InvertedFileReader();
     	//tokenizer = new LuceneStandardTokenizer();
     	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
@@ -42,7 +42,7 @@ public class RawInvertedFileReaderAndWriterTest {
 	   	corpusManager.index("src/test/resources/text/some/");
 	   	} catch(Throwable t) { t.printStackTrace(); }
 	   	TreeMap<String, InvertedList> postings = new TreeMap<String, InvertedList>();
-	   	fileReader.open("target/corpus-manager/depth1-0.corpus");
+	   	fileReader.open("target/corpus-manager/corpus.index");
     	fileReader.scanFile(indexBuilder.getIdToWord(), postings);
     	assertEquals(indexBuilder.getPostings().size(), postings.size());
     	for(String key : indexBuilder.getPostings().keySet()) {
