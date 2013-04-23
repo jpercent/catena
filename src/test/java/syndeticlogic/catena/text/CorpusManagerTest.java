@@ -23,7 +23,7 @@ public class CorpusManagerTest {
     	//fileWriter = new CatenaInvertedFileWriter();
     	fileWriter = new RawInvertedFileWriter();
     	tokenizer = new BasicTokenizer();
-    	indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
+    	indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
     	//tokenizer = new LuceneStandardTokenizer();
     	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
 	}

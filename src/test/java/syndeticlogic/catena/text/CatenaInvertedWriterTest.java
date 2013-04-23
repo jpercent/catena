@@ -17,13 +17,13 @@ public class CatenaInvertedWriterTest {
 	
 	@Before
 	public void setup() throws Exception {
-    	prefix = "target"+File.separator+"corpus-manager"+File.separator;
+    	prefix = "target"+File.separator+"catena-inverted-writer"+File.separator;
     	FileUtils.deleteDirectory(prefix);
     	FileUtils.mkdir(prefix);
     	//fileWriter = new CatenaInvertedFileWriter();
     	fileWriter = new RawInvertedFileWriter();
     	tokenizer = new BasicTokenizer();
-    	indexBuilder = new InvertedFileBuilder(prefix, "index.corpus", fileWriter);
+    	indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
     	//tokenizer = new LuceneStandardTokenizer();
     	corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
 	}

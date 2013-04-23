@@ -27,7 +27,7 @@ public class BlockMergerTest {
         FileUtils.mkdir(prefix);
         fileWriter = new RawInvertedFileWriter();
         tokenizer = new BasicTokenizer();
-        indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
+        indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
         fileReader = new InvertedFileReader();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
     }
@@ -45,10 +45,7 @@ public class BlockMergerTest {
 
 	public void createIndex(String source) {
 	    File f = new File(prefix);
-	    System.out.println(f.getAbsolutePath());
-	    try {
-	        corpusManager.index(source);
-	    } catch(Throwable t) { t.printStackTrace(); }
+        corpusManager.index(source);
 	}
 	
 	public void createFromSingleBlock() {
@@ -57,12 +54,12 @@ public class BlockMergerTest {
 	public void compare(InvertedFileBuilder indexBuilder, InvertedFileBuilder indexBuilder1) throws IOException {
         
         TreeMap<String, InvertedList> postings = new TreeMap<String, InvertedList>();
-        fileReader.open("target/corpus-manager-block-merger-test/merged/intermediate-merge-target.0");
+        fileReader.open("target/corpus-manager-block-merger-test/merged/corpus.index");
         fileReader.scanFile(indexBuilder.getIdToWord(), postings);
         fileReader.close();
 
         TreeMap<String, InvertedList> postings1 = new TreeMap<String, InvertedList>();
-        fileReader.open("target/corpus-manager-block-merger-test/single/depth1-0.corpus");
+        fileReader.open("target/corpus-manager-block-merger-test/single/corpus.index");
         fileReader.scanFile(indexBuilder1.getIdToWord(), postings1);
         fileReader.close();
         
@@ -89,6 +86,18 @@ public class BlockMergerTest {
 	
 	@Test
 	public void testIndex() throws Throwable {
+        InvertedList.setTableType(IdTable.TableType.VariableByteCoded);
+        test();
+	    
+	}
+	
+	@Test
+	public void testIndexUncoded() throws Throwable {
+        InvertedList.setTableType(IdTable.TableType.VariableByteCoded);
+        test();
+	}
+	
+	public void test() throws Throwable {
         String base = prefix;
         prefix = base + "merged"+File.separator;
         FileUtils.deleteDirectory(prefix);
@@ -96,7 +105,7 @@ public class BlockMergerTest {
         //fileWriter = new CatenaInvertedFileWriter();
         fileWriter = new RawInvertedFileWriter();
         tokenizer = new BasicTokenizer();
-        InvertedFileBuilder indexBuilder = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
+        InvertedFileBuilder indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
         fileReader = new InvertedFileReader();
         //tokenizer = new LuceneStandardTokenizer();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
@@ -111,7 +120,7 @@ public class BlockMergerTest {
         //fileWriter = new CatenaInvertedFileWriter();
         fileWriter = new RawInvertedFileWriter();
         tokenizer = new BasicTokenizer();
-        InvertedFileBuilder indexBuilder1 = new InvertedFileBuilder(prefix, "corpus.index", fileWriter);
+        InvertedFileBuilder indexBuilder1 = new InvertedFileBuilder(prefix, fileWriter);
         fileReader = new InvertedFileReader();
         //tokenizer = new LuceneStandardTokenizer();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder1);
