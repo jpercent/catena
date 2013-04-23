@@ -20,7 +20,7 @@ import syndeticlogic.catena.utility.Codec;
 
 public class DictionaryReader {
 	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
-	private static int BLOCK_SIZE=1048576/2/2; // 256k
+	private static int BLOCK_SIZE=1048576; // 256k
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;

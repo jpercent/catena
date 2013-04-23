@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class RawInvertedFileWriter implements InvertedFileWriter {
 	private static final Log log = LogFactory.getLog(RawInvertedFileWriter.class);
-	private static int BLOCK_SIZE = 1048576/2/2;	
+	private static int BLOCK_SIZE = 1048576;	
 	FileOutputStream outputStream=null;
 	FileChannel channel=null;
 	File indexFile;

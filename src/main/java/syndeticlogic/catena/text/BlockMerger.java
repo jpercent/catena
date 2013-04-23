@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import syndeticlogic.catena.utility.Config;
 
 public class BlockMerger {
-    private static int BLOCK_SIZE=10*1048576;
+    private static int BLOCK_SIZE=1048576;
     private static double MEMORY_PERCENTAGE=0.3;
     private HashMap<Integer, String> idToWord;
     private String prefix;
@@ -22,6 +22,7 @@ public class BlockMerger {
     }
     
     public List<InvertedListDescriptor> mergeBlocks(String mergeTarget, LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blockDescriptors) {
+        System.err.println("Starting merge...");
         long memory = (long)(((double)Config.getPhysicalMemorySize()) * MEMORY_PERCENTAGE);
         int readBlocksAndWriteBlock = Math.min((int)(memory/BLOCK_SIZE), blockDescriptors.size()+1);
         int readBlocks = readBlocksAndWriteBlock - 1;
@@ -68,8 +69,14 @@ public class BlockMerger {
             writer.open(fileName);
             
             mergedDescriptors = merge(readers, descriptors, writer);
+            writer.close();
             sources -= readBlocks;
             readBlocks = Math.min((int)(memory/BLOCK_SIZE), sources);
+            
+            for(i = 0; i < readBlocks; i++) {
+                readers[i].close();
+            }
+
         }
         /*
         for(int i = 0; i < totalMergeFiles-1; i++) {

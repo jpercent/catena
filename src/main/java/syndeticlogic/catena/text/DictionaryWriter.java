@@ -17,7 +17,7 @@ import syndeticlogic.catena.utility.Codec;
 
 public class DictionaryWriter {
 	private static final Log log = LogFactory.getLog(DictionaryWriter.class);
-	private static int BLOCK_SIZE = 1048576/2/2;	
+	private static int BLOCK_SIZE = 1048576;	
 	FileOutputStream outputStream=null;
 	FileChannel channel=null;
 	File dictionaryFile;

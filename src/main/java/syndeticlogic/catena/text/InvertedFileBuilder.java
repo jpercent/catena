@@ -67,6 +67,7 @@ public class InvertedFileBuilder {
     }
 
     public void startBlock(String block) {
+        System.err.println("Starting block "+block);
     	blockToId.put(block, blockId++);
     	postings = new TreeMap<String, InvertedList>();
 	}
@@ -77,15 +78,18 @@ public class InvertedFileBuilder {
     }
     
 	public void completeBlock(String block) {
+        System.err.println("Complete block "+block+ " writing intermediates ");
 	    String blockFileName = getBlockFileName(block);
 		fileWriter.open(blockFileName);
 		LinkedList<InvertedListDescriptor> invertedListDescriptors = new LinkedList<InvertedListDescriptor>();   
 		fileWriter.writeFile(postings, invertedListDescriptors);
         fileWriter.close();
         this.blocksAndDescriptors.add(new AbstractMap.SimpleEntry<String, List<InvertedListDescriptor>>(blockFileName, invertedListDescriptors));
+        System.err.println("Block complete");
 	}
 
     public void mergeBlocks() {
+        System.err.println("Merging blocks... ");
         List<InvertedListDescriptor> finalList;
         if(blocksAndDescriptors.size() > 1) {
             BlockMerger merger = new BlockMerger(prefix, idToWord);
@@ -99,6 +103,7 @@ public class InvertedFileBuilder {
                 System.err.println("could not rename index file; final index is named "+blockDesc.getKey());
             }
         }
+        System.err.println("All blocks merged... ");
         writeMeta(descriptors);
     }
 
