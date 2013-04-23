@@ -53,18 +53,67 @@ public class CorpusManager extends DirectoryWalker {
     	tokenizer.tokenize(indexBuilder, file, document);
     }
     
+    public static void index(String corpus, String output, boolean clearOutputDir) throws Throwable {
+        Tokenizer tokenizer;
+        InvertedFileWriter fileWriter;
+        InvertedFileReader fileReader;
+        InvertedFileBuilder indexBuilder;
+        CorpusManager corpusManager;
+        String prefix;
+
+        String base = output;
+        prefix = base + File.separator;
+        if (clearOutputDir) {
+            FileUtils.deleteDirectory(prefix);
+        }
+        FileUtils.mkdir(prefix);
+        
+        fileWriter = new RawInvertedFileWriter();
+        tokenizer = new BasicTokenizer();
+        
+        indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
+        fileReader = new InvertedFileReader();
+        corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
+        
+        corpusManager.index(corpus);
+        System.out.println(indexBuilder.getNumberOfDocumentsIndexed()+"\n");
+        fileWriter.close();
+        fileWriter = null;
+        tokenizer = null;
+        indexBuilder = null;
+        if (fileReader != null)
+            fileReader.close();
+        fileReader = null;
+        corpusManager = null;
+    }
+    
     public static void main(String[] args) {
-        //long start = System.currentTimeMillis();
-    	String prefix = "target"+File.separator+"corpus-manager"+File.separator;
-    	FileUtils.mkdir(prefix);
-    	InvertedFileWriter fileWriter = new RawInvertedFileWriter();
-    	Tokenizer tokenizer = new BasicTokenizer();
-    	CorpusManager corpusManager = new CorpusManager(prefix, tokenizer, new InvertedFileBuilder(prefix, "corpus.index", fileWriter));
-    	try {
-    		corpusManager.index("/home/james/catena/PA1/data");
-    	} catch(Throwable e) {e.printStackTrace();}
-    	//System.out.println("Total time = "+(System.currentTimeMillis() - start));
-    	//System.out.println(corpusManager.indexBuilder.getPostings().keySet().size());
-    	
+        CorpusManagerConfig corpusManagerConfig=null;
+        long start=0;
+        try {
+            
+            corpusManagerConfig = new CorpusManagerConfig(args);
+            boolean success = corpusManagerConfig.parse();
+            if (!success) {
+                throw new RuntimeException("Invalid parameters");
+            }
+            start = System.currentTimeMillis();
+            File test = new File(corpusManagerConfig.getInputPrefix());
+            if(!test.exists()) {
+                throw new RuntimeException("Input prefix must be a valid directory");
+            } 
+            if(corpusManagerConfig.getInputPrefix().equals(corpusManagerConfig.getOutputPrefix())) {
+                throw new RuntimeException("Input and output prefix cannot be the same");
+            }
+            InvertedList.setTableType(corpusManagerConfig.getTableType());
+            CorpusManager.index(corpusManagerConfig.getInputPrefix(), corpusManagerConfig.getOutputPrefix(), corpusManagerConfig.removeOutputPrefix());
+            System.err.println("Total time = "+(System.currentTimeMillis() - start));
+        } catch(Throwable t) {
+            String prefix = (corpusManagerConfig != null ? corpusManagerConfig.getInputPrefix() : "<no file name was parsed> ");
+            System.err.println("Exception indexing corpus " + prefix + " message ");
+            t.printStackTrace(System.err);
+        }
+
     }
 }
+
