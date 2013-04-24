@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,6 +10,9 @@ import java.util.SortedMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 
 public class RawInvertedFileWriter implements InvertedFileWriter {
 	private static final Log log = LogFactory.getLog(RawInvertedFileWriter.class);

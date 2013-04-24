@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.postings;
 
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import syndeticlogic.catena.type.Codeable;
 
 public abstract class IdTable implements Codeable {
+    public enum TableType { Uncoded, VariableByteCoded };
     protected static int PAGE_SIZE = 8192;
-    protected enum TableType { Uncoded, VariableByteCoded };
     abstract void addId(int docId);
     abstract void resetIterator();
     abstract boolean hasNext();    

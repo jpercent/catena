@@ -12,6 +12,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.postings.IdTable;
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.Tokenizer;
+
 public class BlockMergerTest {
 	Tokenizer tokenizer;
 	InvertedFileWriter fileWriter;

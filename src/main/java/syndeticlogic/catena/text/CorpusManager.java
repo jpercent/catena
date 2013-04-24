@@ -9,6 +9,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
 
+import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.Tokenizer;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class CorpusManager extends DirectoryWalker {
     private static final Log log = LogFactory.getLog(CorpusManager.class);

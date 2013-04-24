@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.lucene;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +10,9 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.Version;
+
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.Tokenizer;
 
 
 public class LuceneStandardTokenizer implements Tokenizer {

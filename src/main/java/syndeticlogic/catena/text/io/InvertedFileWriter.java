@@ -1,8 +1,11 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
+
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 
 public interface InvertedFileWriter {
     void open(String fileName);

@@ -1,19 +1,13 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import syndeticlogic.catena.text.IdTable.TableType;
-import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.utility.Codec;
 
 public class BlockWriter {
 	private static final Log log = LogFactory.getLog(BlockWriter.class);
@@ -63,41 +57,40 @@ public class BlockWriter {
 	
     public long writeDictionary(WriteCursor feed) {
         long fileOffset = 0;
-        int count = 0;
         try {
             channel.position(headerSize);
             fileOffset = headerSize;
 
-            byte[] jvm = new byte[blockSize];
+            byte[] jvmBuffer = new byte[blockSize];
             int offset = 0;
             while (feed.hasNext()) {
                 int length = feed.nextLength();
                 if (offset + length >= BLOCK_SIZE) {
-                    direct.put(jvm, 0, offset);
-                    direct.rewind();
-                    direct.limit(offset);
-                    channel.write(direct);
-                    direct.rewind();
-                    direct.limit(direct.capacity());
+                    write(jvmBuffer, 0, offset);
                     offset = 0;
                 }
-                int encoded = feed.encodeNext(jvm, offset);
+                int encoded = feed.encodeNext(jvmBuffer, offset);
                 assert encoded == length;
                 offset += encoded;
                 fileOffset += encoded;
-                count++;
             }
-            direct.put(jvm, 0, offset);
-            direct.rewind();
-            direct.limit(offset);
-            channel.write(direct);
-            direct.rewind();
-            direct.limit(direct.capacity());
+            write(jvmBuffer, 0 , offset);
+            channel.position(0);
+            feed.encodeHeader(jvmBuffer, 0);
         } catch (Throwable t) {
             log.fatal("exception writing index file " + t, t);
             throw new RuntimeException(t);
         }
         return fileOffset;
+    }
+    
+    private void write(byte[] jvmBuffer, int offset, int length) throws IOException {
+        direct.put(jvmBuffer, 0, offset);
+        direct.rewind();
+        direct.limit(offset);
+        channel.write(direct);
+        direct.rewind();
+        direct.limit(direct.capacity());        
     }
     
     public int getBlockSize() {
@@ -114,7 +107,5 @@ public class BlockWriter {
     
     public void setHeaderSize(int headerSize) {
         this.headerSize = headerSize;
-    }
-	
- 
+    } 
 }

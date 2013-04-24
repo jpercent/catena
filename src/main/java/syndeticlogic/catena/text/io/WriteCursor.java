@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 public interface WriteCursor {
     int reserveHeaderLength();

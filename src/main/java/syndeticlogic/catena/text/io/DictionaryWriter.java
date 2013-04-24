@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,7 +11,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.DocumentDescriptor;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
@@ -62,46 +65,15 @@ public class DictionaryWriter {
         DocumentDescriptor doc = new DocumentDescriptor();
         int count = 0;
         try {
-            int prefixLength = 0;
-            int header = Type.LONG.length()+Type.BYTE.length()+Type.INTEGER.length();
+            int header = Type.BYTE.length()+Type.LONG.length();
             channel.position(header);
             fileOffset = header;
                     
             byte[] jvm = new byte[BLOCK_SIZE];
             int offset = 0;
-            
-            for(Map.Entry<String, Integer> document : prefixes.entrySet()) {
-                int length = document.getKey().length()+Type.STRING.length()+Type.INTEGER.length();
-                if (offset + length >= BLOCK_SIZE) {
-                    direct.put(jvm, 0, offset);
-                    direct.rewind();
-                    direct.limit(offset);
-                    channel.write(direct);
-                    direct.rewind();
-                    direct.limit(direct.capacity());
-                    offset = 0;
-                }
-                int written = Codec.getCodec().encode(document.getValue(), jvm, offset);
-                written += Codec.getCodec().encode(document.getKey(), jvm, offset+Type.INTEGER.length());
-                assert written == length;
-                offset += length;
-                fileOffset += length;
-                count++;
-            }
-            
-            prefixLength = (int)fileOffset;
-            direct.put(jvm, 0, offset);
-            direct.rewind();
-            direct.limit(offset);
-            channel.write(direct);
-            direct.rewind();
-            direct.limit(direct.capacity());
-            
-            offset = 0;
             for (Map.Entry<Integer, String> document : idToDoc.entrySet()) {
                 doc.setDocId(document.getKey());
-                doc.setDoc(new File(document.getValue()).getName());
-                doc.setDocPrefixId(prefixes.get(new File(document.getValue()).getParent()));
+                doc.setDoc(document.getValue());
                 int length = doc.size();
                 if (offset + length >= BLOCK_SIZE) {
                     direct.put(jvm, 0, offset);

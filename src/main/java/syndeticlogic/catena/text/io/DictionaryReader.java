@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,7 +14,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.DocumentDescriptor;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
@@ -64,7 +67,6 @@ public class DictionaryReader {
         buffer.get(block, 0, Type.LONG.length()+Type.BYTE.length()+Type.INTEGER.length());
         long docDictionaryLength = Codec.getCodec().decodeLong(block, 0);
         byte coding = Codec.getCodec().decodeByte(block, Type.LONG.length());
-        int prefixLength = Codec.getCodec().decodeInteger(block, Type.LONG.length()+Type.BYTE.length());
         
         if(coding == 1) {
             InvertedList.setTableType(TableType.VariableByteCoded);
@@ -80,17 +82,11 @@ public class DictionaryReader {
             buffer.get(block, 0, blockSize);
             int blockOffset = 0;
 
-            HashMap<Integer, String> idToPrefix = new HashMap<Integer, String>();
             while (blockOffset < blockSize) {
                 int size=0;
-                if(cursor < prefixLength) {
-                    int prefixId = Codec.getCodec().decodeInteger(block, blockOffset);
-                    String prefix = Codec.getCodec().decodeString(block, blockOffset+Type.INTEGER.length());
-                    size = Type.INTEGER.length()+Type.STRING.length()+prefix.length();
-                    idToPrefix.put(prefixId, prefix);
-                } else if(cursor < docDictionaryLength) {
+                if(cursor < docDictionaryLength) {
                     size = docDesc.decode(block, blockOffset);
-                    String blockPrefix = new File(idToPrefix.get(docDesc.getDocPrefixId())).getName()+File.separator;
+                    String blockPrefix = new File(docDesc.getDoc()).getName()+File.separator;
                     idToWord.put(docDesc.getDocId(), blockPrefix+docDesc.getDoc());//idToWord.put(docDesc.getWordId(), docDesc.getWord()););
                 } else {
                     InvertedListDescriptor listDesc = new InvertedListDescriptor(null, -1, -1, -1);

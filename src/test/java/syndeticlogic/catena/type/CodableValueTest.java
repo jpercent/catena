@@ -7,7 +7,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import syndeticlogic.catena.text.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedList;
 
 public class CodableValueTest {
     InvertedList list;

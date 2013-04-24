@@ -9,7 +9,11 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.io.DictionaryReader;
+import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 
 public class Query {
     private final InvertedFileReader indexReader;

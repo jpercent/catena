@@ -12,7 +12,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.postings.IdTable;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 
 public class CorpusManagerConfig {
     private static final Log log = LogFactory.getLog(CorpusManagerConfig.class);

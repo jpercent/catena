@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.postings;
 
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.type.Codeable;

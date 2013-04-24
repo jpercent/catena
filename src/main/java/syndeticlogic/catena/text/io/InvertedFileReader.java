@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,6 +13,8 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 import syndeticlogic.catena.type.Type;
 
 public class InvertedFileReader {

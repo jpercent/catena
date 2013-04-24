@@ -1,9 +1,9 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.postings;
 
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;

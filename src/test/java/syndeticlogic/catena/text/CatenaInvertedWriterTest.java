@@ -8,6 +8,11 @@ import org.codehaus.plexus.util.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.Tokenizer;
+
 public class CatenaInvertedWriterTest {
 	Tokenizer tokenizer;
 	InvertedFileWriter fileWriter;

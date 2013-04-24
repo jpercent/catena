@@ -8,7 +8,8 @@ import java.util.TreeSet;
 
 import org.junit.Test;
 
-import syndeticlogic.catena.text.IdTable.TableType;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.IdTable.TableType;
 
 public class InvertedListTest {
 

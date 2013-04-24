@@ -10,6 +10,9 @@ import java.util.HashSet;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.Tokenizer;
+
 public class BasicTokenizer implements Tokenizer {
 	private static final Log log = LogFactory.getLog(BasicTokenizer.class);
 	

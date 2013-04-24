@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.postings;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +12,10 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
+
+import syndeticlogic.catena.text.BlockMerger;
+import syndeticlogic.catena.text.io.DictionaryWriter;
+import syndeticlogic.catena.text.io.InvertedFileWriter;
 
 public class InvertedFileBuilder {
 	private static final Log log = LogFactory.getLog(InvertedFileBuilder.class);

@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 import syndeticlogic.catena.utility.Config;
 
 public class BlockMerger {

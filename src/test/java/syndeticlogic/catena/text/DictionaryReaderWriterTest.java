@@ -11,6 +11,16 @@ import java.util.Map;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Test;
 
+import syndeticlogic.catena.text.io.DictionaryReader;
+import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.postings.IdTable;
+import syndeticlogic.catena.text.postings.InvertedFileBuilder;
+import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.postings.InvertedListDescriptor;
+import syndeticlogic.catena.text.postings.Tokenizer;
+
 public class DictionaryReaderWriterTest {
 	Tokenizer tokenizer;
 	InvertedFileWriter fileWriter;
@@ -61,12 +71,15 @@ public class DictionaryReaderWriterTest {
         
         Map<Integer, String> idToDoc1 = new HashMap<Integer, String>();
         List<InvertedListDescriptor> desc1 = new LinkedList<InvertedListDescriptor>();
+        
+        
         DictionaryReader dictionary = new DictionaryReader();
         dictionary.open(prefix+File.separator+"index.meta");
         dictionary.loadDictionary(idToDoc1, desc1);
         dictionary.close();
         assertEquals(idToDoc.size(), idToDoc1.size());
         assertEquals(desc.size(), desc1.size());
+        
         for(Integer key : idToDoc.keySet()) {
             assertEquals(idToDoc.get(key), idToDoc1.get(key));
         }

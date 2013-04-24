@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.lucene;
 
 import java.io.IOException;
 import java.io.StringReader;

@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.postings;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
