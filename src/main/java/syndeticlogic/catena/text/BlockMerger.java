@@ -11,7 +11,7 @@ import java.util.TreeMap;
 import syndeticlogic.catena.utility.Config;
 
 public class BlockMerger {
-    private static int BLOCK_SIZE=1048576;
+    private static int BLOCK_SIZE=100*1048576;
     private static double MEMORY_PERCENTAGE=0.3;
     private HashMap<Integer, String> idToWord;
     private String prefix;

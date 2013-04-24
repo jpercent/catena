@@ -81,6 +81,7 @@ public class CorpusManagerConfig {
                 if("uncoded".equals(strategy)) {
                     /* default */
                 } else if ("variable".equals(strategy)) {
+                    System.err.println("VariableByteCoded set ");
                     tableType = TableType.VariableByteCoded;
                 } else {
                     System.err.println(strategy+ " is not a valid postings list encoding");

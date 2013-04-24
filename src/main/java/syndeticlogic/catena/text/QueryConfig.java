@@ -12,6 +12,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import syndeticlogic.catena.text.IdTable.TableType;
+
 public class QueryConfig {
     private static final Log log = LogFactory.getLog(QueryConfig.class);
     private final Options options = new Options();
@@ -20,7 +22,12 @@ public class QueryConfig {
     private final String header;
     private final String[] args;
     private String indexDirectory;
-
+    private IdTable.TableType tableType;
+    
+    public TableType getTableType() {
+        return tableType;
+    }
+    
     public QueryConfig(String[] args) throws Exception {
         this.args = args;
         usage = "query.sh -index <directory>";
@@ -31,6 +38,10 @@ public class QueryConfig {
         Option indexDir = OptionBuilder.withArgName("directory").hasArg().withDescription("Index directory").create("index");
 //        @SuppressWarnings("static-access")
   //      Option postingsStrategy = OptionBuilder.withArgName("strategy").hasArg().withDescription("Posting compression strategy").create("postings");
+        @SuppressWarnings("static-access")
+        Option postingCompression = OptionBuilder.withArgName("postings-strategy").hasArg().withDescription("Postings List compression stragtegy.  Options are uncoded and variable").create("posting");
+        
+        options.addOption(postingCompression);
         
         options.addOption(help);
         options.addOption(indexDir);
@@ -55,6 +66,19 @@ public class QueryConfig {
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp(80, usage, header, options, "");
                 return false;
+            }
+            
+            tableType = TableType.Uncoded;
+            if(line.hasOption("posting")) {
+                String strategy = line.getOptionValue("posting");
+                if("uncoded".equals(strategy)) {
+                    /* default */
+                } else if ("variable".equals(strategy)) {
+                    System.err.println("VariableByteCoded set ");
+                    tableType = TableType.VariableByteCoded;
+                } else {
+                    System.err.println(strategy+ " is not a valid postings list encoding");
+                }
             }
             
             if (line.hasOption("index")) {

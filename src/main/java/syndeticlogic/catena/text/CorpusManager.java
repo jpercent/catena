@@ -105,6 +105,7 @@ public class CorpusManager extends DirectoryWalker {
             if(corpusManagerConfig.getInputPrefix().equals(corpusManagerConfig.getOutputPrefix())) {
                 throw new RuntimeException("Input and output prefix cannot be the same");
             }
+            System.err.println("Tabl type ="+corpusManagerConfig.getTableType());
             InvertedList.setTableType(corpusManagerConfig.getTableType());
             CorpusManager.index(corpusManagerConfig.getInputPrefix(), corpusManagerConfig.getOutputPrefix(), corpusManagerConfig.removeOutputPrefix());
             System.err.println("Total time = "+(System.currentTimeMillis() - start));

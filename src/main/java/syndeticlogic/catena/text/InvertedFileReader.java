@@ -17,7 +17,7 @@ import syndeticlogic.catena.type.Type;
 
 public class InvertedFileReader {
 	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
-	private static int BLOCK_SIZE=10*1048576;
+	private static int BLOCK_SIZE=500*1048576;
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;
@@ -123,7 +123,7 @@ public class InvertedFileReader {
 	    		postings.put(list.getWord(), list);
 	    		count++;
 	    	} catch(Throwable t) {
-	    		//t.printStackTrace();
+	    		t.printStackTrace();
 	    		success = false;
 	    	}
 	    	if(count < 1) {

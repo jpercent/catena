@@ -20,7 +20,7 @@ import syndeticlogic.catena.utility.Codec;
 
 public class DictionaryReader {
 	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
-	private static int BLOCK_SIZE=1048576; // 256k
+	private static int BLOCK_SIZE=60*1048576; // 256k
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;
@@ -90,7 +90,8 @@ public class DictionaryReader {
                     idToPrefix.put(prefixId, prefix);
                 } else if(cursor < docDictionaryLength) {
                     size = docDesc.decode(block, blockOffset);
-                    idToWord.put(docDesc.getDocId(), idToPrefix.get(docDesc.getDocPrefixId())+File.separator+docDesc.getDoc());//idToWord.put(docDesc.getWordId(), docDesc.getWord());
+                    String blockPrefix = new File(idToPrefix.get(docDesc.getDocPrefixId())).getName()+File.separator;
+                    idToWord.put(docDesc.getDocId(), blockPrefix+docDesc.getDoc());//idToWord.put(docDesc.getWordId(), docDesc.getWord()););
                 } else {
                     InvertedListDescriptor listDesc = new InvertedListDescriptor(null, -1, -1, -1);
                     size = listDesc.decode(block, blockOffset);

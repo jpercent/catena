@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import syndeticlogic.catena.text.IdTable.TableType;
+
 public class Query {
     private final InvertedFileReader indexReader;
     private final HashMap<String, InvertedListDescriptor> wordToDescriptor;
@@ -28,7 +30,9 @@ public class Query {
         metaReader.close();
         metaReader = null;
         wordToDescriptor = new HashMap<String, InvertedListDescriptor>();
+        System.err.println("Words found in the index "+descriptors.size());
         for(InvertedListDescriptor descriptor : descriptors) {
+            
             wordToDescriptor.put(descriptor.getWord(), descriptor);
         }
     }
@@ -41,6 +45,7 @@ public class Query {
         for(String term : terms) {
             InvertedListDescriptor desc = wordToDescriptor.get(term);
             if(desc == null) {
+                System.err.println("Term "+term+" not in dictionary... ");
                 return notFound;
             } 
             queryTerms.put(desc.getDocumentFrequency(), desc);
@@ -57,6 +62,7 @@ public class Query {
                 docIds = postingList.intersect(docIds);
             }
             if(docIds.size() == 0) {
+                System.err.println("Merged out... ");
                 return notFound;
             }
         }
@@ -75,7 +81,9 @@ public class Query {
         if(!config.parse()) {
             return;
         }
-
+        if(config.getTableType() == TableType.VariableByteCoded) {
+            InvertedList.setTableType(TableType.VariableByteCoded);
+        }
         InputStreamReader inp = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(inp);
         String str = br.readLine();

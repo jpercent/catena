@@ -58,6 +58,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
     @Override
     public long writeFile(SortedMap<String, InvertedList> postings, List<InvertedListDescriptor> invertedListDescriptors) {
         long fileOffset = 0;
+        int count = 0;
         try {
             byte[] jvm = new byte[BLOCK_SIZE];
             int offset = 0;
@@ -74,6 +75,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
                 }
                 int written = list.encode(jvm, offset);
                 assert written == length;
+                count ++;
                 invertedListDescriptors.add(new InvertedListDescriptor(list.getWord(), fileOffset, length, list.getDocumentFrequency()));
                 offset += length;
                 fileOffset += length;
@@ -88,6 +90,7 @@ public class RawInvertedFileWriter implements InvertedFileWriter {
             log.fatal("exception writing index file " + t, t);
             throw new RuntimeException(t);
         }
+        System.err.println("Words indexed = "+count);
         return fileOffset;
     }
     

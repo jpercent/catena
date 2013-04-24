@@ -60,6 +60,7 @@ public class DictionaryWriter {
     public long writeDictionary(Map<Integer, String> idToDoc, Map<String, Integer> prefixes, List<InvertedListDescriptor> invertedListDescriptors) {
         long fileOffset = 0;
         DocumentDescriptor doc = new DocumentDescriptor();
+        int count = 0;
         try {
             int prefixLength = 0;
             int header = Type.LONG.length()+Type.BYTE.length()+Type.INTEGER.length();
@@ -85,6 +86,7 @@ public class DictionaryWriter {
                 assert written == length;
                 offset += length;
                 fileOffset += length;
+                count++;
             }
             
             prefixLength = (int)fileOffset;
@@ -114,6 +116,7 @@ public class DictionaryWriter {
                 assert written == length;
                 offset += length;
                 fileOffset += length;
+                count ++;
             }
             direct.put(jvm, 0, offset);
             direct.rewind();
@@ -139,6 +142,7 @@ public class DictionaryWriter {
                 assert written == length;
                 offset += length;
                 fileOffset += length;
+                count++;
             }
             direct.put(jvm, 0, offset);
             direct.rewind();
@@ -157,7 +161,7 @@ public class DictionaryWriter {
             Codec.getCodec().encode(prefixLength, jvm, Type.LONG.length()+Type.BYTE.length());
             headerData.limit(Type.LONG.length()+Type.BYTE.length()+Type.INTEGER.length());
             channel.write(headerData);
-            
+            System.err.println("Dictionary items "+count);
         } catch (Throwable t) {
             log.fatal("exception writing index file " + t, t);
             throw new RuntimeException(t);
