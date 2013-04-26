@@ -1,7 +1,5 @@
 package syndeticlogic.catena.text.postings;
 
-import java.util.Arrays;
-
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
@@ -14,7 +12,7 @@ public class VariableByteCodedIdArray extends IdTable {
     private int cursor;
     private int iterator;
     private int lastIterator;
-    private int lastDocId;
+    private int lastDocId=-1;
 
     public VariableByteCodedIdArray() {
         codec = new VariableByteCode(0);
@@ -22,7 +20,7 @@ public class VariableByteCodedIdArray extends IdTable {
     }
     
     public void addId(int docId) {
-        if(cursor == ids.length) {
+        if(cursor == 0) {
             addDistance(docId, docId);
         } else {
             int last = lastDocId;
@@ -36,7 +34,6 @@ public class VariableByteCodedIdArray extends IdTable {
             expand();
         }   
         byte[] encodedDistance = codec.encode(distance);
-//      System.out.println("addDistance size = " +encodedDistance.length +" distance "+distance+" Doc id "+docId);
         ids[cursor] = encodedDistance;
         cursor++;
         lastDocId = docId;
@@ -61,6 +58,7 @@ public class VariableByteCodedIdArray extends IdTable {
             System.arraycopy(compressedDocId, 0, dest, offset+copied, compressedDocId.length);
             copied += compressedDocId.length;
         }
+        resetIterator();
         assert docIdsSize == copied;
         return copied;
     }
@@ -85,7 +83,6 @@ public class VariableByteCodedIdArray extends IdTable {
             accumulation += size;
             remaining -= size;
         }
-//        System.out.println(" leaving remaining "+remaining + " accumulation "+accumulation+" total size "+totalSize);
         assert totalSize == accumulation;
         assert remaining == 0;
         return accumulation;
@@ -113,7 +110,7 @@ public class VariableByteCodedIdArray extends IdTable {
     }
     
     public boolean hasNext() {
-        if(iterator < ids.length) {
+        if(iterator < cursor) {
             return true;
         } else {
             return false;
@@ -121,8 +118,7 @@ public class VariableByteCodedIdArray extends IdTable {
     }
     
     public int peek() {
-        byte[] id = ids[iterator];
-        return codec.decode(id, 0);
+        return codec.decode(ids[iterator], 0);
     }
 
     public int advanceIterator() {
@@ -133,12 +129,16 @@ public class VariableByteCodedIdArray extends IdTable {
     }
     
     private byte[] compressedAdvanceIterator() {
-        byte[] ret = ids[iterator++];
-        return ret;
+        return ids[iterator++];
     }
 
-    public int getLastDocId() {
+    public int getLastId() {
         return lastDocId;
+    }
+    
+    public int getFirstId() {
+        assert cursor > 0;
+        return codec.decode(ids[0],0);
     }
     
     @Override

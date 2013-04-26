@@ -1,8 +1,6 @@
 package syndeticlogic.catena.text.postings;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import syndeticlogic.catena.type.Codeable;
 import syndeticlogic.catena.type.Type;
@@ -53,7 +51,6 @@ public class UncodedIdArray extends IdTable {
         if(remaining > ids.length) {
             ids = new int[remaining/Type.INTEGER.length()];
         }
-//        System.out.println("sourc "+source.length+" remaining "+remaining+ " offset "+(offset)+" accum "+accumulation+"dis lengh "+ids.length);
         ByteBuffer transferBuf = ByteBuffer.wrap(source, offset+accumulation, remaining);
         transferBuf.asIntBuffer().get(ids, 0, remaining/Type.INTEGER.length());
         cursor = remaining/Type.INTEGER.length();
@@ -93,8 +90,13 @@ public class UncodedIdArray extends IdTable {
         return ret;
     }
          
-    public int getLastDocId() {
+    public int getLastId() {
         return ids[cursor-1];
+    }
+    
+    public int getFirstId() {
+        assert cursor > 0;
+        return ids[0];
     }
     
     @Override

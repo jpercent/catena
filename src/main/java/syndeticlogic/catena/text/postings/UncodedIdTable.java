@@ -161,8 +161,12 @@ public class UncodedIdTable extends IdTable {
         }
         return ret;
     }
-         
-    public int getLastDocId() {
+    
+    public int getFirstId() {
+        return ids[0][0];
+    } 
+    
+    public int getLastId() {
         return ids[slotCursor][pageCursor-1];
     }
     

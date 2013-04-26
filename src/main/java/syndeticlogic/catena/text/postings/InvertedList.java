@@ -42,8 +42,12 @@ public class InvertedList implements Codeable {
         }
     }
     
-    private int getLastDocId() {
-        return table.getLastDocId();
+    public int getLastDocId() {
+        return table.getLastId();
+    }
+
+    public int getFirstDocId() {
+        return table.getFirstId();
     }
 
     public TreeSet<Integer> getDocumentIds() {
@@ -257,7 +261,7 @@ public class InvertedList implements Codeable {
             idTable = new VariableByteCodedIdTable();
             break;
         case VariableByteCodedArray:
-            idTable = new VariableByteCodedIdTable();
+            idTable = new VariableByteCodedIdArray();
             break;
             
         default:

@@ -13,8 +13,8 @@ public abstract class IdTable implements Codeable {
     abstract boolean hasNext();    
     abstract int peek();
     abstract int advanceIterator();
-    abstract int getLastDocId();
-
+    abstract int getLastId();
+    abstract int getFirstId();
 
     public TreeSet<Integer> getValues() {
         TreeSet<Integer> docIds = new TreeSet<Integer>();

@@ -85,8 +85,11 @@ public class CorpusManagerConfig {
                     System.err.println("UncodedArray set ");
                     tableType = TableType.UncodedArray;
                 } else if ("variable-table".equals(strategy)) {
-                    System.err.println("VariableByteCoded set ");
+                    System.err.println("VariableByteCodedTable set ");
                     tableType = TableType.VariableByteCodedTable;
+                } else if ("variable-array".equals(strategy)) {
+                    System.err.println("VariableByteCodedArray set ");
+                    tableType = TableType.VariableByteCodedArray;
                 } else {
                     System.err.println(strategy+ " is not a valid postings list encoding");
                 }

@@ -199,7 +199,11 @@ public class VariableByteCodedIdTable extends IdTable {
         return ret;
     }
 
-    public int getLastDocId() {
+    public int getFirstId() {
+        return codec.decode(documentIds[0][0], 0);
+    }
+    
+    public int getLastId() {
         return lastDocId;
     }
     
