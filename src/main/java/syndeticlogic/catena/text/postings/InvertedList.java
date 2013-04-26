@@ -207,6 +207,10 @@ public class InvertedList implements Codeable {
         return wordId;
     }
     
+    public void setWordId(int wordId) {
+        this.wordId = wordId;
+    }
+    
     public void setWord(String word) {
         this.word = word;
     }

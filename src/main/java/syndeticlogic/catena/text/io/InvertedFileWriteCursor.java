@@ -44,6 +44,7 @@ public class InvertedFileWriteCursor extends BaseWriteCursor {
     @Override
     public int encodeNext(byte[] buffer, int offset) {
         int length = currentList.encode(buffer, offset);
+        //System.out.print("encoding ");BlockReader.printBinary(buffer, offset, 10);
         descriptors.add(new InvertedListDescriptor(currentList.getWord(), fileOffset, length, currentList.getDocumentFrequency()));
         fileOffset += length;
         return length;

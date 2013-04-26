@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text;
+package syndeticlogic.catena.text.io.old;
 
 import static org.junit.Assert.*;
 
@@ -11,7 +11,8 @@ import java.util.Map;
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.Test;
 
-import syndeticlogic.catena.text.io.DictionaryReader;
+import syndeticlogic.catena.text.BasicTokenizer;
+import syndeticlogic.catena.text.CorpusManager;
 import syndeticlogic.catena.text.io.InvertedFileReader;
 import syndeticlogic.catena.text.io.InvertedFileWriter;
 import syndeticlogic.catena.text.io.RawInvertedFileWriter;

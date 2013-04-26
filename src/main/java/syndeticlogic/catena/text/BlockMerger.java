@@ -6,9 +6,15 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import syndeticlogic.catena.text.io.BlockReader;
+import syndeticlogic.catena.text.io.BlockWriter;
+import syndeticlogic.catena.text.io.InvertedFileReadCursor;
 import syndeticlogic.catena.text.io.InvertedFileReader;
+import syndeticlogic.catena.text.io.InvertedFileWriteCursor;
 import syndeticlogic.catena.text.io.InvertedFileWriter;
 import syndeticlogic.catena.text.io.RawInvertedFileWriter;
 import syndeticlogic.catena.text.postings.InvertedList;
@@ -26,83 +32,58 @@ public class BlockMerger {
         this.idToWord = idToWord;
     }
     
-    public List<InvertedListDescriptor> mergeBlocks(String mergeTarget, LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blockDescriptors) {
+    public List<InvertedListDescriptor> mergeBlocks(String mergeTarget, LinkedList<String> blocks) {
         System.err.println("Starting merge...");
-        long memory = (long)(((double)Config.getPhysicalMemorySize()) * MEMORY_PERCENTAGE);
-        int readBlocksAndWriteBlock = Math.min((int)(memory/BLOCK_SIZE), blockDescriptors.size()+1);
-        int readBlocks = readBlocksAndWriteBlock - 1;
-        int sources = blockDescriptors.size();
+        boolean done = false;
+        int merges = 0;
+        String fileName = null;
+        List<InvertedListDescriptor> ret=null;
         
-        String intermediateMerge = prefix+File.separator+"intermediate-merge-target.";
-        List<InvertedListDescriptor> mergedDescriptors=null;
-        String fileName=null;
-        int totalMergeFiles = 0;
+        while(!done) {
+        
+            long memory = (long)(((double)Config.getPhysicalMemorySize()) * MEMORY_PERCENTAGE);
+            int readBlocksAndWriteBlock = Math.min((int)(memory/BLOCK_SIZE), blocks.size()+1);
+            int readBlocks = readBlocksAndWriteBlock - 1;
+        
+            BlockReader[] readers = new BlockReader[readBlocks];
+            InvertedFileReadCursor[] cursors = new InvertedFileReadCursor[readBlocks];
 
-        while(sources > 0) {
-            assert sources >= readBlocks;
-            InvertedFileReader[] readers = new InvertedFileReader[readBlocks];
-            @SuppressWarnings("unchecked")
-            List<InvertedListDescriptor>[] descriptors = new List[readBlocks];
-            Iterator<Map.Entry<String, List<InvertedListDescriptor>>> bditerator = blockDescriptors.iterator();
-            int i=0;
-            if(mergedDescriptors != null) {
-                assert fileName != null;
-                descriptors[0] = mergedDescriptors;
-                readers[0] = new InvertedFileReader();
-                readers[0].setBlockSize(BLOCK_SIZE);
-                readers[0].open(fileName);
-                i = 1;
-            }
-            
-            for(; i < readBlocks; i++) {
-                Map.Entry<String, List<InvertedListDescriptor>> id = bditerator.next();
-                descriptors[i] = id.getValue();
-                readers[i] = new InvertedFileReader();
+            Iterator<String> blockFilesIter = blocks.iterator();
+            for(int i = 0; i < readBlocks; i++) {
+                assert blockFilesIter.hasNext();
+                cursors[i] = new InvertedFileReadCursor(idToWord);
+                readers[i] = new BlockReader();
                 readers[i].setBlockSize(BLOCK_SIZE);
-                readers[i].open(id.getKey());
+                readers[i].open(blockFilesIter.next());
+            }
+                       
+            if(!blockFilesIter.hasNext()) {
+                done = true;
+                fileName = mergeTarget;
+            } else {
+                LinkedList<String> remaining = new LinkedList<String>();
+                String mergeFileName = prefix+File.separator+"intermediate-merge-target."+Integer.toString(merges++);
+                remaining.add(mergeFileName);
+                while(blockFilesIter.hasNext()) {
+                    remaining.add(blockFilesIter.next());
+                }
+                blocks = remaining;
+                fileName = mergeFileName;
             }
 
-            boolean finalPass = (((sources - readBlocks) > 0) ?  true : false);
-            if(finalPass) {
-                fileName = intermediateMerge+Integer.toString(totalMergeFiles);
-                totalMergeFiles++;
-            } else {
-                fileName = mergeTarget;
-            }
-            InvertedFileWriter writer = new RawInvertedFileWriter();
-            writer.setBlockSize(BLOCK_SIZE);
-            writer.open(fileName);
-            
-            mergedDescriptors = merge(readers, descriptors, writer);
-            writer.close();
-            sources -= readBlocks;
-            readBlocks = Math.min((int)(memory/BLOCK_SIZE), sources);
-            
-            for(i = 0; i < readBlocks; i++) {
+            ret = merge(fileName, readers, cursors);
+            for(int i = 0; i < readBlocks; i++) {
                 readers[i].close();
             }
-
         }
-        /*
-        for(int i = 0; i < totalMergeFiles-1; i++) {
-            String name = intermediateMerge+Integer.toString(totalMergeFiles);
-            if(!(new File(name).delete())) {
-                System.err.println("failed to delete "+name);
-            }
-        }
-        */
-        return mergedDescriptors;
+        return ret;
     }
 
-    public List<InvertedListDescriptor> merge(InvertedFileReader[] readers, List<InvertedListDescriptor>[] descriptors, 
-            InvertedFileWriter writer) {
-        assert readers.length == descriptors.length;
+    public List<InvertedListDescriptor> merge(String target, BlockReader[] readers, InvertedFileReadCursor[] cursors) {
         TreeMap<String, InvertedList> ret=null;
-        int[] positions = new int[readers.length];
-        
         for(int i = 0; i < readers.length; i++) {
-            TreeMap<String, InvertedList> newPostings = new TreeMap<String, InvertedList>();
-            positions[i] = readers[i].scanBlock(positions[i], descriptors[i], idToWord, newPostings);
+            readers[i].scanBlock(cursors[i]);
+            TreeMap<String, InvertedList> newPostings = cursors[i].getInvertedList();
             if(ret == null) {
                 ret = newPostings;
             } else {
@@ -116,8 +97,15 @@ public class BlockMerger {
                 }
             }
         }
-        List<InvertedListDescriptor> newDescriptors = new LinkedList<InvertedListDescriptor>();
-        writer.writeFile(ret, newDescriptors);
+        BlockWriter writer = new BlockWriter();
+        writer.setBlockSize(BLOCK_SIZE);
+        writer.open(target);
+        
+        //List<InvertedListDescriptor> newDescriptors = new LinkedList<InvertedListDescriptor>();
+        InvertedFileWriteCursor cursor = new InvertedFileWriteCursor(ret);
+        writer.writeBlock(cursor);
+        List<InvertedListDescriptor> newDescriptors = cursor.getInvertedListDescriptors();
+        writer.close();
         return newDescriptors; 
     }
 }

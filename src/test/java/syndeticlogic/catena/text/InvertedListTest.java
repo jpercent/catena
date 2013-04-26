@@ -33,9 +33,9 @@ public class InvertedListTest {
     @Test
     public void testCoding1() {
         InvertedList.setTableType(TableType.Uncoded);
-        testBase(1023, 4096, 32, 21, true);
+        testBase(127, 4096, 32, 21, true);
         InvertedList.setTableType(TableType.VariableByteCoded);
-        testBase(1023, 4096, 32, 21, true);
+        testBase(127, 4096, 32, 21, true);
     }
     
     @Test
@@ -49,9 +49,9 @@ public class InvertedListTest {
     @Test
     public void testCoding3() {
         InvertedList.setTableType(TableType.Uncoded);
-        testBase(4096, 511, 0, 4, true);
+        testBase(1024, 511, 0, 2, true);
         InvertedList.setTableType(TableType.VariableByteCoded);
-        testBase(4096, 511, 0, 4, true);
+        testBase(1024, 511, 0, 2, true);
     }
     
     @Test
@@ -124,6 +124,7 @@ public class InvertedListTest {
         int size = InvertedList.getPageSize() * InvertedList.getPageSize() * postingsFactor;
         
         TreeSet<Integer> ids = new TreeSet<Integer>();
+        long start = System.currentTimeMillis();
         for(int i = 0; i < size; ++i) {
             try {
                 ids.add(Math.abs(rand.nextInt()));
@@ -134,6 +135,8 @@ public class InvertedListTest {
             }
         }
         
+        System.out.println("Lots of time rand?"+(System.currentTimeMillis() - start));
+        start = System.currentTimeMillis();
         Iterator i = ids.iterator();
         while (i.hasNext()) {
             posting.addDocumentId((Integer) i.next());
@@ -165,5 +168,6 @@ public class InvertedListTest {
                 assertFalse(true);
             }
         }
+        System.out.println("Lots of time ~rand?"+(System.currentTimeMillis() - start));
     }
 }

@@ -33,14 +33,14 @@ public class DocumentDescriptor implements Codeable {
     public void setDoc(String doc) {
         this.doc = getDocName(doc);
     }
-
+    
     public void setDocId(int docId) {
         this.docId = docId;
     }
 
     @Override
     public int size() {
-        return Type.INTEGER.length()+Type.STRING.length()+doc.length()+Type.INTEGER.length();
+        return Type.INTEGER.length()+Type.STRING.length()+doc.length();
     }
 
     @Override
@@ -62,7 +62,6 @@ public class DocumentDescriptor implements Codeable {
         doc = Codec.getCodec().decodeString(source, offset);
         decoded += Type.STRING.length()+doc.length();
         docId = Codec.getCodec().decodeInteger(source, offset+decoded);
-        decoded += Type.INTEGER.length();
         decoded += Type.INTEGER.length();
         return decoded;
     }

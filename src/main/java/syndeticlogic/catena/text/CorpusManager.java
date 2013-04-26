@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
 
+import syndeticlogic.catena.text.io.BlockWriter;
 import syndeticlogic.catena.text.io.InvertedFileReader;
 import syndeticlogic.catena.text.io.InvertedFileWriter;
 import syndeticlogic.catena.text.io.RawInvertedFileWriter;
@@ -62,7 +63,7 @@ public class CorpusManager extends DirectoryWalker {
     
     public static void index(String corpus, String output, boolean clearOutputDir) throws Throwable {
         Tokenizer tokenizer;
-        InvertedFileWriter fileWriter;
+        BlockWriter blockWriter;
         InvertedFileReader fileReader;
         InvertedFileBuilder indexBuilder;
         CorpusManager corpusManager;
@@ -74,18 +75,17 @@ public class CorpusManager extends DirectoryWalker {
             FileUtils.deleteDirectory(prefix);
         }
         FileUtils.mkdir(prefix);
-        
-        fileWriter = new RawInvertedFileWriter();
+     
         tokenizer = new BasicTokenizer();
-        
-        indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
+        blockWriter = new BlockWriter();
+        indexBuilder = new InvertedFileBuilder(prefix, blockWriter);
         fileReader = new InvertedFileReader();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
         
         corpusManager.index(corpus);
         System.out.println(indexBuilder.getNumberOfDocumentsIndexed()+"\n");
-        fileWriter.close();
-        fileWriter = null;
+        blockWriter.close();
+        blockWriter = null;
         tokenizer = null;
         indexBuilder = null;
         if (fileReader != null)

@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text.io;
+package syndeticlogic.catena.text.io.old;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -130,7 +130,7 @@ public class DictionaryWriter {
                 postingsCoding = 1;
             }
             Codec.getCodec().encode(postingsCoding, jvm, Type.LONG.length());
-            Codec.getCodec().encode(prefixLength, jvm, Type.LONG.length()+Type.BYTE.length());
+          //  Codec.getCodec().encode(prefixLength, jvm, Type.LONG.length()+Type.BYTE.length());
             headerData.limit(Type.LONG.length()+Type.BYTE.length()+Type.INTEGER.length());
             channel.write(headerData);
             System.err.println("Dictionary items "+count);

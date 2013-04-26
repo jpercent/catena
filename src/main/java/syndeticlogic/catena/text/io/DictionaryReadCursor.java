@@ -10,7 +10,6 @@ import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
-
 public class DictionaryReadCursor implements ReadCursor {
     private IdDocMapCursor idDocMapCursor;
     private InvertedListDescriptorCursor invertedListDescriptorCursor;
@@ -22,35 +21,28 @@ public class DictionaryReadCursor implements ReadCursor {
         this.invertedListDescriptorCursor = new InvertedListDescriptorCursor(descriptors);
     }
     
-    
     public int headerSize() {
         return Type.LONG.length()+Type.BYTE.length();
     }
     
-    public int decodeHeader(byte[] block, int blockSize) {
-        byte coding = Codec.getCodec().decodeByte(block, Type.LONG.length());
-        idDocLength = Codec.getCodec().decodeLong(block, 0);
+    public void decodeHeader(BlockDescriptor blockDesc) {
+        byte coding = Codec.getCodec().decodeByte(blockDesc.buf, 0);
+        idDocLength = Codec.getCodec().decodeLong(blockDesc.buf, 1);
         if(coding == 1) {
             InvertedList.setTableType(TableType.VariableByteCoded);
         }
-        return 0;
+        blockDesc.offset += Type.BYTE.length() + Type.LONG.length(); 
     }
     
-    public int decodeBlock(byte[] block, int blockOffset) {
-        int remaining = blockOffset;
-        int start = blockOffset;
-        while (remaining < blockOffset) {
-            int decodeLength=0;
+    public void decodeBlock(BlockDescriptor blockDesc) {
+        assert blockDesc.buf.length >= blockDesc.offset;
+        while (blockDesc.offset < blockDesc.buf.length) {
             if (decoded < idDocLength) {
-                decodeLength = idDocMapCursor.decodeBlock(block, blockOffset);
+                idDocMapCursor.decodeBlock(blockDesc);
             } else {
-                decodeLength = invertedListDescriptorCursor.decodeBlock(block, blockOffset);
+                invertedListDescriptorCursor.decodeBlock(blockDesc);
             }
-            remaining -= decodeLength;
-            decoded += decodeLength;
-            blockOffset += decodeLength;
         }
-        return blockOffset - start; 
     }
     
     protected class IdDocMapCursor extends BaseReadCursor {
@@ -62,41 +54,27 @@ public class DictionaryReadCursor implements ReadCursor {
         }
         
         @Override
-        public int decodeBlock(byte[] block, int blockOffset) {
-            try {
-            blockOffset += docDesc.decode(block, blockOffset);
+        public void doDecode(BlockDescriptor blockDesc) {
+            int length = docDesc.decode(blockDesc.buf, blockDesc.offset);
             idDocMap.put(docDesc.getDocId(), docDesc.getDoc());
-            } catch(IndexOutOfBoundsException e){
-                addLeftover(block, blockOffset);
-                blockOffset = block.length;
-            }
-            return blockOffset;
+            decoded += length;
+            blockDesc.offset += length;
         }
     }
         
     protected class InvertedListDescriptorCursor extends BaseReadCursor {
         List<InvertedListDescriptor> descriptors;
-        
         public InvertedListDescriptorCursor(List<InvertedListDescriptor> descriptors) {
             this.descriptors = descriptors;
         }
         
         @Override
-        public int decodeBlock(byte[] block, int blockOffset) {
-            InvertedListDescriptor listDesc = new InvertedListDescriptor(null, -1, -1, -1);
-              try {
-                  int length = listDesc.decode(block, blockOffset);
-                  descriptors.add(listDesc);
-                  blockOffset += length;
-                  decoded += length;
-              
-            } catch (IndexOutOfBoundsException e) {
-                addLeftover(block, blockOffset);
-                blockOffset = block.length;
-            }
-              return blockOffset;
+        public void doDecode(BlockDescriptor blockDesc) {
+            InvertedListDescriptor listDesc = new InvertedListDescriptor(null,-1,-1,-1);
+            int length = listDesc.decode(blockDesc.buf, blockDesc.offset);
+            descriptors.add(listDesc);
+            decoded += length;
+            blockDesc.offset += length;
         }
-        
     }
-
 }

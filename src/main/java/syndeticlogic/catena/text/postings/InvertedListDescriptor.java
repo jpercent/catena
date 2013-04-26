@@ -81,7 +81,7 @@ public class InvertedListDescriptor implements Codeable {
     public int encode(byte[] dest, int offset) {
         int copied = 0;
         copied += Codec.getCodec().encode(word, dest, offset);
-        copied += Codec.getCodec().encode(this.fileOffset, dest, offset+copied); 
+        copied += Codec.getCodec().encode(fileOffset, dest, offset+copied); 
         copied += Codec.getCodec().encode(length, dest, offset+copied); 
         copied += Codec.getCodec().encode(documentFrequency, dest, offset+copied); 
         return copied;

@@ -1,6 +1,7 @@
 package syndeticlogic.catena.text.io;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -11,14 +12,18 @@ import syndeticlogic.catena.text.postings.InvertedList;
 
 public class InvertedFileReadCursor extends BaseReadCursor {
 	private final static Log log = LogFactory.getLog(InvertedFileReadCursor.class);
-	private HashMap<Integer, String> idToWord;
+	private Map<Integer, String> idToWord;
     private TreeMap<String, InvertedList> postings;
 	
-	public InvertedFileReadCursor() {
-	    idToWord = new HashMap<Integer, String>();
+	public InvertedFileReadCursor(Map<Integer, String> idToWord) {
+	    this.idToWord = idToWord;
 	    postings = new TreeMap<String, InvertedList>();
 	}
-	
+
+    public TreeMap<String, InvertedList> getInvertedList() {
+        return postings;
+    }   
+
     @Override
     public void decodeBlock(BlockDescriptor desc) {
         while(desc.offset < desc.buf.length) {
@@ -30,48 +35,13 @@ public class InvertedFileReadCursor extends BaseReadCursor {
     protected void doDecode(BlockDescriptor desc) {    
         assert desc.buf.length >= desc.offset;
         InvertedList list = InvertedList.create();
+        //System.out.print("do decod ");BlockReader.printBinary(desc.buf, desc.offset, 10);
         list.decode(desc.buf, desc.offset);
-        
         desc.offset += list.size();
         list.setWord(idToWord.get(list.getWordId()));
-        assert !postings.containsKey(list.getWord());
-        postings.put(list.getWord(), list);
-    }	
-
-/*	public int scanBlock(int start, List<InvertedListDescriptor> descriptors, HashMap<Integer, String> idToWord, TreeMap<String, InvertedList> postings) {
-	    InvertedListDescriptor cursor = descriptors.get(start);
-	    assert buffer.remaining() > cursor.getLength();
-        int blockSize = (int) Math.min((long) BLOCK_SIZE, buffer.remaining());
-        blockSize = (int)Math.max(blockSize, cursor.getLength());
-        byte[] block = new byte[blockSize];
-
-        int sizeCursor = blockSize;
-        assert sizeCursor >= cursor.getLength();
-        while(true) {
-            sizeCursor -= cursor.getLength();
-            if(sizeCursor > 0) {
-                start++;
-                cursor = descriptors.get(start);
-            } else {
-                break;
-            }
+        if(!postings.containsKey(list.getWord())) {
+            log.warn("Key "+list.getWord()+" has already has postings ");
         }
-        // XXX - if the invertedList for an object is > BLOCK_SIZE we will never read it.
-        buffer.get(block, 0, blockSize);
-        int offset = decodePostings(block, blockSize, postings, idToWord);
-        buffer.position((buffer.position() - (buffer.position() - offset)));
-        return start;
-	}
-	
-    public InvertedList scanEntry(InvertedListDescriptor desc) throws IOException {
-        buffer = channel.map(MapMode.READ_ONLY, desc.getOffset(), desc.getLength());
-        byte[] copy = new byte[desc.getLength()];
-        buffer.get(copy);
-        InvertedList ret = InvertedList.create();
-        ret.decode(copy, 0);
-        ret.setWord(desc.getWord());
-        return ret;
+        postings.put(list.getWord(), list);
     }
-	*/
-
 }

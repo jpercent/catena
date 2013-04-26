@@ -6,30 +6,24 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import syndeticlogic.catena.text.DocumentDescriptor;
-import syndeticlogic.catena.text.postings.InvertedList;
+import syndeticlogic.catena.text.io.ReadCursor.BlockDescriptor;
 import syndeticlogic.catena.text.postings.InvertedListDescriptor;
-import syndeticlogic.catena.text.postings.IdTable.TableType;
-import syndeticlogic.catena.type.Type;
-import syndeticlogic.catena.utility.Codec;
 
 public class BlockReader {
 	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
-	private static int BLOCK_SIZE=60*1048576; // 256k
+	private static int BLOCK_SIZE=10*1048576;
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;
 	private MappedByteBuffer buffer;
 	private boolean closed = true;
 	private int blockSize = BLOCK_SIZE;
+	
 	public void open(String fileName) {
 	    file = new File(fileName);
 		assert file.exists();
@@ -61,24 +55,28 @@ public class BlockReader {
 	}
 	
 	public void read(ReadCursor cursor) throws IOException {
-        int blockSize = (int) Math.min(this.blockSize, channel.size());
-        byte[] block = new byte[blockSize];
+        BlockDescriptor blockDesc = new BlockDescriptor();
+        blockDesc.buf = new byte[(int) Math.min(this.blockSize, channel.size())];
         boolean headerDecoded = false;
-        int blockOffset = 0;
         
         while (buffer.hasRemaining()) {
-            if (buffer.remaining() < blockSize) {
-                blockSize = buffer.remaining();
-                block = new byte[blockSize];
-                blockOffset = 0;
-            }            
-            buffer.get(block, 0, blockSize);
+            buffer.get(blockDesc.buf, 0, blockDesc.buf.length);            
             if(!headerDecoded) {
-                blockOffset += cursor.decodeHeader(block, blockOffset);
+                cursor.decodeHeader(blockDesc);
                 headerDecoded = true;
+                if(blockDesc.offset < blockDesc.buf.length) {
+                    cursor.decodeBlock(blockDesc);
+                }
             } else {
-                assert blockOffset <= blockSize;
-                blockOffset += cursor.decodeBlock(block, blockOffset);
+                cursor.decodeBlock(blockDesc);
+            }
+            blockDesc.offset = 0;
+            if(buffer.remaining() < blockDesc.buf.length) {
+                blockDesc.buf = new byte[buffer.remaining()];
+            } else {
+                for(int i = 0; i < blockDesc.buf.length; i++) {
+                    blockDesc.buf[i] = 0;
+                }
             }
         }
 	}
@@ -97,5 +95,21 @@ public class BlockReader {
     
     public static void setDefaultBlockSize(int blockSize) {
         BLOCK_SIZE = blockSize;
+    }
+
+    public static void printBinary(byte[] buffer2, int offset, int ret) {
+        for (int i =0 ; i < ret;i++) {
+            System.out.print(buffer2[offset+i]+", ");
+        }
+        System.out.println();
+
+        
+    }
+
+    public void scanBlock(ReadCursor cursor) {
+        BlockDescriptor blockDesc = new BlockDescriptor();
+        blockDesc.buf = new byte[(int) Math.min(this.blockSize, buffer.remaining())];
+        buffer.get(blockDesc.buf, 0, blockDesc.buf.length);            
+        cursor.decodeBlock(blockDesc);
     }
 }

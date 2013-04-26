@@ -12,6 +12,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import syndeticlogic.catena.text.io.BlockReader;
+import syndeticlogic.catena.text.io.BlockWriter;
+import syndeticlogic.catena.text.io.InvertedFileReadCursor;
 import syndeticlogic.catena.text.io.InvertedFileReader;
 import syndeticlogic.catena.text.io.InvertedFileWriter;
 import syndeticlogic.catena.text.io.RawInvertedFileWriter;
@@ -22,8 +25,8 @@ import syndeticlogic.catena.text.postings.Tokenizer;
 
 public class BlockMergerTest {
 	Tokenizer tokenizer;
-	InvertedFileWriter fileWriter;
-	InvertedFileReader fileReader;
+	BlockWriter fileWriter;
+	BlockReader fileReader;
 	InvertedFileBuilder indexBuilder;
 	CorpusManager corpusManager;
 	String prefix;
@@ -33,10 +36,10 @@ public class BlockMergerTest {
         prefix = "target"+File.separator+"corpus-manager-block-merger-test"+File.separator;
         FileUtils.deleteDirectory(prefix);
         FileUtils.mkdir(prefix);
-        fileWriter = new RawInvertedFileWriter();
+        fileWriter = new BlockWriter();
         tokenizer = new BasicTokenizer();
         indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
-        fileReader = new InvertedFileReader();
+        fileReader = new BlockReader();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
     }
 	
@@ -63,12 +66,19 @@ public class BlockMergerTest {
         
         TreeMap<String, InvertedList> postings = new TreeMap<String, InvertedList>();
         fileReader.open("target/corpus-manager-block-merger-test/merged/corpus.index");
-        fileReader.scanFile(indexBuilder.getIdToWord(), postings);
+        InvertedFileReadCursor cursor = new InvertedFileReadCursor(indexBuilder.getIdToWord());
+        fileReader.read(cursor);
         fileReader.close();
-
+        postings = cursor.getInvertedList();
+        
         TreeMap<String, InvertedList> postings1 = new TreeMap<String, InvertedList>();
         fileReader.open("target/corpus-manager-block-merger-test/single/corpus.index");
-        fileReader.scanFile(indexBuilder1.getIdToWord(), postings1);
+        cursor = new InvertedFileReadCursor(indexBuilder1.getIdToWord());
+        fileReader.read(cursor);
+        fileReader.close();
+        postings1 = cursor.getInvertedList();
+
+        
         fileReader.close();
         
         assertEquals(postings.size(), postings1.size());
@@ -111,10 +121,10 @@ public class BlockMergerTest {
         FileUtils.deleteDirectory(prefix);
         FileUtils.mkdir(prefix);
         //fileWriter = new CatenaInvertedFileWriter();
-        fileWriter = new RawInvertedFileWriter();
+        fileWriter = new BlockWriter();
         tokenizer = new BasicTokenizer();
         InvertedFileBuilder indexBuilder = new InvertedFileBuilder(prefix, fileWriter);
-        fileReader = new InvertedFileReader();
+        fileReader = new BlockReader();
         //tokenizer = new LuceneStandardTokenizer();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder);
         	    
@@ -126,10 +136,10 @@ public class BlockMergerTest {
         FileUtils.deleteDirectory(prefix);
         FileUtils.mkdir(prefix);
         //fileWriter = new CatenaInvertedFileWriter();
-        fileWriter = new RawInvertedFileWriter();
+        fileWriter = new BlockWriter();
         tokenizer = new BasicTokenizer();
         InvertedFileBuilder indexBuilder1 = new InvertedFileBuilder(prefix, fileWriter);
-        fileReader = new InvertedFileReader();
+        fileReader = new BlockReader();
         //tokenizer = new LuceneStandardTokenizer();
         corpusManager = new CorpusManager(prefix, tokenizer, indexBuilder1);
 

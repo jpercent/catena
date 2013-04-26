@@ -2,11 +2,9 @@ package syndeticlogic.catena.text.postings;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
@@ -14,35 +12,30 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
 
 import syndeticlogic.catena.text.BlockMerger;
-import syndeticlogic.catena.text.io.DictionaryWriter;
-import syndeticlogic.catena.text.io.InvertedFileWriter;
+import syndeticlogic.catena.text.io.BlockWriter;
+import syndeticlogic.catena.text.io.DictionaryWriteCursor;
+import syndeticlogic.catena.text.io.InvertedFileWriteCursor;
 
 public class InvertedFileBuilder {
 	private static final Log log = LogFactory.getLog(InvertedFileBuilder.class);
-    private final LinkedList<Map.Entry<String, List<InvertedListDescriptor>>> blocksAndDescriptors;
+    private final LinkedList<String> blocks;
     private List<InvertedListDescriptor> descriptors;
-    private final InvertedFileWriter fileWriter;
+    private final BlockWriter blockWriter;
     private final HashMap<Integer, String> idToDoc;
     private final HashMap<Integer, String> idToWord;
     private final HashMap<String, Integer> wordToId;
-    private final HashMap<String, Integer> blockToId;
-    private final HashMap<String, Integer> directoryToId;
     private final String prefix;
     private TreeMap<String, InvertedList> postings;
-    private int blockId;
     private int docId;
-    private int directoryId;
     private int wordId;
     
-    public InvertedFileBuilder(String prefix, InvertedFileWriter fileWriter) {
-        this.fileWriter = fileWriter;
+    public InvertedFileBuilder(String prefix, BlockWriter fileWriter) {
+        this.blockWriter = fileWriter;
         this.prefix = prefix;
+        blocks = new LinkedList<String>();
         idToDoc = new HashMap<Integer, String>();
         idToWord = new HashMap<Integer, String>();
         postings = new TreeMap<String, InvertedList>();
-        blocksAndDescriptors = new LinkedList<Map.Entry<String, List<InvertedListDescriptor>>>();
-        blockToId = new HashMap<String, Integer>();
-        directoryToId = new HashMap<String, Integer>();
         wordToId = new HashMap<String, Integer>();
     }
         
@@ -63,48 +56,37 @@ public class InvertedFileBuilder {
 
     public int addDocument(final String document) {
         idToDoc.put(docId, document);
-        File f = new File(document);
-        if(!directoryToId.containsKey(f.getParent())) {
-            directoryToId.put(f.getParent(), directoryId++);
-        }
         return docId++;
     }
 
     public void startBlock(String block) {
         System.err.println("Starting block "+block);
-    	blockToId.put(block, blockId++);
     	postings = new TreeMap<String, InvertedList>();
 	}
-   
-    private String getBlockFileName(String block) {
-        File blockFile = new File(block);
-        return prefix+File.separator+"."+blockFile.getName()+"-block-"+blockToId.get(block)+".index";
-    }
-    
+  
 	public void completeBlock(String block) {
         System.err.println("Complete block "+block+ " writing intermediates ");
-	    String blockFileName = getBlockFileName(block);
-		fileWriter.open(blockFileName);
-		LinkedList<InvertedListDescriptor> invertedListDescriptors = new LinkedList<InvertedListDescriptor>();   
-		fileWriter.writeFile(postings, invertedListDescriptors);
-        fileWriter.close();
-        this.blocksAndDescriptors.add(new AbstractMap.SimpleEntry<String, List<InvertedListDescriptor>>(blockFileName, invertedListDescriptors));
-        System.err.println("Block complete");
+        String blockFileName = getBlockFileName(block);
+        System.err.println("BLOCK FILE NAME == "+blockFileName);
+	    blockWriter.open(blockFileName);
+		InvertedFileWriteCursor cursor = new InvertedFileWriteCursor(postings);
+		blockWriter.writeBlock(cursor);
+        blockWriter.close();
+        descriptors = cursor.getInvertedListDescriptors();
+        cursor = null;
+        this.blocks.add(blockFileName);
 	}
 
     public void mergeBlocks() {
         System.err.println("Merging blocks... ");
-        List<InvertedListDescriptor> finalList;
-        if(blocksAndDescriptors.size() > 1) {
+        if(blocks.size() > 1) {
             BlockMerger merger = new BlockMerger(prefix, idToWord);
-            descriptors = merger.mergeBlocks(getFinalName(), blocksAndDescriptors);
+            descriptors = merger.mergeBlocks(getFinalName(), blocks);
         } else {
-            descriptors = (List<InvertedListDescriptor>) blocksAndDescriptors.get(0).getValue();
-            Map.Entry<String,  List<InvertedListDescriptor>> blockDesc = blocksAndDescriptors.get(0);
             try {
-                FileUtils.rename(new File(blockDesc.getKey()), new File(getFinalName()));
+                FileUtils.rename(new File(blocks.get(0)), new File(getFinalName()));
             } catch (IOException e) {
-                System.err.println("could not rename index file; final index is named "+blockDesc.getKey());
+                System.err.println("could not rename index file; final index is named "+blocks.get(0));
             }
         }
         System.err.println("All blocks merged... ");
@@ -118,12 +100,17 @@ public class InvertedFileBuilder {
     private String getDictionaryName() {
         return prefix+File.separator+"index.meta";
     }
-
+    
+    private String getBlockFileName(String block) {
+        File blockFile = new File(block);
+        return prefix+"."+blockFile.getParentFile().getName()+"-"+blockFile.getName()+".index";
+    }
+    
     public void writeMeta(List<InvertedListDescriptor> finalList) {
-        DictionaryWriter writer = new DictionaryWriter();
-        writer.open(getDictionaryName());
-        writer.writeDictionary(idToDoc, directoryToId, finalList);
-        writer.close();
+        DictionaryWriteCursor cursor = new DictionaryWriteCursor(idToDoc, finalList);
+        blockWriter.open(getDictionaryName());
+        blockWriter.writeBlock(cursor);
+        blockWriter.close();
     }
     
     public HashMap<Integer, String> getIdToDoc() {
@@ -142,9 +129,6 @@ public class InvertedFileBuilder {
 		return descriptors;
 	}
 
-	public HashMap<String, Integer> getBlockToId() {
-		return blockToId;
-	}
 
 	public String getPrefix() {
 		return prefix;

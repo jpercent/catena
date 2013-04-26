@@ -2,32 +2,53 @@ package syndeticlogic.catena.text.io;
 
 public interface ReadCursor {
     int headerSize();
-    int decodeHeader(byte[] block, int blockSize);
-    int decodeBlock(byte[] block, int blockSize);
+    void decodeHeader(BlockDescriptor blockDesc);
+    void decodeBlock(BlockDescriptor blockDesc);
 
     abstract class BaseReadCursor implements ReadCursor {
-        protected byte[] leftover;
+        protected byte[] leftover=null;
+        
+        protected abstract void doDecode(BlockDescriptor blockDesc);
+        
+        @Override
+        public int headerSize() { return 0; }
 
         @Override
-        public int headerSize() {
-            return 0;
-        }
-
+        public void decodeHeader(BlockDescriptor blockDesc) { return; }
+        
         @Override
-        public int decodeHeader(byte[] block, int blockSize) {
-            return 0;
-        }
-
-        void addLeftover(byte[] block, int blockOffset) {
-            int offset = 0;
-            int remaining = block.length - blockOffset;
-            if(leftover != null) {
-                int newSize = leftover.length + remaining;
-                byte[] newleftover = new byte[newSize];
-                System.arraycopy(leftover, leftover.length, newleftover, 0, leftover.length);
-                offset = newSize;
+        public void decodeBlock(BlockDescriptor blockDesc) {
+            mixinLeftover(blockDesc);
+            try {
+                doDecode(blockDesc);                
+            } catch(Throwable e){
+                addLeftover(blockDesc);
             }
-            System.arraycopy(block, blockOffset, leftover, offset, block.length);
         }
+        
+        protected void mixinLeftover(BlockDescriptor blockDesc) {
+            if(leftover != null) {
+                byte[] newBlock = new byte[leftover.length + blockDesc.buf.length];
+                System.arraycopy(leftover, 0, newBlock, 0, leftover.length);
+                System.arraycopy(blockDesc.buf, blockDesc.offset, newBlock, leftover.length, blockDesc.buf.length);
+                leftover = null;
+                blockDesc.buf = newBlock;
+                blockDesc.offset = 0;
+            }
+        }
+        
+        protected void addLeftover(BlockDescriptor blockDesc) {
+            assert blockDesc.buf.length >= blockDesc.offset;
+            int remaining = blockDesc.buf.length - blockDesc.offset;
+            assert leftover == null;
+            leftover = new byte[remaining];
+            System.arraycopy(blockDesc.buf, blockDesc.offset, leftover, 0, remaining);
+            blockDesc.offset = blockDesc.buf.length;
+        }
+    }
+    
+    public static class BlockDescriptor {
+        byte[] buf;
+        int offset;
     }
 }
