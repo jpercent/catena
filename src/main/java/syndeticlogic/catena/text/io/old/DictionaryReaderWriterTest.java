@@ -38,14 +38,14 @@ public class DictionaryReaderWriterTest {
 	
 	@Test
 	public void testIndex() throws Throwable {
-        InvertedList.setTableType(IdTable.TableType.VariableByteCoded);
+        InvertedList.setTableType(IdTable.TableType.VariableByteCodedTable);
         test();
 	    
 	}
 	
 	@Test
 	public void testIndexUncoded() throws Throwable {
-        InvertedList.setTableType(IdTable.TableType.Uncoded);
+        InvertedList.setTableType(IdTable.TableType.UncodedTable);
         test();
 	}
 	

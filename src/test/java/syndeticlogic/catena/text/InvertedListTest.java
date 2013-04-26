@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import syndeticlogic.catena.text.postings.InvertedList;
@@ -24,49 +25,104 @@ public class InvertedListTest {
     
     @Test
     public void testCoding() {
-        InvertedList.setTableType(TableType.Uncoded);
+        System.out.println("TestCoding0 pageSize = 512, ids = "+(512*512*31));
+        long start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
         testBase(512, 512, 31, 33, true);
-        InvertedList.setTableType(TableType.VariableByteCoded);
-        testBase(51, 51, 31, 3, true);
+        System.out.println("UncodedTable  time "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
+        testBase(512, 512, 31, 33, true);
+        System.out.println("UncodedArray time "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
+        testBase(512, 512, 31, 33, true);
+        System.out.println("VariabvleTable time "+ (System.currentTimeMillis() - start));
     }
     
     @Test
     public void testCoding1() {
-        InvertedList.setTableType(TableType.Uncoded);
+        System.out.println("TestCoding1 pageSize = 127, ids = "+(127*127*31));
+        long start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
         testBase(127, 4096, 32, 21, true);
-        InvertedList.setTableType(TableType.VariableByteCoded);
+        System.out.println("UncodedTable time2 "+ (System.currentTimeMillis() - start));
+
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedArray);
         testBase(127, 4096, 32, 21, true);
+        System.out.println("UncodedArray time2 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
+        testBase(127, 4096, 32, 21, true);
+        System.out.println("VariableTable time2 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
     public void testCoding2() {
-        InvertedList.setTableType(TableType.Uncoded);
+        System.out.println("TestCoding2 pageSize = 511, ids = "+(511*511*31));
+        long start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
         testBase(511, 4095, 768, 88, true);
-        InvertedList.setTableType(TableType.VariableByteCoded);
+        System.out.println("UncodedArray time2 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedArray);
         testBase(511, 4095, 768, 88, true);
+        System.out.println("Uncoded time2 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
+        testBase(511, 4095, 768, 88, true);
+        System.out.println("Variable time2 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
     public void testCoding3() {
-        InvertedList.setTableType(TableType.Uncoded);
+        System.out.println("TestCoding3 pageSize = 1024, ids = "+(1024*1024*31));
+        long start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
         testBase(1024, 511, 0, 2, true);
-        InvertedList.setTableType(TableType.VariableByteCoded);
+        System.out.println("Uncodedtable time3 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedArray);
         testBase(1024, 511, 0, 2, true);
+        System.out.println("UncodedArrau time3 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
+        testBase(1024, 511, 0, 2, true);
+        System.out.println("Variable time3 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
     public void testCoding4() {
-        InvertedList.setTableType(TableType.Uncoded);
+        System.out.println("TestCoding4 pageSize = 4095, ids = "+(4095*4095*2));
+        long start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedTable);
         testBase(4095, 1023, 0, 2, true);
-        InvertedList.setTableType(TableType.VariableByteCoded);
+        System.out.println("UncodedTable time4 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.UncodedArray);
+        testBase(4095, 1023, 0, 2, true);
+        System.out.println("UncodedArray time4 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(4096, 511, 0, 4, true);
+        System.out.println("VariableTable time4 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
     public void testCompare() {
-        InvertedList.setTableType(TableType.Uncoded);
+        InvertedList.setTableType(TableType.UncodedTable);
         doCompareTest();
-        InvertedList.setTableType(TableType.VariableByteCoded);
+        InvertedList.setTableType(TableType.VariableByteCodedTable);
         doCompareTest();
         
     }
@@ -114,16 +170,14 @@ public class InvertedListTest {
         assertTrue(0 < posting1.compareTo(posting3));
         assertTrue(0 < posting4.compareTo(posting3));        
     }
-    
-    public void testBase(int postingsPageSize, int postings1PageSize, int offset, int postingsFactor, 
-            boolean compressDecompress) 
-    {
-        Random rand = new Random(1337);
-        InvertedList.setPageSize(postingsPageSize);
-        InvertedList posting = InvertedList.create(12);
-        int size = InvertedList.getPageSize() * InvertedList.getPageSize() * postingsFactor;
-        
-        TreeSet<Integer> ids = new TreeSet<Integer>();
+    static Random rand = new Random(1337);        
+    static TreeSet<Integer> ids = new TreeSet<Integer>();
+    static int size;
+    @BeforeClass
+    public static void setup() {
+        System.out.println("Generating ids...");
+        size = 4096*4096;
+        //size = 4096;
         long start = System.currentTimeMillis();
         for(int i = 0; i < size; ++i) {
             try {
@@ -134,9 +188,18 @@ public class InvertedListTest {
                 throw new RuntimeException(t);
             }
         }
+        System.out.println("Finish generating ids...");
+    }
+    public void testBase(int postingsPageSize, int postings1PageSize, int offset, int postingsFactor, 
+            boolean compressDecompress) 
+    {
+
+        InvertedList.setPageSize(postingsPageSize);
+        InvertedList posting = InvertedList.create(12);
+        int size = InvertedList.getPageSize() * InvertedList.getPageSize() * postingsFactor;
         
-        System.out.println("Lots of time rand?"+(System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
+  //      System.out.println("Lots of time rand?"+(System.currentTimeMillis() - start));
+//        start = System.currentTimeMillis();
         Iterator i = ids.iterator();
         while (i.hasNext()) {
             posting.addDocumentId((Integer) i.next());
@@ -168,6 +231,5 @@ public class InvertedListTest {
                 assertFalse(true);
             }
         }
-        System.out.println("Lots of time ~rand?"+(System.currentTimeMillis() - start));
     }
 }

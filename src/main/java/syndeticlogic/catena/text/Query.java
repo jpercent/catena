@@ -85,8 +85,8 @@ public class Query {
         if(!config.parse()) {
             return;
         }
-        if(config.getTableType() == TableType.VariableByteCoded) {
-            InvertedList.setTableType(TableType.VariableByteCoded);
+        if(config.getTableType() == TableType.VariableByteCodedTable) {
+            InvertedList.setTableType(TableType.VariableByteCodedTable);
         }
         InputStreamReader inp = new InputStreamReader(System.in);
         BufferedReader br = new BufferedReader(inp);

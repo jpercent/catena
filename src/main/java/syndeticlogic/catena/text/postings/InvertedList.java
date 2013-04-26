@@ -9,7 +9,7 @@ import syndeticlogic.catena.type.Type;
 import syndeticlogic.catena.utility.Codec;
 
 public class InvertedList implements Codeable {
-    private static IdTable.TableType tableType=TableType.Uncoded;
+    private static IdTable.TableType tableType=TableType.UncodedArray;
     private int wordId;
     private String word;
     private int documentFrequency;
@@ -247,12 +247,19 @@ public class InvertedList implements Codeable {
     public static InvertedList create(Integer wordId) {
         IdTable idTable=null;
         switch(tableType) {
-        case Uncoded:
+        case UncodedTable:
             idTable = new UncodedIdTable();
             break;
-        case VariableByteCoded:
+        case UncodedArray:
+            idTable = new UncodedIdArray();
+            break;
+        case VariableByteCodedTable:
             idTable = new VariableByteCodedIdTable();
             break;
+        case VariableByteCodedArray:
+            idTable = new VariableByteCodedIdTable();
+            break;
+            
         default:
             assert false;
         }

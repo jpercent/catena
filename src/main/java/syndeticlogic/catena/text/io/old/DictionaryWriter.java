@@ -126,7 +126,7 @@ public class DictionaryWriter {
             ByteBuffer headerData = ByteBuffer.wrap(jvm);
             Codec.getCodec().encode(docIdOffset, jvm, 0);
             byte postingsCoding = 0;
-            if(InvertedList.getTableType() == TableType.VariableByteCoded) {
+            if(InvertedList.getTableType() == TableType.VariableByteCodedTable) {
                 postingsCoding = 1;
             }
             Codec.getCodec().encode(postingsCoding, jvm, Type.LONG.length());

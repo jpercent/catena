@@ -76,14 +76,17 @@ public class CorpusManagerConfig {
                 removeOutputDir = true;
             }
             
-            tableType = TableType.Uncoded;
+            tableType = TableType.UncodedTable;
             if(line.hasOption("posting")) {
                 String strategy = line.getOptionValue("posting");
-                if("uncoded".equals(strategy)) {
+                if("uncoded-table".equals(strategy)) {
                     /* default */
-                } else if ("variable".equals(strategy)) {
+                } else if ("uncoded-array".equals(strategy)) {
+                    System.err.println("UncodedArray set ");
+                    tableType = TableType.UncodedArray;
+                } else if ("variable-table".equals(strategy)) {
                     System.err.println("VariableByteCoded set ");
-                    tableType = TableType.VariableByteCoded;
+                    tableType = TableType.VariableByteCodedTable;
                 } else {
                     System.err.println(strategy+ " is not a valid postings list encoding");
                 }

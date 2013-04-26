@@ -144,7 +144,7 @@ public class DictionaryWriteCursor implements WriteCursor {
     public int encodeHeader(byte[] buffer, int offset) {
         byte postingsCodec = 0;
         int start = offset;
-        if(InvertedList.getTableType() == TableType.VariableByteCoded) {
+        if(InvertedList.getTableType() == TableType.VariableByteCodedTable) {
             postingsCodec = 1;
         }
         offset += Codec.getCodec().encode(postingsCodec, buffer, offset);

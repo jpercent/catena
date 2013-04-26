@@ -29,7 +29,7 @@ public class DictionaryReadCursor implements ReadCursor {
         byte coding = Codec.getCodec().decodeByte(blockDesc.buf, 0);
         idDocLength = Codec.getCodec().decodeLong(blockDesc.buf, 1);
         if(coding == 1) {
-            InvertedList.setTableType(TableType.VariableByteCoded);
+            InvertedList.setTableType(TableType.VariableByteCodedTable);
         }
         blockDesc.offset += Type.BYTE.length() + Type.LONG.length(); 
     }

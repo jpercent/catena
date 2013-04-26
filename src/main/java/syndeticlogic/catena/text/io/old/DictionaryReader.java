@@ -69,7 +69,7 @@ public class DictionaryReader {
         byte coding = Codec.getCodec().decodeByte(block, Type.LONG.length());
         
         if(coding == 1) {
-            InvertedList.setTableType(TableType.VariableByteCoded);
+            InvertedList.setTableType(TableType.VariableByteCodedTable);
         }
         
         DocumentDescriptor docDesc = new DocumentDescriptor();

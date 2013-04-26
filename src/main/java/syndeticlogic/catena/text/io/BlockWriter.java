@@ -71,7 +71,6 @@ public class BlockWriter {
                     offset = 0;
                     //continue;
                 }
-//               / System.out.println(" length "+length+ " offset "+offset);
                 int encoded = cursor.encodeNext(jvmBuffer, offset);
                 assert encoded == length;
                 offset += encoded;
@@ -121,8 +120,8 @@ public class BlockWriter {
     }
     
     private void write(byte[] jvmBuffer, int offset, int length) throws IOException {
-        System.err.println("jvmlenght "+jvmBuffer.length+" offset "+offset+" length "+length);
-        System.err.println("buffer "+direct.capacity()+" limit "+direct.limit()+" position "+direct.position());
+        //System.err.println("jvmlenght "+jvmBuffer.length+" offset "+offset+" length "+length);
+        //System.err.println("buffer "+direct.capacity()+" limit "+direct.limit()+" position "+direct.position());
         direct.put(jvmBuffer, 0, length);
         direct.rewind();
         direct.limit(length);

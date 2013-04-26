@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import syndeticlogic.catena.type.Codeable;
 
 public abstract class IdTable implements Codeable {
-    public enum TableType { Uncoded, VariableByteCoded };
-    protected static int PAGE_SIZE = 8192;
+    public enum TableType { UncodedTable, UncodedArray, VariableByteCodedTable, VariableByteCodedArray };
+    protected static int PAGE_SIZE = 1024;
     abstract void addId(int docId);
     abstract void resetIterator();
     abstract boolean hasNext();    
