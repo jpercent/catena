@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
 
 import syndeticlogic.catena.text.BlockMerger;
@@ -17,7 +15,6 @@ import syndeticlogic.catena.text.io.DictionaryWriteCursor;
 import syndeticlogic.catena.text.io.InvertedFileWriteCursor;
 
 public class InvertedFileBuilder {
-	private static final Log log = LogFactory.getLog(InvertedFileBuilder.class);
     private final LinkedList<String> blocks;
     private List<InvertedListDescriptor> descriptors;
     private final BlockWriter blockWriter;
@@ -60,12 +57,13 @@ public class InvertedFileBuilder {
     }
 
     public void startBlock(String block) {
-        System.err.println("Starting block "+block);
+        System.err.println("Starting block "+block+" starting document id = "+docId);
     	postings = new TreeMap<String, InvertedList>();
 	}
   
 	public void completeBlock(String block) {
-        System.err.println("Complete block "+block+ " writing intermediates ");
+        System.err.println("Complete block "+block+ " writing intermediates "+" ending document id = "+docId);
+        
         String blockFileName = getBlockFileName(block);
         System.err.println("BLOCK FILE NAME == "+blockFileName);
 	    blockWriter.open(blockFileName);
@@ -80,7 +78,7 @@ public class InvertedFileBuilder {
     public void mergeBlocks() {
         System.err.println("Merging blocks... ");
         if(blocks.size() > 1) {
-            BlockMerger merger = new BlockMerger(prefix, idToWord);
+            BlockMerger merger = new BlockMerger(idToWord);
             descriptors = merger.mergeBlocks(getFinalName(), blocks);
         } else {
             try {
@@ -94,7 +92,7 @@ public class InvertedFileBuilder {
     }
 
     private String getFinalName() {
-        return prefix+File.separator+"corpus.index";
+        return prefix+File.separator+"corpus-"+InvertedList.getTableType().name()+".index";
     }
 
     private String getDictionaryName() {
@@ -103,7 +101,8 @@ public class InvertedFileBuilder {
     
     private String getBlockFileName(String block) {
         File blockFile = new File(block);
-        return prefix+"."+blockFile.getParentFile().getName()+"-"+blockFile.getName()+".index";
+        return prefix+"."+blockFile.getParentFile().getName()+"-"+InvertedList.getTableType().name()
+                +"-"+blockFile.getName()+".index";
     }
     
     public void writeMeta(List<InvertedListDescriptor> finalList) {
