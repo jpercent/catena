@@ -39,7 +39,12 @@ public class InvertedListTest {
         start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(512, 512, 31, 33, true);
-        System.out.println("VariabvleTable time "+ (System.currentTimeMillis() - start));
+        System.out.println("VariableTable time "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedArray);
+        testBase(512, 512, 31, 33, true);
+        System.out.println("VariableArray time "+ (System.currentTimeMillis() - start));
     }
     
     @Test
@@ -59,6 +64,11 @@ public class InvertedListTest {
         InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(127, 4096, 32, 21, true);
         System.out.println("VariableTable time2 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedArray);
+        testBase(127, 4096, 32, 21, true);
+        System.out.println("VariableArray time2 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
@@ -67,17 +77,22 @@ public class InvertedListTest {
         long start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.UncodedTable);
         testBase(511, 4095, 768, 88, true);
-        System.out.println("UncodedArray time2 "+ (System.currentTimeMillis() - start));
+        System.out.println("UncodedTable time2 "+ (System.currentTimeMillis() - start));
         
         start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.UncodedArray);
         testBase(511, 4095, 768, 88, true);
-        System.out.println("Uncoded time2 "+ (System.currentTimeMillis() - start));
+        System.out.println("UncodedArray time2 "+ (System.currentTimeMillis() - start));
         
         start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(511, 4095, 768, 88, true);
-        System.out.println("Variable time2 "+ (System.currentTimeMillis() - start));
+        System.out.println("VariableTable time2 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedArray);
+        testBase(511, 4095, 768, 88, true);
+        System.out.println("VariableArray time2 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
@@ -86,17 +101,22 @@ public class InvertedListTest {
         long start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.UncodedTable);
         testBase(1024, 511, 0, 2, true);
-        System.out.println("Uncodedtable time3 "+ (System.currentTimeMillis() - start));
+        System.out.println("UncodedTable time3 "+ (System.currentTimeMillis() - start));
         
         start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.UncodedArray);
         testBase(1024, 511, 0, 2, true);
-        System.out.println("UncodedArrau time3 "+ (System.currentTimeMillis() - start));
+        System.out.println("UncodedArry time3 "+ (System.currentTimeMillis() - start));
         
         start = System.currentTimeMillis();
         InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(1024, 511, 0, 2, true);
-        System.out.println("Variable time3 "+ (System.currentTimeMillis() - start));
+        System.out.println("VariableTable time3 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedArray);
+        testBase(1024, 511, 0, 2, true);
+        System.out.println("VariableArray time3 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
@@ -116,6 +136,11 @@ public class InvertedListTest {
         InvertedList.setTableType(TableType.VariableByteCodedTable);
         testBase(4096, 511, 0, 4, true);
         System.out.println("VariableTable time4 "+ (System.currentTimeMillis() - start));
+        
+        start = System.currentTimeMillis();
+        InvertedList.setTableType(TableType.VariableByteCodedArray);
+        testBase(4096, 511, 0, 4, true);
+        System.out.println("VariableArray time4 "+ (System.currentTimeMillis() - start));
     }
     
     @Test
