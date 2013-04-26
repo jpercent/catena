@@ -19,9 +19,16 @@ public interface ReadCursor {
         @Override
         public void decodeBlock(BlockDescriptor blockDesc) {
             mixinLeftover(blockDesc);
+            Throwable t = null;;
             try {
                 doDecode(blockDesc);                
-            } catch(Throwable e){
+            } catch(AssertionError e){
+                t = e;
+            } catch(IndexOutOfBoundsException e) {
+                t = e;
+            }
+            
+            if(t != null) {
                 addLeftover(blockDesc);
             }
         }

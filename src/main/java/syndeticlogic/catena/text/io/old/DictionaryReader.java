@@ -15,7 +15,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.text.DocumentDescriptor;
-import syndeticlogic.catena.text.io.InvertedFileReader;
 import syndeticlogic.catena.text.postings.InvertedList;
 import syndeticlogic.catena.text.postings.InvertedListDescriptor;
 import syndeticlogic.catena.text.postings.IdTable.TableType;

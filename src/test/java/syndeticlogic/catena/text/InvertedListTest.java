@@ -57,7 +57,7 @@ public class InvertedListTest {
     @Test
     public void testCoding4() {
         InvertedList.setTableType(TableType.Uncoded);
-        testBase(4095, 1023, 0, 8, true);
+        testBase(4095, 1023, 0, 2, true);
         InvertedList.setTableType(TableType.VariableByteCoded);
         testBase(4096, 511, 0, 4, true);
     }

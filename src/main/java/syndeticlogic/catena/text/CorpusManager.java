@@ -10,9 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.plexus.util.FileUtils;
 
 import syndeticlogic.catena.text.io.BlockWriter;
-import syndeticlogic.catena.text.io.InvertedFileReader;
-import syndeticlogic.catena.text.io.InvertedFileWriter;
-import syndeticlogic.catena.text.io.RawInvertedFileWriter;
+import syndeticlogic.catena.text.io.old.InvertedFileReader;
+import syndeticlogic.catena.text.io.old.InvertedFileWriter;
+import syndeticlogic.catena.text.io.old.RawInvertedFileWriter;
 import syndeticlogic.catena.text.postings.InvertedFileBuilder;
 import syndeticlogic.catena.text.postings.InvertedList;
 import syndeticlogic.catena.text.postings.Tokenizer;

@@ -1,6 +1,5 @@
 package syndeticlogic.catena.text.io;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -39,8 +38,11 @@ public class InvertedFileReadCursor extends BaseReadCursor {
         list.decode(desc.buf, desc.offset);
         desc.offset += list.size();
         list.setWord(idToWord.get(list.getWordId()));
-        if(!postings.containsKey(list.getWord())) {
-            log.warn("Key "+list.getWord()+" has already has postings ");
+        //System.out.println("Postings = "+postings);
+        //System.out.println("key == "+list.getWord());
+        if(postings.containsKey(list.getWord())) {
+            throw new RuntimeException("Duplicate key = "+list.getWord());
+            //log.warn("Key --->"+list.getWord()+"<-- duplicate ");
         }
         postings.put(list.getWord(), list);
     }

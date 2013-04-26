@@ -6,17 +6,16 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import syndeticlogic.catena.text.io.ReadCursor.BlockDescriptor;
-import syndeticlogic.catena.text.postings.InvertedListDescriptor;
+import syndeticlogic.catena.text.io.old.InvertedFileReader;
 
 public class BlockReader {
 	private final static Log log = LogFactory.getLog(InvertedFileReader.class);
-	private static int BLOCK_SIZE=10*1048576;
+	private static int BLOCK_SIZE=1048576;
 	private FileInputStream inputStream;
 	private FileChannel channel;
 	private File file;
@@ -106,10 +105,15 @@ public class BlockReader {
         
     }
 
-    public void scanBlock(ReadCursor cursor) {
+    public boolean hasMore() {
+        return (buffer.remaining() > 0 ? true : false);
+    }
+    
+    public void readNextBlock(ReadCursor cursor) {  
         BlockDescriptor blockDesc = new BlockDescriptor();
         blockDesc.buf = new byte[(int) Math.min(this.blockSize, buffer.remaining())];
         buffer.get(blockDesc.buf, 0, blockDesc.buf.length);            
         cursor.decodeBlock(blockDesc);
+        System.err.println("FUCKED");
     }
 }

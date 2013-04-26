@@ -27,7 +27,7 @@ public class BlockWriter {
 			assert dictionaryFile.createNewFile();
 			outputStream = new FileOutputStream(dictionaryFile);
 			channel = outputStream.getChannel();
-			direct = ByteBuffer.allocateDirect(BLOCK_SIZE);
+			direct = ByteBuffer.allocateDirect(blockSize);
 			closed = false;
 			headerSize = 0;
 		} catch(Throwable e) {
@@ -54,7 +54,7 @@ public class BlockWriter {
 		}
 	}
 	
-    public long writeBlock(WriteCursor cursor) {
+    public long writeFile(WriteCursor cursor) {
         long fileOffset = 0;
         try {
             headerSize = cursor.reserveHeaderLength();
@@ -82,7 +82,6 @@ public class BlockWriter {
             int encodedHeaderSize = cursor.encodeHeader(jvmBuffer, 0);
             assert encodedHeaderSize == headerSize;
             write(jvmBuffer, 0, headerSize);
-            
         } catch (Throwable t) {
             log.fatal("exception writing index file " + t, t);
             throw new RuntimeException(t);
@@ -90,7 +89,40 @@ public class BlockWriter {
         return fileOffset;
     }
     
+    public long writeBlock(WriteCursor cursor) {
+        try {
+//            fileOffset = headerSize;
+
+            byte[] jvmBuffer = new byte[blockSize];
+            int offset = 0;
+            while (cursor.hasNext()) {
+                int length = cursor.nextLength();
+                if (offset + length >= blockSize) {
+                    write(jvmBuffer, 0, offset);
+                    offset = 0;
+                    //continue;
+                }
+//               / System.out.println(" length "+length+ " offset "+offset);
+                int encoded = cursor.encodeNext(jvmBuffer, offset);
+                assert encoded == length;
+                offset += encoded;
+  //              fileOffset += encoded;
+            }
+            write(jvmBuffer, 0 , offset);
+            //channel.position(0);
+          //  int encodedHeaderSize = cursor.encodeHeader(jvmBuffer, 0);
+           // assert encodedHeaderSize == headerSize;
+           // write(jvmBuffer, 0, headerSize);
+        } catch (Throwable t) {
+            log.fatal("exception writing index file " + t, t);
+            throw new RuntimeException(t);
+        }
+        return -1 ;//fileOffset;
+    }
+    
     private void write(byte[] jvmBuffer, int offset, int length) throws IOException {
+        System.err.println("jvmlenght "+jvmBuffer.length+" offset "+offset+" length "+length);
+        System.err.println("buffer "+direct.capacity()+" limit "+direct.limit()+" position "+direct.position());
         direct.put(jvmBuffer, 0, length);
         direct.rewind();
         direct.limit(length);

@@ -71,7 +71,7 @@ public class BlockReaderWriterTest {
         
         WriteCursor writeCursor = new InvertedFileWriteCursor(invertedList);
         writer.open(fileName);
-        writer.writeBlock(writeCursor);
+        writer.writeFile(writeCursor);
         writer.close();
         
         TreeMap<String, InvertedList> invertedList1 = new TreeMap<String, InvertedList>(); 
@@ -109,7 +109,7 @@ public class BlockReaderWriterTest {
         
         WriteCursor writeCursor = new DictionaryWriteCursor(idDocMap, descriptors);
         writer.open(fileName);
-        writer.writeBlock(writeCursor);
+        writer.writeFile(writeCursor);
         writer.close();
         
         Map<Integer, String> idDocMap1 = new HashMap<Integer, String>();

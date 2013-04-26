@@ -13,9 +13,6 @@ import org.junit.Test;
 
 import syndeticlogic.catena.text.BasicTokenizer;
 import syndeticlogic.catena.text.CorpusManager;
-import syndeticlogic.catena.text.io.InvertedFileReader;
-import syndeticlogic.catena.text.io.InvertedFileWriter;
-import syndeticlogic.catena.text.io.RawInvertedFileWriter;
 import syndeticlogic.catena.text.postings.IdTable;
 import syndeticlogic.catena.text.postings.InvertedFileBuilder;
 import syndeticlogic.catena.text.postings.InvertedList;

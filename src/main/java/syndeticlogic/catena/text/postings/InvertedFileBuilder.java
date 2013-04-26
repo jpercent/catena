@@ -70,7 +70,7 @@ public class InvertedFileBuilder {
         System.err.println("BLOCK FILE NAME == "+blockFileName);
 	    blockWriter.open(blockFileName);
 		InvertedFileWriteCursor cursor = new InvertedFileWriteCursor(postings);
-		blockWriter.writeBlock(cursor);
+		blockWriter.writeFile(cursor);
         blockWriter.close();
         descriptors = cursor.getInvertedListDescriptors();
         cursor = null;
@@ -109,7 +109,7 @@ public class InvertedFileBuilder {
     public void writeMeta(List<InvertedListDescriptor> finalList) {
         DictionaryWriteCursor cursor = new DictionaryWriteCursor(idToDoc, finalList);
         blockWriter.open(getDictionaryName());
-        blockWriter.writeBlock(cursor);
+        blockWriter.writeFile(cursor);
         blockWriter.close();
     }
     

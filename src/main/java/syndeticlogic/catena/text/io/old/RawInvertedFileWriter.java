@@ -1,4 +1,4 @@
-package syndeticlogic.catena.text.io;
+package syndeticlogic.catena.text.io.old;
 
 import java.io.File;
 import java.io.FileOutputStream;
